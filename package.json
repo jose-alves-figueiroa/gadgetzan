@@ -16,7 +16,7 @@
     "db:studio": "prisma studio",
     "create-user": "tsx scripts/create-user.ts",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down",
+    "docker:down": "docker compose down --remove-orphans",
     "docker:logs": "docker compose logs -f"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "argon2": "^0.45.1",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
+    "dotenv": "^16.4.7",
     "next": "16.3.3",
     "next-auth": "^4.24.15",
     "pg": "^8.16.3",
@@ -41,7 +42,6 @@
     "@types/pg": "^8.11.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "playwright": "^1.62.1",

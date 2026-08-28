@@ -29,21 +29,21 @@ Two schema changes come out of this and land in Stage 1: `Settings.minCashCents`
 
 Mechanical bootstrap tasks, no product logic. Do this before opening Stage 1 for real.
 
-- [ ] `git init` on the repo (it isn't a git repository yet) + `.gitignore` (node_modules, .env, .next; don't ignore prisma/migrations)
-- [ ] `create-next-app` (App Router, TypeScript, Tailwind, no `src/`) at the root
-- [ ] Folder structure per `06-stack-and-deploy.md`: `app/(auth)`, `app/(app)`, `components/ui`, `components/finance`, `components/layout`, `lib/finance`, `prisma/`
-- [ ] Install deps: `prisma`, `@prisma/client`, `next-auth`, `zod`, `argon2` (or `bcrypt`), `date-fns`, `date-fns-tz`, `@phosphor-icons/react`, `recharts` (or `visx`), `vitest`, `@testing-library/react` if needed, `playwright`
-- [ ] `tailwind.config.ts` with the tokens from `04-design-tokens.md` (colors, ramps, 0.7× spacing, radii, Inter typography 400/500/600)
-- [ ] Inter loaded from Google Fonts via `next/font`
-- [ ] Initial `prisma/schema.prisma` (full schema from `01`, + `minCashCents` and `includeCommitments` from D2/D4)
-- [ ] `docker-compose.yml` and multi-stage `Dockerfile` (`06-stack-and-deploy.md`), `next.config` with `output: 'standalone'`
-- [ ] `.env.example` (`DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`)
-- [ ] `vitest.config.ts` and `playwright.config.ts`
-- [ ] `scripts/create-user.ts` (creates the single user via CLI, password hash)
-- [ ] `prisma/seed.ts` — default categories only, from the list in `01-data-model.md`
-- [ ] Root README with local setup instructions (docker compose up, migrate, seed, create-user)
+- [x] `git init` on the repo (it isn't a git repository yet) + `.gitignore` (node_modules, .env, .next; don't ignore prisma/migrations)
+- [x] `create-next-app` (App Router, TypeScript, Tailwind, no `src/`) at the root
+- [x] Folder structure per `06-stack-and-deploy.md`: `app/(auth)`, `app/(app)`, `components/ui`, `components/finance`, `components/layout`, `lib/finance`, `prisma/`
+- [x] Install deps: `prisma`, `@prisma/client`, `next-auth`, `zod`, `argon2` (or `bcrypt`), `date-fns`, `date-fns-tz`, `@phosphor-icons/react`, `recharts` (or `visx`), `vitest`, `@testing-library/react` if needed, `playwright`
+- [x] Tailwind tokens from `04-design-tokens.md` (colors, ramps, 0.7× spacing, radii, Inter typography 400/500/600) — via Tailwind v4's CSS-first `@theme` in `app/globals.css` (v4 has no `tailwind.config.ts`; same tokens, current Tailwind convention)
+- [x] Inter loaded from Google Fonts via `next/font`
+- [x] Initial `prisma/schema.prisma` (full schema from `01`, + `minCashCents` and `includeCommitments` from D2/D4)
+- [x] `docker-compose.yml` and multi-stage `Dockerfile` (`06-stack-and-deploy.md`), `next.config` with `output: 'standalone'`
+- [x] `.env.example` (`DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`)
+- [x] `vitest.config.mts` and `playwright.config.ts`
+- [x] `scripts/create-user.ts` (creates the single user via CLI, password hash)
+- [x] `prisma/seed.ts` — default categories only, from the list in `01-data-model.md`
+- [x] Root README with local setup instructions (docker compose up, migrate, seed, create-user)
 
-**Stage 0 definition of done**: `pnpm dev` serves an authenticatable (or stub) blank page, `pnpm test` runs (even with no tests yet), `docker compose up` brings up a healthy Postgres.
+**Stage 0 definition of done**: `pnpm dev` serves an authenticatable (or stub) blank page, `pnpm test` runs (even with no tests yet), `docker compose up` brings up a healthy Postgres. **Met** — verified end-to-end: `pnpm test`/`pnpm build` green, `docker compose up` brings up a healthy `db` + a working `app` container (migrations applied, HTTP 200), `create-user`/`db:seed` verified against the live DB.
 
 ---
 

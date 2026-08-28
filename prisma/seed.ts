@@ -1,6 +1,5 @@
-import { PrismaClient, CategoryNature } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { CategoryNature } from "@prisma/client";
+import { prisma } from "../lib/db";
 
 // Default categories suggested during onboarding — docs/agents/01-data-model.md
 const DEFAULT_CATEGORIES: { name: string; nature: CategoryNature; icon: string }[] = [
