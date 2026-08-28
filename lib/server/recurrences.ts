@@ -1,0 +1,83 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { centsPositive } from "@/lib/validation/money";
+import { requireUserId } from "./session";
+import { todayDateString, toPrismaDate } from "./clock";
+
+const RecurrenceInput = z
+  .object({
+    kind: z.enum(["INCOME", "EXPENSE"]),
+    description: z.string().min(1, "Nome obrigatório."),
+    amountCents: centsPositive,
+    frequency: z.enum(["MONTHLY", "WEEKLY", "YEARLY"]),
+    dayOfMonth: z.number().int().min(1).max(31).nullable().optional(),
+    weekday: z.number().int().min(0).max(6).nullable().optional(),
+    monthOfYear: z.number().int().min(1).max(12).nullable().optional(),
+    categoryId: z.string().min(1, "Categoria obrigatória."),
+    method: z.enum(["ACCOUNT", "CARD"]),
+    accountId: z.string().nullable().optional(),
+    cardId: z.string().nullable().optional(),
+    startDate: z.string().min(1, "Data de início obrigatória."),
+    endDate: z.string().nullable().optional(),
+  })
+  .refine((data) => (data.method === "ACCOUNT" ? !!data.accountId : !!data.cardId), {
+    message: "Conta ou cartão obrigatório conforme a forma de pagamento.",
+    path: ["accountId"],
+  });
+
+export async function createRecurrenceRule(input: z.input<typeof RecurrenceInput>) {
+  const userId = await requireUserId();
+  const data = RecurrenceInput.parse(input);
+
+  const rule = await prisma.recurrenceRule.create({
+    data: {
+      userId,
+      kind: data.kind,
+      description: data.description,
+      amountCents: data.amountCents,
+      frequency: data.frequency,
+      dayOfMonth: data.dayOfMonth ?? null,
+      weekday: data.weekday ?? null,
+      monthOfYear: data.monthOfYear ?? null,
+      categoryId: data.categoryId,
+      method: data.method,
+      accountId: data.method === "ACCOUNT" ? data.accountId : null,
+      cardId: data.method === "CARD" ? data.cardId : null,
+      startDate: toPrismaDate(data.startDate),
+      endDate: data.endDate ? toPrismaDate(data.endDate) : null,
+      status: "ACTIVE",
+    },
+  });
+
+  revalidatePath("/recurrences");
+  revalidatePath("/future");
+  revalidatePath("/calendar");
+  return rule;
+}
+
+export async function pauseRecurrenceRule(id: string) {
+  const userId = await requireUserId();
+  await prisma.recurrenceRule.updateMany({ where: { id, userId }, data: { status: "PAUSED" } });
+  revalidatePath("/recurrences");
+}
+
+export async function endRecurrenceRule(id: string) {
+  const userId = await requireUserId();
+  await prisma.recurrenceRule.updateMany({
+    where: { id, userId },
+    data: { status: "ENDED", endDate: toPrismaDate(todayDateString()) },
+  });
+  revalidatePath("/recurrences");
+}
+
+export async function listRecurrenceRules() {
+  const userId = await requireUserId();
+  return prisma.recurrenceRule.findMany({
+    where: { userId },
+    include: { category: true },
+    orderBy: { description: "asc" },
+  });
+}

@@ -1,0 +1,337 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Segmented } from "@/components/ui/Segmented";
+import { formatBRL } from "@/lib/finance/money";
+import { createTransaction, createTransfer, createInvestmentMove } from "@/lib/server/transactions";
+import { getCardImpactPreview, type CardImpactPreview } from "@/lib/server/transaction-impact";
+
+interface Option {
+  id: string;
+  name: string;
+}
+
+interface CardOption extends Option {
+  closingDay: number;
+  dueDay: number;
+}
+
+type TxType = "EXPENSE" | "INCOME" | "TRANSFER" | "INVESTMENT_IN" | "INVESTMENT_OUT";
+
+const TYPE_OPTIONS: { value: TxType; label: string }[] = [
+  { value: "EXPENSE", label: "Despesa" },
+  { value: "INCOME", label: "Receita" },
+  { value: "TRANSFER", label: "Transf." },
+  { value: "INVESTMENT_IN", label: "Invest." },
+  { value: "INVESTMENT_OUT", label: "Resgate" },
+];
+
+export function NewTransactionModal({
+  open,
+  onClose,
+  categories,
+  accounts,
+  cards,
+  investments,
+}: {
+  open: boolean;
+  onClose: () => void;
+  categories: Option[];
+  accounts: Option[];
+  cards: CardOption[];
+  investments: Option[];
+}) {
+  const [type, setType] = useState<TxType>("EXPENSE");
+  const [method, setMethod] = useState<"ACCOUNT" | "CARD">("ACCOUNT");
+  const [cardId, setCardId] = useState(cards[0]?.id ?? "");
+  const [amountInput, setAmountInput] = useState("");
+  const [installments, setInstallments] = useState(1);
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [isFixed, setIsFixed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [impact, setImpact] = useState<CardImpactPreview | null>(null);
+
+  useEffect(() => {
+    if (type !== "EXPENSE" || method !== "CARD" || !cardId || !amountInput) {
+      setImpact(null);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const { toCents } = await import("@/lib/finance/money");
+        const cents = toCents(amountInput);
+        const preview = await getCardImpactPreview(cardId, cents, installments, date);
+        setImpact(preview);
+      } catch {
+        setImpact(null);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [type, method, cardId, amountInput, installments, date]);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setSaving(true);
+
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      if (type === "TRANSFER") {
+        await createTransfer({
+          accountId: String(formData.get("accountId") ?? ""),
+          toAccountId: String(formData.get("toAccountId") ?? ""),
+          amountCents: amountInput,
+          competenceDate: date,
+          note: null,
+        });
+      } else if (type === "INVESTMENT_IN" || type === "INVESTMENT_OUT") {
+        await createInvestmentMove({
+          kind: type,
+          investmentId: String(formData.get("investmentId") ?? ""),
+          accountId: String(formData.get("accountId") ?? ""),
+          amountCents: amountInput,
+          competenceDate: date,
+        });
+      } else {
+        await createTransaction({
+          kind: type,
+          description: String(formData.get("description") ?? ""),
+          amountCents: amountInput,
+          competenceDate: date,
+          categoryId: String(formData.get("categoryId") ?? ""),
+          method,
+          accountId: method === "ACCOUNT" ? String(formData.get("accountId") ?? "") : null,
+          cardId: method === "CARD" ? cardId : null,
+          installments: method === "CARD" ? installments : 1,
+          isFixed,
+          note: null,
+        });
+      }
+      onClose();
+      (event.target as HTMLFormElement).reset();
+      setAmountInput("");
+      setInstallments(1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar lançamento.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Novo lançamento">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-lg">
+        <Segmented options={TYPE_OPTIONS} value={type} onChange={(v) => setType(v as TxType)} />
+
+        {type !== "TRANSFER" && type !== "INVESTMENT_IN" && type !== "INVESTMENT_OUT" ? (
+          <Field name="description" label="Descrição" required />
+        ) : null}
+
+        <Field
+          label="Valor"
+          placeholder="0,00"
+          required
+          value={amountInput}
+          onChange={(e) => setAmountInput(e.target.value)}
+        />
+
+        <Field name="date" label="Data" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+
+        {(type === "EXPENSE" || type === "INCOME") && (
+          <>
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="categoryId" className="text-micro text-text/70">
+                Categoria
+              </label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Segmented
+              options={[
+                { value: "ACCOUNT", label: "Débito/Pix" },
+                { value: "CARD", label: "Cartão" },
+              ]}
+              value={method}
+              onChange={(v) => setMethod(v as typeof method)}
+            />
+
+            {method === "ACCOUNT" ? (
+              <div className="flex flex-col gap-xs">
+                <label htmlFor="accountId" className="text-micro text-text/70">
+                  Conta
+                </label>
+                <select
+                  id="accountId"
+                  name="accountId"
+                  required
+                  className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+                >
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="cardSelect" className="text-micro text-text/70">
+                    Cartão
+                  </label>
+                  <select
+                    id="cardSelect"
+                    value={cardId}
+                    onChange={(e) => setCardId(e.target.value)}
+                    className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+                  >
+                    {cards.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Field
+                  label="Parcelas"
+                  type="number"
+                  min={1}
+                  max={48}
+                  value={installments}
+                  onChange={(e) => setInstallments(Number(e.target.value))}
+                  hint={
+                    installments > 1 && amountInput
+                      ? `${installments}× de aprox. ${formatBRL(
+                          Math.floor((Number(amountInput.replace(/\D/g, "")) || 0) / installments)
+                        )}`
+                      : undefined
+                  }
+                />
+              </>
+            )}
+
+            <label className="flex items-center gap-sm text-row text-text">
+              <input type="checkbox" checked={isFixed} onChange={(e) => setIsFixed(e.target.checked)} />
+              Despesa fixa
+            </label>
+
+            {impact ? (
+              <div className="flex flex-col gap-xs rounded-md bg-tile p-md text-micro text-muted">
+                <span className="text-dim uppercase tracking-wide">Impacto ao salvar</span>
+                <span>
+                  Fatura atual: {formatBRL(impact.currentInvoiceBeforeCents)} → {formatBRL(impact.currentInvoiceAfterCents)}
+                </span>
+                <span>
+                  Próxima fatura: {formatBRL(impact.nextInvoiceBeforeCents)} → {formatBRL(impact.nextInvoiceAfterCents)}
+                </span>
+                <span>
+                  Limite disponível: {formatBRL(impact.availableBeforeCents)} → {formatBRL(impact.availableAfterCents)}
+                </span>
+              </div>
+            ) : null}
+          </>
+        )}
+
+        {type === "TRANSFER" && (
+          <>
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="accountId" className="text-micro text-text/70">
+                Conta de origem
+              </label>
+              <select
+                id="accountId"
+                name="accountId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="toAccountId" className="text-micro text-text/70">
+                Conta de destino
+              </label>
+              <select
+                id="toAccountId"
+                name="toAccountId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="text-micro text-dim">Não entra em receitas nem despesas — apenas move dinheiro entre contas.</p>
+          </>
+        )}
+
+        {(type === "INVESTMENT_IN" || type === "INVESTMENT_OUT") && (
+          <>
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="investmentId" className="text-micro text-text/70">
+                Investimento
+              </label>
+              <select
+                id="investmentId"
+                name="investmentId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {investments.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="accountId" className="text-micro text-text/70">
+                Conta
+              </label>
+              <select
+                id="accountId"
+                name="accountId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
+        {error ? <p className="text-micro text-neg">{error}</p> : null}
+        <Button type="submit" disabled={saving}>
+          {saving ? "Salvando…" : "Salvar"}
+        </Button>
+      </form>
+    </Modal>
+  );
+}

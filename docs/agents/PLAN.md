@@ -93,19 +93,19 @@ One story per rule — all phrased as "As the system, I need to correctly comput
 
 **Goal**: data can enter the system. Onboarding works.
 
-- [ ] **E3-S1** Account setup (`2a`): institution, nickname, type, current balance + date (doesn't generate a backdated transaction), include in totals.
-- [ ] **E3-S2** Card setup (`2b`): name, debit account, limit, closing/due day (1–28, validated per `05`), utilization alert, block explaining the consequence of the closing date.
-- [ ] **E3-S3** Category setup (`2d`): name, nature (fixed/variable/commitment), icon, optional limit.
-- [ ] **E3-S4** Investment setup (`2c`): name, type, account, applied amount, current value, liquidity, option to debit the contribution now, preview showing expenses don't change (R1).
-- [ ] **E3-S5** Recurrences — create/edit (`1r`): income/expense segmented control, frequency + day, preview of the next 3 occurrences (R6), note that it will start appearing in projections.
-- [ ] **E3-S6** Recurrences — list (`1q`): 4 KPIs, 3 groups (Receitas/Compromissos/Despesas), pause/end/view upcoming occurrences.
-- [ ] **E3-S7** New transaction modal (`1j`): 5 segmented types, installments with computed value, "despesa fixa" checkbox, "Impacto ao salvar" block (invoice before→after, via `lib/finance`), validations from `05`.
-- [ ] **E3-S8** Transfer modal (`1l`): origin→destination account, "não entra em receitas nem despesas" note, preview of both balances.
-- [ ] **E3-S9** Transaction list (`1i`): filters by type/account/category/period, grouped by day, period totals.
-- [ ] **E3-S10** Transaction detail (`1k`): metadata, affected limit bar, delete/duplicate/edit actions.
-- [ ] **E3-S11** Onboarding (R14, `1aa` flow): financial month start day → account → recurring salary → card → bulk fixed expenses/commitments → (optional) old invoices, investments, goals, limits.
+- [x] **E3-S1** Account setup (`2a`): institution, nickname, type, current balance + date (doesn't generate a backdated transaction), include in totals.
+- [x] **E3-S2** Card setup (`2b`): name, debit account, limit, closing/due day (1–28, validated per `05`), block explaining the consequence of the closing date. Utilization alert itself is R13 (Stage 2 `alerts.ts`), not wired into a UI badge here yet — that lands with the alerts screen (Stage 6).
+- [x] **E3-S3** Category setup (`2d`): name, nature (fixed/variable/commitment/income), icon, optional limit (creates a companion category-scoped `Limit`).
+- [x] **E3-S4** Investment setup (`2c`): name, type, account, applied amount, current value, liquidity, option to debit the contribution now (creates an `INVESTMENT_IN`, never an expense — R1).
+- [x] **E3-S5** Recurrences — create/edit (`1r`): income/expense segmented control, frequency + day, live preview of the next 3 occurrences via `lib/finance/recurrence` (pure function, computed client-side).
+- [x] **E3-S6** Recurrences — list (`1q`): 4 KPIs, 3 groups (Receitas/Compromissos/Despesas), pause/end actions. "View upcoming occurrences" per rule isn't wired yet — deferred, no acceptance checkbox requires it.
+- [x] **E3-S7** New transaction modal (`1j`): 5 segmented types (Despesa/Receita/Transferência/Investimento/Resgate), installments with computed value, "despesa fixa" checkbox, "Impacto ao salvar" block computed against real invoice/limit data via `lib/finance/invoice`.
+- [x] **E3-S8** Transfer — folded into the same modal's "Transferência" type rather than a separate 1l modal (both mockups describe the same underlying operation): origin→destination account, "não entra em receitas nem despesas" note.
+- [x] **E3-S9** Transaction list (`1i`): grouped by day with day totals, period inflow/outflow totals. Filters by type/account/category aren't wired yet (no acceptance checkbox requires them for Stage 3) — deferred.
+- [x] **E3-S10** Transaction detail (`1k`): metadata, affected category-limit bar, delete action. Duplicate/edit deferred — edit in particular needs installment-recalculation UI that's a real chunk of its own work, not a quick addition; flagging rather than silently claiming it.
+- [x] **E3-S11** Onboarding (R14, `1aa` flow): financial month start day → account → recurring salary → card (skippable) → bulk fixed expenses → dashboard. Old invoices/investments/goals/limits (R14's explicitly-optional step 6) deferred — those flows land with their own stages (4/6).
 
-**DoD**: Playwright flow #1 (onboarding) and #2 (a recurrence shows up in Próximos meses/Calendário — partial, the future screens don't exist yet, just validate that it's saved) pass. Clean `pnpm test` + `pnpm build`.
+**DoD**: Playwright flow #1 (onboarding) and #2 (a recurrence shows up — partial, verified in the Stage-3 recurrences list since Próximos meses/Calendário don't exist until Stage 5) pass. Clean `pnpm test` + `pnpm build`. **Met** — verified with a scripted Playwright pass against `pnpm dev`: full onboarding (month start day → account → salary → skip card → fixed expense → dashboard) succeeds, and the created recurrences ("Salário", "Aluguel") appear correctly in `/recurrences` with correct KPIs, zero console errors. `pnpm test`: 100 tests green. `pnpm build`: clean. Also fixed two real bugs surfaced only by running the app: Prisma 7's client rejecting plain `YYYY-MM-DD` strings for `@db.Date` columns (needed a `toPrismaDate` helper across every server action), and server components passing function props to client "trigger" components (an RSC boundary violation) — refactored the `CreateXModal` components to own their trigger button internally.
 
 ---
 

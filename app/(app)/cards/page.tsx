@@ -1,5 +1,58 @@
+import { listCards } from "@/lib/server/cards";
+import { listAccounts } from "@/lib/server/accounts";
+import { formatBRL } from "@/lib/finance/money";
+import { calculateAvailableLimit } from "@/lib/finance/invoice";
+import { Card } from "@/components/ui/Card";
+import { Bar } from "@/components/ui/Bar";
+import { CreateCardModal } from "@/components/finance/CreateCardModal";
 import { UnderConstruction } from "@/components/layout/UnderConstruction";
+import { prisma } from "@/lib/db";
+import { requireUserId } from "@/lib/server/session";
 
-export default function CardsPage() {
-  return <UnderConstruction title="Cartões" />;
+export default async function CardsPage() {
+  const [cards, accounts] = await Promise.all([listCards(), listAccounts()]);
+  const userId = await requireUserId();
+
+  return (
+    <div className="flex flex-col gap-lg">
+      <div className="flex items-center justify-between">
+        <h1 className="text-title text-text">Cartões</h1>
+        <CreateCardModal accounts={accounts.map((a) => ({ id: a.id, nickname: a.nickname }))} />
+      </div>
+
+      {cards.length === 0 ? (
+        <UnderConstruction title="Nenhum cartão cadastrado ainda" />
+      ) : (
+        <div className="flex flex-col gap-md">
+          {await Promise.all(
+            cards.map(async (card) => {
+              const unpaid = await prisma.transaction.aggregate({
+                where: { userId, cardId: card.id, invoice: { paidAt: null } },
+                _sum: { amountCents: true },
+              });
+              const { availableCents, utilizationPercent } = calculateAvailableLimit({
+                limitCents: card.limitCents,
+                unpaidInvoiceTotalCents: unpaid._sum.amountCents ?? 0,
+              });
+
+              return (
+                <Card key={card.id} className="gap-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-row font-medium text-text">{card.name}</span>
+                    <span className="tabular-money text-row text-dim">
+                      {formatBRL(availableCents)} disponível
+                    </span>
+                  </div>
+                  <Bar
+                    percent={utilizationPercent}
+                    severity={utilizationPercent >= 100 ? "neg" : utilizationPercent >= 80 ? "warn" : "accent"}
+                  />
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

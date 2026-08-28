@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assignInvoice, calculateAvailableLimit, calculateOutstandingBalance } from "./invoice";
+import { assignInvoice, calculateAvailableLimit, calculateOutstandingBalance, closingForReferenceMonth } from "./invoice";
 
 describe("R3 — invoice assignment", () => {
   it("purchase on 10/08 with closingDay=12 lands on the August invoice, due 20/08", () => {
@@ -32,6 +32,19 @@ describe("R3 — invoice assignment", () => {
   it("rolls the year over at December", () => {
     const result = assignInvoice("2026-12-20", 12, 5);
     expect(result.closingMonth).toEqual({ year: 2027, month: 1 });
+  });
+});
+
+describe("R3 — closingForReferenceMonth is the inverse of assignInvoice", () => {
+  it("round-trips for every purchase day in a month, for both roll directions", () => {
+    for (let day = 1; day <= 28; day++) {
+      for (const [closingDay, dueDay] of [[12, 20], [25, 5]] as const) {
+        const purchaseDate = `2026-08-${String(day).padStart(2, "0")}`;
+        const assignment = assignInvoice(purchaseDate, closingDay, dueDay);
+        const { closingMonth } = closingForReferenceMonth(assignment.referenceMonth, closingDay, dueDay);
+        expect(closingMonth).toEqual(assignment.closingMonth);
+      }
+    }
   });
 });
 

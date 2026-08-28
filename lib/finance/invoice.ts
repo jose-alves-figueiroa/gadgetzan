@@ -36,6 +36,22 @@ export function assignInvoice(
   return { closingMonth, closingDate, referenceMonth, dueDate };
 }
 
+/**
+ * Closing date/month for a given reference (due) month — the inverse of
+ * assignInvoice's referenceMonth derivation. Used when an installment plan
+ * already knows which month it lands on and needs the matching invoice's
+ * closing date to find-or-create that Invoice row.
+ */
+export function closingForReferenceMonth(
+  referenceMonth: { year: number; month: number },
+  closingDay: number,
+  dueDay: number
+): { closingMonth: { year: number; month: number }; closingDate: string } {
+  const closingMonth = dueDay >= closingDay ? referenceMonth : addMonths(referenceMonth, -1);
+  const closingDate = formatDateParts({ ...closingMonth, day: closingDay } as DateParts);
+  return { closingMonth, closingDate };
+}
+
 export interface CardLimitInput {
   limitCents: number;
   /** Sum of amountCents for every transaction tied to an unpaid invoice — open, closed-unpaid, or future (R3). */

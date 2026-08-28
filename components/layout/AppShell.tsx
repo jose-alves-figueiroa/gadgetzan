@@ -4,8 +4,27 @@ import { type ReactNode, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { Modal } from "@/components/ui/Modal";
+import { NewTransactionModal } from "@/components/finance/NewTransactionModal";
 
-export function AppShell({ children }: { children: ReactNode }) {
+interface Option {
+  id: string;
+  name: string;
+}
+
+interface CardOption extends Option {
+  closingDay: number;
+  dueDay: number;
+}
+
+interface AppShellProps {
+  children: ReactNode;
+  accounts: Option[];
+  cards: CardOption[];
+  categories: Option[];
+  investments: Option[];
+}
+
+export function AppShell({ children, accounts, cards, categories, investments }: AppShellProps) {
   const [newTransactionOpen, setNewTransactionOpen] = useState(false);
   const [simulateOpen, setSimulateOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -25,13 +44,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 overflow-y-auto p-2xl">{children}</main>
       </div>
 
-      <Modal
+      <NewTransactionModal
         open={newTransactionOpen}
         onClose={() => setNewTransactionOpen(false)}
-        title="Novo lançamento"
-      >
-        <p className="text-row text-muted">Em construção — chega no Stage 3.</p>
-      </Modal>
+        categories={categories}
+        accounts={accounts}
+        cards={cards}
+        investments={investments}
+      />
 
       <Modal open={simulateOpen} onClose={() => setSimulateOpen(false)} title="Simular compra">
         <p className="text-row text-muted">Em construção — chega no Stage 6.</p>
