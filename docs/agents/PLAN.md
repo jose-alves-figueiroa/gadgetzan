@@ -69,23 +69,23 @@ Mechanical bootstrap tasks, no product logic. Do this before opening Stage 1 for
 
 One story per rule — all phrased as "As the system, I need to correctly compute X, so the UI never shows a wrong number":
 
-- [ ] **E2-R1** `lib/finance/transactions.ts` (or inside the queries) — `TRANSFER`, `INVESTMENT_IN/OUT`, `GOAL_IN/OUT`, `CARD_PAYMENT` never count as income/expense; `CARD_ADJUSTMENT` counts as an expense. Tests: the 4 R1 checkboxes in `05`.
-- [ ] **E2-R2** `lib/finance/savings.ts` — savings rate with the 4 lines (income, expenses, contributions, cash leftover), `null` when income = 0. Tests: the 4 R2 checkboxes.
-- [ ] **E2-R3** `lib/finance/invoice.ts` — invoice assignment by `closingDay`/`dueDay`, `referenceMonth` = due month, available card limit. Tests: 7 R3/R4 checkboxes (invoice part).
-- [ ] **E2-R4** `lib/finance/installments.ts` — installment split with the remainder on the last one, `installmentNo` 1..n, recalculation of unpaid installments on edit, removal of future installments on delete. Tests: part of R3/R4.
-- [ ] **E2-R5** `lib/finance/period.ts` — configurable financial month (`monthStartDay` 1..28), label from the interval's start. Tests: the 3 R5 checkboxes.
-- [ ] **E2-R6** `lib/finance/recurrence.ts` — occurrence generation (`MONTHLY`/`WEEKLY`/`YEARLY`), short-month truncation, pending status for a past occurrence with no transaction, `PAUSED`/`ENDED`, `method = CARD` lands on the invoice. Tests: the 4 R6 checkboxes.
-- [ ] **E2-R7** `lib/finance/projection.ts` (confidence) — every future value carries a `Confidence` (`REALIZED`/`CONFIRMED`/`RECURRING`/`PROJECTED`), never summed without a visible breakdown. Tests: part of R7/R8.
-- [ ] **E2-R8** `lib/finance/projection.ts` (variable) — average of the last `variableLookback` closed months per `VARIABLE` category; no projection with < 3 closed months; `FIXED`/`COMMITMENT` only via recurrence; `projectedBalance[current month] == balance available today`. Tests: the 6 R7/R8 checkboxes.
-- [ ] **E2-R9** `lib/finance/goals.ts` — free to spend (`available − reserved`, an investment-backed goal doesn't subtract), required pace vs. average contribution. Tests: the 4 R9 checkboxes.
-- [ ] **E2-R10** `lib/finance/simulate.ts` — pure simulation function (full R10: invoice before/after, category limit, projected balance, impact on goals, warnings with a number, suggested alternative), using `Settings.minCashCents` (D2) as the floor. **Writes nothing.** Tests: the 6 R10 checkboxes.
-- [ ] **E2-R11** `lib/finance/networth.ts` — net worth = accounts + investments (± open invoices per the setting, always `false` for now per D1); stable monthly snapshot in the past. Tests: the 4 R11/R12 checkboxes.
-- [ ] **E2-R12** `lib/finance/accounts.ts` (balance) — account balance via the R12 formula, only `competenceDate <= today` enters the current balance. Tests: part of R11/R12.
-- [ ] **E2-R13** `lib/finance/alerts.ts` — the 10 triggers from the R13 table, ordered by severity, max 3 "warning" items on the dashboard, stable and dismissible `alertKey`, at least one action per alert, using `Limit.includeCommitments` (D4) for the total limit. Tests: the 6 R13 checkboxes.
-- [ ] **E2-Limits** `lib/finance/limits.ts` — limit utilization (category, total, card), respecting D4 (commitments excluded from the total by default).
-- [ ] **E2-Money** `lib/finance/money.ts` — `toCents`, `formatBRL`, parsing "1.234,56" and "1234,56" (covers the validation in `05 § Form validations`).
+- [x] **E2-R1** `lib/finance/transactions.ts` (or inside the queries) — `TRANSFER`, `INVESTMENT_IN/OUT`, `GOAL_IN/OUT`, `CARD_PAYMENT` never count as income/expense; `CARD_ADJUSTMENT` counts as an expense. Tests: the 4 R1 checkboxes in `05`.
+- [x] **E2-R2** `lib/finance/savings.ts` — savings rate with the 4 lines (income, expenses, contributions, cash leftover), `null` when income = 0. Tests: the 4 R2 checkboxes.
+- [x] **E2-R3** `lib/finance/invoice.ts` — invoice assignment by `closingDay`/`dueDay`, `referenceMonth` = due month, available card limit, outstanding balance on partial payment. Tests: 7 R3/R4 checkboxes (invoice part).
+- [x] **E2-R4** `lib/finance/installments.ts` — installment split with the remainder on the last one, `installmentNo` 1..n, recalculation of unpaid installments on edit, removal of future installments on delete. Tests: part of R3/R4.
+- [x] **E2-R5** `lib/finance/period.ts` — configurable financial month (`monthStartDay` 1..28), label from the interval's start. Tests: the 3 R5 checkboxes.
+- [x] **E2-R6** `lib/finance/recurrence.ts` — occurrence generation (`MONTHLY`/`WEEKLY`/`YEARLY`), short-month truncation, pending status for a past occurrence with no transaction, `PAUSED`/`ENDED`, `method = CARD` lands on the invoice. Tests: the 4 R6 checkboxes.
+- [x] **E2-R7** `lib/finance/projection.ts` (confidence) — every future value carries a `Confidence` (`REALIZED`/`CONFIRMED`/`RECURRING`/`PROJECTED`), never summed without a visible breakdown (`groupByConfidence`). Tests: part of R7/R8.
+- [x] **E2-R8** `lib/finance/projection.ts` (variable) — average of the last `variableLookback` closed months per `VARIABLE` category; no projection with < 3 closed months; `FIXED`/`COMMITMENT` only via recurrence; `projectedBalance[current month] == balance available today`. Tests: the 6 R7/R8 checkboxes.
+- [x] **E2-R9** `lib/finance/goals.ts` — free to spend (`available − reserved`, an investment-backed goal doesn't subtract), required pace vs. average contribution. Tests: the 4 R9 checkboxes.
+- [x] **E2-R10** `lib/finance/simulate.ts` — pure simulation function (invoice before/after, category limit, projected balance, warnings with a number, `Settings.minCashCents` (D2) as the floor). **Writes nothing.** Tests: all 6 R10 checkboxes in `05`. **Not implemented** — "impact on each goal with a deadline" (no acceptance checkbox covers it and the exact delay-computation isn't specified anywhere; implementing it would mean inventing product behavior) and "suggested alternative" (explicitly marked optional in `02-business-rules.md`). Flagging rather than silently claiming full R10 coverage — revisit if the product owner wants goal-impact specified.
+- [x] **E2-R11** `lib/finance/networth.ts` — net worth = accounts + investments (± open invoices per the setting, always `false` for now per D1). Tests: the 4 R11/R12 checkboxes. (Stable monthly snapshot *storage* is a data-access concern, not a pure function — deferred to whichever stage wires this to Prisma.)
+- [x] **E2-R12** `lib/finance/accounts.ts` (balance) — account balance via the R12 formula, only `competenceDate <= today` enters the current balance. Tests: part of R11/R12.
+- [x] **E2-R13** `lib/finance/alerts.ts` — the 10 triggers from the R13 table, ordered by severity, max 3 "warning" items on the dashboard, stable and dismissible `alertKey`, at least one action per alert, using `Limit.includeCommitments` (D4) for the total limit. Tests: the 6 R13 checkboxes.
+- [x] **E2-Limits** `lib/finance/limits.ts` — limit utilization (category, total, card), respecting D4 (commitments excluded from the total by default).
+- [x] **E2-Money** `lib/finance/money.ts` — `toCents`, `formatBRL`, parsing "1.234,56" and "1234,56" (covers the validation in `05 § Form validations`).
 
-**DoD**: `pnpm test` with one test per checkbox in `05` (rules R1–R13), 100% green, no `Float` anywhere in a monetary computation, clean `pnpm build`.
+**DoD**: `pnpm test` with one test per checkbox in `05` (rules R1–R13), 100% green, no `Float` anywhere in a monetary computation, clean `pnpm build`. **Met** — 99 tests across 14 files, all green; `grep`-audited for stray `Float`/`parseFloat` in non-test finance code (none); clean `pnpm build`.
 
 ---
 
