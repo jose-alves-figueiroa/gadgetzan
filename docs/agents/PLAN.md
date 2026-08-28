@@ -51,15 +51,15 @@ Mechanical bootstrap tasks, no product logic. Do this before opening Stage 1 for
 
 **Goal**: schema live, auth working, visual shell (`1a`) navigable with empty data, base components ready for the following stages.
 
-- [ ] **E1-S1** As the app owner, I want the full Prisma schema from `01-data-model.md` (+ D2/D4) migrated on Postgres, so every following stage has somewhere to write data.
-- [ ] **E1-S2** As the single user, I want to log in with an email/password created via script, so I can access the app without a public signup screen (`06 § Auth`).
-- [ ] **E1-S3** As a user, I want every route outside `/login` to require a valid session, so the app isn't exposed on the local network without authentication (`middleware.ts`).
-- [ ] **E1-S4** As a user, I want to see the sidebar (212px, "Hoje"/"Planejamento" groups) and the topbar (month selector, search, **+ Novo lançamento**, avatar) per mockup `1a`, so I can navigate across all the product's screens.
-- [ ] **E1-S5** As a user, I want constant access to the **+ Novo lançamento** and **Simular compra** buttons on every screen, so I never need to go back to the dashboard to act (`03 § Shell`).
-- [ ] **E1-S6** As a developer, I want the base components (`Button`, `Field`, `Segmented`, `Card`, `Tag`, `Table`, `Modal`, `Bar`, `Donut`, `Tooltip`) implemented with the tokens from `04`, so I can reuse them across every screen without redefining style.
-- [ ] **E1-S7** As a developer, I want the shell's footer ("Ajustes") and the minimal responsive behavior (drawer < 1024px) sketched out, so Stage 7 only needs to refine it, not rebuild it.
+- [x] **E1-S1** As the app owner, I want the full Prisma schema from `01-data-model.md` (+ D2/D4) migrated on Postgres, so every following stage has somewhere to write data.
+- [x] **E1-S2** As the single user, I want to log in with an email/password created via script, so I can access the app without a public signup screen (`06 § Auth`). — NextAuth Credentials provider (`lib/auth.ts`), argon2 verify, JWT session.
+- [x] **E1-S3** As a user, I want every route outside `/login` to require a valid session, so the app isn't exposed on the local network without authentication (`middleware.ts`). — custom middleware using `getToken` (next-auth's default `withAuth` re-export isn't recognized as a valid export under Next.js 16's build).
+- [x] **E1-S4** As a user, I want to see the sidebar (212px, "Hoje"/"Planejamento" groups) and the topbar (month selector, search, **+ Novo lançamento**, avatar) per mockup `1a`, so I can navigate across all the product's screens.
+- [x] **E1-S5** As a user, I want constant access to the **+ Novo lançamento** and **Simular compra** buttons on every screen, so I never need to go back to the dashboard to act (`03 § Shell`). — both open placeholder modals; real functionality lands in Stage 3/6.
+- [x] **E1-S6** As a developer, I want the base components (`Button`, `Field`, `Segmented`, `Card`, `Tag`, `Table`, `Modal`, `Bar`, `Donut`, `Tooltip`) implemented with the tokens from `04`, so I can reuse them across every screen without redefining style.
+- [x] **E1-S7** As a developer, I want the shell's footer ("Ajustes") and the minimal responsive behavior (drawer < 1024px) sketched out, so Stage 7 only needs to refine it, not rebuild it. — footer done; below `lg` (1024px) the sidebar collapses and a hamburger button in the topbar opens it as an overlay drawer. Deliberately unrefined (no single-column card stacking, no fixed bottom action bar, no 44px target audit) — that polish is Stage 7 (E7-S3) per the plan.
 
-**DoD**: clean `pnpm build`, working local login, navigable shell (routes can be "under construction" stubs), green `pnpm test` (even if empty of rules so far).
+**DoD**: clean `pnpm build`, working local login, navigable shell (routes can be "under construction" stubs), green `pnpm test` (even if empty of rules so far). **Met** — verified with a scripted Playwright pass against `pnpm dev`: logged-out `/` redirects to `/login`, login succeeds, shell renders at spec dimensions (212px sidebar, 56px topbar), modal opens/closes, nav routes work, zero console errors.
 
 ---
 
