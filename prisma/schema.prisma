@@ -1,0 +1,392 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum CategoryNature {
+  FIXED
+  VARIABLE
+  COMMITMENT
+  INCOME
+}
+
+enum TxKind {
+  EXPENSE
+  INCOME
+  TRANSFER
+  INVESTMENT_IN
+  INVESTMENT_OUT
+  GOAL_IN
+  GOAL_OUT
+  CARD_PAYMENT
+  CARD_ADJUSTMENT
+}
+
+enum PaymentMethod {
+  ACCOUNT
+  CARD
+}
+
+enum Confidence {
+  REALIZED
+  CONFIRMED
+  RECURRING
+  PROJECTED
+}
+
+enum Frequency {
+  MONTHLY
+  WEEKLY
+  YEARLY
+}
+
+enum RuleStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum LimitScope {
+  TOTAL_MONTH
+  CATEGORY
+  CARD_UTILIZATION
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  PAYMENT
+}
+
+enum InvestmentKind {
+  FIXED_INCOME
+  TREASURY
+  FUND
+  STOCKS
+  OTHER
+}
+
+// ---------- User / Settings ----------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime  @default(now())
+  settings     Settings?
+
+  accounts        Account[]
+  cards           Card[]
+  categories      Category[]
+  transactions    Transaction[]
+  purchases       Purchase[]
+  invoices        Invoice[]
+  recurrenceRules RecurrenceRule[]
+  investments     Investment[]
+  goals           Goal[]
+  limits          Limit[]
+  alertStates     AlertState[]
+}
+
+model Settings {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // day the financial month starts on (1..28). Typically payday.
+  monthStartDay Int @default(1)
+  // months of projection shown in "Upcoming months"
+  projectionMonths Int @default(6)
+  // card utilization ceiling that triggers an alert, in percentage points
+  cardUtilizationTarget Int @default(70)
+  // months of history used to project variable spend
+  variableLookback Int @default(3)
+
+  // see docs/agents/07-open-decisions.md D1 — resolved: keep false, no debt tracking yet
+  netWorthSubtractsOpenInvoices Boolean @default(false)
+  // floor for projected balance used by R10/R13 (docs/agents/07-open-decisions.md D2); null = no floor
+  minCashCents Int?
+
+  hideAmounts Boolean @default(false)
+  currency    String  @default("BRL")
+  locale      String  @default("pt-BR")
+}
+
+// ---------- Account ----------
+
+model Account {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  institution     String
+  nickname        String
+  type            AccountType @default(CHECKING)
+  openingBalance  Int
+  openingDate     DateTime    @db.Date
+  includeInTotals Boolean     @default(true)
+  archivedAt      DateTime?
+
+  cards        Card[]
+  investments  Investment[]
+  transactions Transaction[] @relation("TransactionAccount")
+  toTransactions Transaction[] @relation("TransactionToAccount")
+  goals        Goal[]
+
+  @@index([userId])
+}
+
+// ---------- Card ----------
+
+model Card {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  accountId         String
+  account           Account   @relation(fields: [accountId], references: [id])
+  name              String
+  limitCents        Int
+  closingDay        Int
+  dueDay            Int
+  utilizationTarget Int?
+  archivedAt        DateTime?
+
+  transactions Transaction[]
+  purchases    Purchase[]
+  invoices     Invoice[]
+  limits       Limit[]
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+// ---------- Category ----------
+
+model Category {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  name       String
+  nature     CategoryNature
+  icon       String
+  parentId   String?
+  parent     Category?      @relation("CategoryParent", fields: [parentId], references: [id])
+  children   Category[]     @relation("CategoryParent")
+  archivedAt DateTime?
+
+  transactions Transaction[]
+  purchases    Purchase[]
+  recurrenceRules RecurrenceRule[]
+  limits       Limit[]
+
+  @@index([userId])
+}
+
+// ---------- Transaction ----------
+
+model Transaction {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  kind           TxKind
+  description    String
+  amountCents    Int
+  competenceDate DateTime       @db.Date
+  categoryId     String?
+  category       Category?      @relation(fields: [categoryId], references: [id])
+  method         PaymentMethod?
+
+  accountId String?
+  account   Account? @relation("TransactionAccount", fields: [accountId], references: [id])
+
+  toAccountId String?
+  toAccount   Account? @relation("TransactionToAccount", fields: [toAccountId], references: [id])
+
+  cardId String?
+  card   Card?   @relation(fields: [cardId], references: [id])
+
+  investmentId String?
+  investment   Investment? @relation(fields: [investmentId], references: [id])
+
+  goalId String?
+  goal   Goal?   @relation(fields: [goalId], references: [id])
+
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+
+  purchaseId String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id])
+
+  installmentNo Int?
+
+  recurrenceId String?
+  recurrenceRule RecurrenceRule? @relation(fields: [recurrenceId], references: [id])
+
+  isFixed Boolean @default(false)
+  note    String?
+
+  // reserved for the (out-of-scope-for-now) OFX/CSV importer — see docs/agents/07-open-decisions.md
+  externalId    String? @unique
+  importBatchId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, competenceDate])
+  @@index([userId, categoryId, competenceDate])
+  @@index([invoiceId])
+}
+
+// ---------- Purchase (installment purchase) ----------
+
+model Purchase {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  description  String
+  totalCents   Int
+  installments Int
+  cardId       String
+  card         Card     @relation(fields: [cardId], references: [id])
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  purchaseDate DateTime @db.Date
+
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([cardId])
+}
+
+// ---------- Invoice ----------
+
+model Invoice {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  cardId           String
+  card             Card      @relation(fields: [cardId], references: [id])
+  referenceMonth   DateTime  @db.Date
+  closingDate      DateTime  @db.Date
+  dueDate          DateTime  @db.Date
+  closedAt         DateTime?
+  paidAt           DateTime?
+  paidCents        Int?
+  manualTotalCents Int?
+
+  transactions Transaction[]
+
+  @@unique([cardId, referenceMonth])
+  @@index([userId])
+}
+
+// ---------- RecurrenceRule ----------
+
+model RecurrenceRule {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  kind        TxKind
+  description String
+  amountCents Int
+  frequency   Frequency     @default(MONTHLY)
+  dayOfMonth  Int?
+  weekday     Int?
+  monthOfYear Int?
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  method      PaymentMethod
+  accountId   String?
+  cardId      String?
+  startDate   DateTime      @db.Date
+  endDate     DateTime?     @db.Date
+  status      RuleStatus    @default(ACTIVE)
+
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+// ---------- Investment ----------
+
+model Investment {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  accountId       String
+  account         Account        @relation(fields: [accountId], references: [id])
+  name            String
+  kind            InvestmentKind
+  appliedCents    Int
+  currentCents    Int
+  lastValuationAt DateTime?      @db.Date
+  liquidity       String?
+  archivedAt      DateTime?
+
+  transactions Transaction[]
+  goals        Goal[]
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+// ---------- Goal ("porquinho") ----------
+
+model Goal {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id])
+  name               String
+  icon               String
+  targetCents        Int
+  targetDate         DateTime? @db.Date
+  monthlyTargetCents Int?
+  accountId          String?
+  account            Account?  @relation(fields: [accountId], references: [id])
+  investmentId       String?
+  investment         Investment? @relation(fields: [investmentId], references: [id])
+  closedAt           DateTime?
+
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+// ---------- Limit ----------
+
+model Limit {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  scope         LimitScope
+  categoryId    String?
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  cardId        String?
+  card          Card?      @relation(fields: [cardId], references: [id])
+  amountCents   Int?
+  percent       Int?
+  period        Frequency  @default(MONTHLY)
+  warnAtPercent Int        @default(80)
+  // whether TOTAL_MONTH includes COMMITMENT-nature spend (docs/agents/07-open-decisions.md D4)
+  includeCommitments Boolean @default(false)
+  archivedAt    DateTime?
+
+  @@index([userId])
+}
+
+// ---------- Alert ----------
+
+model AlertState {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  alertKey    String
+  dismissedAt DateTime?
+
+  @@unique([userId, alertKey])
+}

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-9211fcfa-7ed2-4fab-b975-483dba23f224/styles.css">
+<script src="_ds/nocturne-9211fcfa-7ed2-4fab-b975-483dba23f224/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+:root{--pos:oklch(0.74 0.11 158);--neg:oklch(0.70 0.13 22);--warn:oklch(0.78 0.12 78);--ac:#9184d9;--line:#3f424d;--tile:#292b31;--mut:#9397ab;--dim:#75798c}
+body{margin:0;background:#0e1017;color:#e9e9ed;font-family:"Inter",system-ui,sans-serif}
+a{color:var(--ac);text-decoration:none}a:hover{color:#b5abfc}
+.dv-turn{padding:44px 48px 36px;border-bottom:1px solid rgba(233,233,237,.1);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 22px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#e9e9ed;color:#161826;border-radius:4px;text-decoration:none}
+.dv-tname{font:500 13px/1.2 "Inter",system-ui;color:#e9e9ed}
+.dv-sub{display:flex;align-items:baseline;gap:12px;margin:44px 0 18px;font:500 11px/1 "Inter",system-ui;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.dv-sub::after{content:"";flex:1;height:1px;background:linear-gradient(to right,rgba(233,233,237,.14),transparent)}
+.dv-opts{display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(233,233,237,.12);color:#e9e9ed;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 "Inter",system-ui;color:var(--mut)}
+.dv-opt:target .dv-oid{background:var(--ac);color:#161826}
+.dv-card{background:#161826;border-radius:8px;box-shadow:0 0 0 1px var(--line),0 18px 44px rgba(0,0,0,.5);overflow:hidden}
+.dv-next{margin:34px 0 0;font:12px/1.6 "Inter",system-ui;color:var(--dim)}
+.sb{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:6px;font-size:12.5px;color:var(--mut);cursor:default}
+.sb i{font-size:15px}
+.sb.on{background:rgba(145,132,217,.14);color:#d2cefd;box-shadow:inset 0 0 0 1px rgba(145,132,217,.35)}
+.sbh{font:500 9.5px/1 "Inter",system-ui;letter-spacing:.14em;text-transform:uppercase;color:#595d6c;padding:0 10px;margin:16px 0 6px}
+.kpi{font-variant-numeric:tabular-nums;font-weight:500;letter-spacing:-.02em}
+.lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.tile{background:#232532;border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.bar{height:6px;border-radius:3px;background:#292b31;overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:3px;background:var(--ac)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.al{display:flex;gap:10px;padding:11px 12px;border-radius:7px;background:#232532;font-size:12px;line-height:1.45}
+.al i{font-size:15px;line-height:1.3}
+.tbar{display:flex;align-items:center;gap:14px;padding:0 22px;height:56px;border-bottom:1px solid rgba(233,233,237,.1)}
+.mstep{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;padding:5px 8px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--line)}
+.mstep i{font-size:13px;color:var(--mut)}
+.pri{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--ac);padding:7px 12px;border-radius:8px;border:1px solid var(--ac)}
+.sec{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#e9e9ed;padding:7px 12px;border-radius:8px;border:1px solid var(--line)}
+.chip{font-size:11px;padding:3px 9px;border-radius:6px;background:#292b31;color:var(--mut)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.sheet{background:#161826;padding:26px 30px 30px;display:flex;flex-direction:column;gap:12px}
+.tip{cursor:help;position:relative;border-bottom:1px dotted #595d6c}
+.tip:hover::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 7px);width:240px;padding:9px 11px;border-radius:8px;background:#292b31;box-shadow:0 0 0 1px #595d6c,0 6px 18px rgba(0,0,0,.55);font:400 11px/1.45 "Inter",system-ui;letter-spacing:0;text-transform:none;color:#e9e9ed;z-index:30}
+.ttl{font-size:19px;font-weight:500;letter-spacing:-.02em;margin:0}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Tela do mês — fechamento com composição, limites e porquinhos em um lugar</span></div>
+<p style="margin:-8px 0 22px;font:12.5px/1.65 'Inter',system-ui;color:var(--mut);max-width:840px">O brief diz que o usuário revisa as finanças uma vez por mês; faltava a tela desse ritual. Ela reúne o que estava espalhado entre <a class="dv-oid" href="#1y">1y</a> (análise), <a class="dv-oid" href="#1t">1t</a> (limites) e <a class="dv-oid" href="#1v">1v</a> (porquinhos) na ordem de uma conversa: o que entrou e saiu, onde foi, se respeitei meus limites, quanto guardei, o que mudou.</p>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="3a">
+    <div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Mês · fechamento de agosto 2026</div>
+    <div class="dv-card" style="width:1180px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div><h4 class="ttl">Agosto 2026</h4><span style="font-size:12px;color:var(--dim)">Mês fechado · 34 lançamentos · comparado com julho</span></div>
+        <div style="display:flex;gap:8px;align-items:center"><div class="mstep"><i class="ph ph-caret-left"></i><span>Agosto 2026</span><i class="ph ph-caret-right"></i></div><div class="sec"><i class="ph ph-download-simple"></i>Exportar</div><div class="pri"><i class="ph ph-arrow-right"></i>Ver setembro</div></div>
+      </div>
+
+      <div class="tile" style="gap:14px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Receitas</span><span class="kpi" style="font-size:21px;color:var(--pos)">R$ 15.000</span><span style="font-size:11px;color:var(--dim)">= igual a julho</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Despesas</span><span class="kpi" style="font-size:21px">R$ 9.200</span><span style="font-size:11px;color:var(--warn)">↑ R$ 900 vs. julho</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Dinheiro movido da conta para investimentos. Não é despesa: não reduz seu patrimônio, só muda onde ele está.">Aportes</span><span class="kpi" style="font-size:21px;color:var(--ac)">R$ 3.000</span><span style="font-size:11px;color:var(--pos)">↑ R$ 400 vs. julho</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Receitas − despesas − aportes. É o que ficou parado na conta.">Sobra em caixa</span><span class="kpi" style="font-size:21px">R$ 2.800</span><span style="font-size:11px;color:var(--dim)">↓ R$ 1.300 vs. julho</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Aportes + sobra em caixa ÷ receitas. Aqui: (3.000 + 2.800) ÷ 15.000.">Taxa de poupança</span><span class="kpi" style="font-size:21px;color:var(--pos)">38,7%</span><span style="font-size:11px;color:var(--dim)">média do ano 41,2%</span></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+        <div class="tile" style="gap:16px">
+          <div class="row"><span style="font-size:14px;font-weight:500">Onde o dinheiro foi</span><div class="seg"><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Categoria</span><span class="seg-opt">Natureza</span></div></div>
+          <div style="display:flex;align-items:center;gap:24px">
+            <div style="position:relative;width:168px;height:168px;flex:none">
+              <div style="width:168px;height:168px;border-radius:50%;background:conic-gradient(#968ae0 0 24%,#7972a9 24% 42%,#796cbf 42% 63%,#5d5294 63% 79%,#423a6a 79% 93%,#3f424d 93% 100%)"></div>
+              <div style="position:absolute;inset:34px;border-radius:50%;background:#232532;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                <span class="kpi" style="font-size:19px">R$ 9.200</span>
+                <span style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">despesas</span>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#968ae0"></span>Moradia</span><span><span class="mono">2.200</span> <span style="color:var(--dim);font-size:11px">24%</span></span></div>
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#7972a9"></span>Compromissos</span><span><span class="mono">1.700</span> <span style="color:var(--dim);font-size:11px">18%</span></span></div>
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#796cbf"></span>Alimentação</span><span><span class="mono">1.900</span> <span style="color:var(--dim);font-size:11px">21%</span></span></div>
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#5d5294"></span>Transporte</span><span><span class="mono">1.480</span> <span style="color:var(--dim);font-size:11px">16%</span></span></div>
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#423a6a"></span>Lazer</span><span><span class="mono">1.290</span> <span style="color:var(--dim);font-size:11px">14%</span></span></div>
+              <div class="row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:2px;background:#3f424d"></span>Outros</span><span><span class="mono">630</span> <span style="color:var(--dim);font-size:11px">7%</span></span></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid rgba(233,233,237,.09)">
+            <div style="flex:1"><span class="lbl">Fixo</span><div class="mono" style="font-size:13px;margin-top:3px">R$ 3.310 · 36%</div></div>
+            <div style="flex:1"><span class="lbl">Compromissos</span><div class="mono" style="font-size:13px;margin-top:3px">R$ 1.700 · 18%</div></div>
+            <div style="flex:1"><span class="lbl">Variável</span><div class="mono" style="font-size:13px;margin-top:3px">R$ 4.190 · 46%</div></div>
+          </div>
+        </div>
+
+        <div class="tile" style="gap:14px">
+          <div class="row"><span style="font-size:14px;font-weight:500">Limites do mês</span><span style="color:var(--ac);font-size:12px">Ajustar limites</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="row"><span>Limite mensal total</span><span class="mono">9.200 <span style="color:var(--dim)">/ 10.000</span></span></div>
+            <div class="bar" style="height:9px"><i style="width:92%"></i></div>
+            <div class="row"><span style="color:var(--mut);font-size:11.5px">92% usado · sobraram R$ 800</span><span style="color:var(--pos);font-size:11.5px">dentro do limite</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:11px;padding-top:12px;border-top:1px solid rgba(233,233,237,.09)">
+            <div style="display:flex;flex-direction:column;gap:6px"><div class="row"><span><i class="ph ph-fork-knife" style="margin-right:8px;color:var(--mut)"></i>Alimentação</span><span class="mono" style="color:var(--neg)">1.900 <span style="color:var(--dim)">/ 1.500</span></span></div><div class="bar"><i style="width:100%;background:var(--neg)"></i></div><span style="font-size:11.5px;color:var(--neg)">R$ 400 acima · 3º mês seguido acima do limite</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><div class="row"><span><i class="ph ph-confetti" style="margin-right:8px;color:var(--mut)"></i>Lazer</span><span class="mono" style="color:var(--warn)">1.290 <span style="color:var(--dim)">/ 1.200</span></span></div><div class="bar"><i style="width:100%;background:var(--warn)"></i></div><span style="font-size:11.5px;color:var(--warn)">R$ 90 acima · primeira vez no ano</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><div class="row"><span><i class="ph ph-car" style="margin-right:8px;color:var(--mut)"></i>Transporte</span><span class="mono">1.480 <span style="color:var(--dim)">/ 2.000</span></span></div><div class="bar"><i style="width:74%"></i></div><span style="font-size:11.5px;color:var(--pos)">74% · 12% abaixo da sua média</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><div class="row"><span><i class="ph ph-credit-card" style="margin-right:8px;color:var(--mut)"></i>Utilização do cartão</span><span class="mono">29% <span style="color:var(--dim)">/ 70%</span></span></div><div class="bar"><i style="width:41%"></i></div><span style="font-size:11.5px;color:var(--mut)">R$ 2.340 comprometidos de R$ 8.000</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+        <div class="tile" style="gap:14px">
+          <div class="row"><span style="font-size:14px;font-weight:500">O que você guardou em agosto</span><span class="mono" style="color:var(--ac)">R$ 3.000</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div class="row"><span style="display:flex;align-items:center;gap:8px"><i class="ph ph-airplane-tilt" style="color:var(--mut)"></i>Viagem</span><span><span class="mono" style="color:var(--pos)">+ 1.000</span> <span style="color:var(--dim);font-size:11px">7.500 / 12.000</span></span></div>
+            <div class="bar"><i style="width:62.5%"></i></div>
+            <div class="row"><span style="display:flex;align-items:center;gap:8px"><i class="ph ph-shield-check" style="color:var(--mut)"></i>Reserva</span><span><span class="mono" style="color:var(--pos)">+ 1.600</span> <span style="color:var(--dim);font-size:11px">9.000 / 30.000</span></span></div>
+            <div class="bar"><i style="width:30%;background:var(--warn)"></i></div>
+            <div class="row"><span style="display:flex;align-items:center;gap:8px"><i class="ph ph-graduation-cap" style="color:var(--mut)"></i>Curso</span><span><span class="mono" style="color:var(--pos)">+ 400</span> <span style="color:var(--dim);font-size:11px">1.200 / 4.000</span></span></div>
+            <div class="bar"><i style="width:30%"></i></div>
+          </div>
+          <div class="row" style="padding-top:11px;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Patrimônio líquido</span><span><span class="mono">42.300</span> <span style="color:var(--pos);font-size:11.5px">+ 2.200 no mês</span></span></div>
+        </div>
+        <div class="tile" style="gap:11px">
+          <span style="font-size:14px;font-weight:500">O que mudou neste mês</span>
+          <div class="al" style="align-items:flex-start"><i class="ph ph-warning-circle" style="color:var(--warn)"></i><span><strong style="font-weight:500">Alimentação passou do limite pelo 3º mês</strong><br><span style="color:var(--mut)">R$ 1.900 contra limite de R$ 1.500. Ou o limite está desatualizado, ou vale olhar as compras de supermercado.</span><span style="display:flex;gap:8px;margin-top:8px"><span class="sec" style="font-size:11.5px;padding:5px 10px">Ver gastos</span><span class="sec" style="font-size:11.5px;padding:5px 10px">Subir limite para R$ 1.900</span></span></span></div>
+          <div class="al" style="align-items:flex-start"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span><strong style="font-weight:500">Você guardou R$ 400 mais que em julho</strong><br><span style="color:var(--mut)">Mesmo com a parcela nova do notebook.</span></span></div>
+          <div class="al" style="align-items:flex-start"><i class="ph ph-info" style="color:var(--mut)"></i><span><strong style="font-weight:500">Setembro já tem R$ 5.140 comprometidos</strong><br><span style="color:var(--mut)">Recorrentes, compromissos e parcelas — sobra prevista de R$ 7.000.</span></span></div>
+          <div class="row" style="padding-top:9px;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut);font-size:12px">Despesas por mês · mar a ago</span><span style="color:var(--dim);font-size:11.5px">média R$ 8.100</span></div>
+          <div style="display:flex;align-items:flex-end;gap:9px;height:56px">
+            <span style="flex:1;height:52%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:61%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:48%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:70%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:82%;background:#5d5294;border-radius:3px 3px 0 0"></span><span style="flex:1;height:92%;background:var(--ac);border-radius:3px 3px 0 0"></span>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+<p class="dv-next">Próximos passos: “donut também na análise <a class="dv-oid" href="#1y">1y</a>” · “versão mobile da tela do mês” · “comparar dois meses lado a lado”</p>
+</section>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Cadastros que faltavam — conta, cartão, investimento, categoria e fatura</span></div>
+<p style="margin:-8px 0 22px;font:12.5px/1.65 'Inter',system-ui;color:var(--mut);max-width:840px">Na rodada <a class="dv-oid" href="#t1">1</a> existiam cadastros de lançamento, transferência, recorrência, limite e porquinho — contas, cartões, investimentos e categorias apareciam só como listas. Sobre fatura: <strong style="font-weight:500;color:#e9e9ed">fatura não se cadastra</strong> — ela é gerada pelo cartão a partir de compras, parcelas e assinaturas. O que se faz com uma fatura é pagar, ajustar (quando o valor real difere do calculado) ou lançar uma fatura antiga ao começar a usar o app: é o que <a class="dv-oid" href="#2e">2e</a> cobre.</p>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="2a">
+    <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Nova conta</div>
+    <div class="dv-card" style="width:430px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Nova conta</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="field"><label>Instituição</label><div class="input" style="display:flex;align-items:center;justify-content:space-between"><span><i class="ph ph-bank" style="margin-right:7px;color:var(--mut)"></i>Nubank</span><i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Apelido</label><input class="input" value="Conta principal" readonly></div>
+      <div class="field"><label>Tipo</label><div class="seg" style="align-self:stretch"><span class="seg-opt" style="flex:1;justify-content:center;color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Corrente</span><span class="seg-opt" style="flex:1;justify-content:center">Poupança</span><span class="seg-opt" style="flex:1;justify-content:center">Pagamento</span></div></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1.3"><label>Saldo atual</label><input class="input mono" value="R$ 3.200,00" readonly></div><div class="field" style="flex:1"><label>Na data</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">27/08<i class="ph ph-calendar-blank" style="color:var(--mut)"></i></div></div></div>
+      <span style="font-size:11px;color:var(--dim);margin-top:-4px">Vira o saldo inicial — nenhum lançamento retroativo é criado.</span>
+      <label class="radio"><input type="checkbox" checked><span class="dot" style="border-radius:4px"></span>Incluir no total disponível</label>
+      <div style="display:flex;gap:8px;margin-top:6px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar conta</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="2b">
+    <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Novo cartão — fechamento e vencimento são o que fazem a projeção funcionar</div>
+    <div class="dv-card" style="width:430px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Novo cartão</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="field"><label>Nome do cartão</label><input class="input" value="Cartão Nubank" readonly></div>
+      <div class="field"><label>Conta de débito</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Nubank · R$ 3.200<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Limite total</label><input class="input mono" value="R$ 8.000,00" readonly></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Fecha dia</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">12<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div><div class="field" style="flex:1"><label>Vence dia</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">20<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div></div>
+      <div class="field"><label>Avisar quando a utilização passar de</label><div class="seg" style="align-self:stretch"><span class="seg-opt" style="flex:1;justify-content:center">60%</span><span class="seg-opt" style="flex:1;justify-content:center;color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">70%</span><span class="seg-opt" style="flex:1;justify-content:center">80%</span><span class="seg-opt" style="flex:1;justify-content:center">Nunca</span></div></div>
+      <div class="tile" style="gap:8px;background:#292b31">
+        <span class="lbl">Como isso aparece no app</span>
+        <div class="row"><span style="color:var(--mut)">Compra até dia 12</span><span>entra na fatura deste mês</span></div>
+        <div class="row"><span style="color:var(--mut)">Compra após dia 12</span><span>entra na fatura seguinte</span></div>
+        <div class="row"><span style="color:var(--mut)">Débito na conta</span><span>dia 20</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:2px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar cartão</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="2c">
+    <div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Novo investimento — o aporte inicial é transferência, não despesa</div>
+    <div class="dv-card" style="width:430px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Novo investimento</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="field"><label>Nome</label><input class="input" value="CDB · 110% CDI" readonly></div>
+      <div class="field"><label>Tipo</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Renda fixa · CDB<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Instituição / conta</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Nubank<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Valor aplicado</label><input class="input mono" value="R$ 23.600,00" readonly></div><div class="field" style="flex:1"><label>Valor atual</label><input class="input mono" value="R$ 25.000,00" readonly></div></div>
+      <div class="field"><label>Vencimento / liquidez</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Liquidez diária<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <label class="radio"><input type="checkbox" checked><span class="dot" style="border-radius:4px"></span>Debitar o aporte de uma conta agora</label>
+      <div class="tile" style="gap:8px;background:#292b31">
+        <span class="lbl">Ao salvar</span>
+        <div class="row"><span style="color:var(--mut)">Nubank</span><span class="mono">3.200 <i class="ph ph-arrow-right" style="font-size:10px"></i> 3.200</span></div>
+        <div class="row"><span style="color:var(--mut)">Investido</span><span class="mono">12.300 <i class="ph ph-arrow-right" style="font-size:10px"></i> 37.300</span></div>
+        <div class="row"><span style="color:var(--mut)">Despesas do mês</span><span>sem alteração</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:2px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar investimento</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="2d">
+    <div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>Nova categoria — inclui a natureza “compromisso”</div>
+    <div class="dv-card" style="width:410px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Nova categoria</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="field"><label>Nome</label><input class="input" value="Ajuda familiar" readonly></div>
+      <div class="field"><label>Natureza</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <label class="radio"><input type="radio" name="nat2d"><span class="dot"></span>Fixo · custo de vida que se repete</label>
+          <label class="radio"><input type="radio" name="nat2d"><span class="dot"></span>Variável · discricionário, dá para ajustar</label>
+          <label class="radio"><input type="radio" name="nat2d" checked><span class="dot"></span>Compromisso · obrigação com terceiros</label>
+        </div>
+      </div>
+      <div class="field"><label>Ícone</label><div style="display:flex;gap:8px;margin-top:4px"><span style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--ac);color:var(--ac)"><i class="ph ph-users-three"></i></span><span style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)"><i class="ph ph-hand-heart"></i></span><span style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)"><i class="ph ph-house"></i></span><span style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)"><i class="ph ph-heart"></i></span><span style="width:34px;height:34px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)"><i class="ph ph-dots-three"></i></span></div></div>
+      <div class="field"><label>Limite mensal (opcional)</label><div class="input" style="display:flex;align-items:center;justify-content:space-between;color:var(--dim)">Sem limite<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <span style="font-size:11px;color:var(--dim);margin-top:-4px">Compromissos aparecem separados de custo de vida e de gasto discricionário na análise.</span>
+      <div style="display:flex;gap:8px;margin-top:4px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar categoria</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="2e">
+    <div class="dv-olabel"><a class="dv-oid" href="#2e">2e</a>Fatura — pagar, ajustar valor real e lançar fatura anterior</div>
+    <div class="dv-card" style="width:880px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div><h4 class="ttl">Fatura de agosto · Cartão Nubank</h4><span style="font-size:12px;color:var(--dim)">Gerada automaticamente · fechou 12/09 · vence 20/09</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+        <div class="tile" style="gap:12px">
+          <span class="lbl">Pagar fatura</span>
+          <div class="row"><span style="color:var(--mut)">Valor calculado pelo app</span><span class="kpi" style="font-size:19px">R$ 2.340,00</span></div>
+          <div class="field"><label>Valor pago</label><input class="input mono" value="R$ 2.340,00" readonly></div>
+          <div class="field"><label>Pagar com</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Nubank · R$ 3.200<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+          <div class="field"><label>Data do pagamento</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">20/09/2026<i class="ph ph-calendar-blank" style="color:var(--mut)"></i></div></div>
+          <div class="seg" style="align-self:stretch"><span class="seg-opt" style="flex:1;justify-content:center;color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Pagamento total</span><span class="seg-opt" style="flex:1;justify-content:center">Parcial</span></div>
+          <div class="al"><i class="ph ph-info" style="color:var(--mut)"></i><span>O pagamento não é uma nova despesa — as compras já foram contadas quando aconteceram.</span></div>
+          <div class="pri" style="justify-content:center">Registrar pagamento</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="tile" style="gap:12px">
+            <span class="lbl">Valor real diferente do calculado?</span>
+            <div class="row"><span style="color:var(--mut)">Diferença</span><span class="mono" style="color:var(--warn)">+ R$ 18,40</span></div>
+            <div class="field"><label>Ajuste</label><input class="input mono" value="R$ 18,40" readonly></div>
+            <div class="field"><label>Motivo</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">IOF e encargos<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+            <span style="font-size:11px;color:var(--dim)">O ajuste entra como lançamento próprio na fatura, sem mexer nas compras.</span>
+            <div class="sec" style="justify-content:center">Salvar ajuste</div>
+          </div>
+          <div class="tile" style="gap:12px">
+            <span class="lbl">Lançar fatura anterior</span>
+            <span style="font-size:12px;color:var(--mut)">Para quem começa a usar o app com faturas antigas em aberto: registre o total sem cadastrar cada compra.</span>
+            <div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Mês</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Julho 2026<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div><div class="field" style="flex:1"><label>Total</label><input class="input mono" value="R$ 1.980,00" readonly></div></div>
+            <label class="radio"><input type="checkbox"><span class="dot" style="border-radius:4px"></span>Já foi paga</label>
+            <div class="sec" style="justify-content:center">Lançar fatura</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+<p class="dv-next">Próximos passos: “cadastro de porquinho e de meta com aporte automático” · “fluxo de primeiro acesso (onboarding) usando <a class="dv-oid" href="#2a">2a</a>–<a class="dv-oid" href="#2e">2e</a>” · “versão mobile desses formulários”</p>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Gadgetzan — app de finanças pessoais · galeria de telas (desktop, pt-BR, Nocturne)</span></div>
+
+<div style="display:flex;gap:28px;flex-wrap:wrap;max-width:1280px;margin-bottom:8px">
+  <div style="flex:1 1 420px;min-width:380px;display:flex;flex-direction:column;gap:14px">
+    <h3 style="margin:0;font-size:22px;letter-spacing:-.02em">Premissas e raciocínio</h3>
+    <p style="margin:0;font-size:13px;line-height:1.65;color:#b2b6ca">O repositório <span class="mono" style="font-size:12px">finance-app</span> está vazio (nenhum commit), então nada foi herdado de código — as telas nascem do brief sobre o design system <strong style="font-weight:500">Nocturne</strong> (fundo escuro dessaturado, acento blurple usado como linha e não como preenchimento, Inter 500, densidade 0,7×).</p>
+    <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:#b2b6ca">
+      <li>Persona: assalariado, R$ 15.000/mês, cartão + investimentos. Revisão mensal → a tela precisa render <em>leitura rápida</em>, não entrada de dados em massa.</li>
+      <li>Tom sóbrio: alertas explicam, não punem. Nenhum vermelho grande, nenhum emoji, nenhuma gamificação.</li>
+      <li>Cor tem função: acento = valor projetado/ação, verde = entrada, âmbar = atenção, vermelho = limite estourado. Nada além disso.</li>
+      <li>Números tabulares em todo saldo; sinal explícito (+/−) só onde há ambiguidade.</li>
+      <li>Bancos reais usados como rótulos de conta, conforme pedido.</li>
+    </ul>
+  </div>
+  <div style="flex:1 1 380px;min-width:340px;display:flex;flex-direction:column;gap:14px">
+    <h3 style="margin:0;font-size:22px;letter-spacing:-.02em">Arquitetura da informação</h3>
+    <div style="font-size:12.5px;line-height:1.9;color:#b2b6ca">
+      <div style="color:#e9e9ed;font-weight:500">Hoje</div>
+      <div style="padding-left:14px">Dashboard · Mês · Lançamentos · Contas · Cartões · Investimentos · Porquinhos</div>
+      <div style="color:#e9e9ed;font-weight:500;margin-top:10px">Planejamento</div>
+      <div style="padding-left:14px">Próximos meses · Calendário · Recorrências · Limites · Análise</div>
+      <div style="color:#e9e9ed;font-weight:500;margin-top:10px">Decisão</div>
+      <div style="padding-left:14px">Simular compra (ação persistente, ao lado de “Novo lançamento”)</div>
+      <div style="color:#e9e9ed;font-weight:500;margin-top:10px">Ajustes</div>
+      <div style="padding-left:14px">Categorias · Contas conectadas · Preferências</div>
+    </div>
+    <p style="margin:0;font-size:12.5px;line-height:1.65;color:var(--dim)">Duas ações sempre alcançáveis: <span style="color:#e9e9ed">+ Novo lançamento</span> (registrar o passado) e <span style="color:#e9e9ed">Simular compra</span> (testar o futuro). É a tese do produto em dois botões.</p>
+  </div>
+</div>
+
+<div class="dv-sub"><span>Dashboard — três direções de layout e navegação</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1a">
+    <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Sidebar + pilha vertical: posição → mês atual → futuro. Convencional, escaneável, cada bloco responde uma pergunta do brief.</div>
+    <div class="dv-card" style="width:1280px">
+      <div style="display:flex;min-height:860px">
+        <div style="width:212px;flex:none;border-right:1px solid rgba(233,233,237,.1);padding:16px 10px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:9px;padding:4px 10px 14px"><span style="width:18px;height:18px;border-radius:5px;background:var(--ac)"></span><span style="font-size:15px;font-weight:500;letter-spacing:-.01em">Gadgetzan</span></div>
+          <div class="sbh">Hoje</div>
+          <div class="sb on"><i class="ph ph-squares-four"></i>Dashboard</div>
+          <div class="sb"><i class="ph ph-calendar-check"></i>Mês</div>
+          <div class="sb"><i class="ph ph-list-dashes"></i>Lançamentos</div>
+          <div class="sb"><i class="ph ph-bank"></i>Contas</div>
+          <div class="sb"><i class="ph ph-credit-card"></i>Cartões</div>
+          <div class="sb"><i class="ph ph-chart-line-up"></i>Investimentos</div>
+          <div class="sb"><i class="ph ph-piggy-bank"></i>Porquinhos</div>
+          <div class="sbh">Planejamento</div>
+          <div class="sb"><i class="ph ph-calendar-dots"></i>Próximos meses</div>
+          <div class="sb"><i class="ph ph-calendar-blank"></i>Calendário</div>
+          <div class="sb"><i class="ph ph-arrows-clockwise"></i>Recorrências</div>
+          <div class="sb"><i class="ph ph-gauge"></i>Limites</div>
+          <div class="sb"><i class="ph ph-chart-pie-slice"></i>Análise</div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:14px 6px 4px">
+            <div class="pri" style="justify-content:center"><i class="ph ph-flask"></i>Simular compra</div>
+            <div class="sb"><i class="ph ph-gear-six"></i>Ajustes</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <div class="tbar">
+            <div class="mstep"><i class="ph ph-caret-left"></i><span>Agosto 2026</span><i class="ph ph-caret-right"></i></div>
+            <span class="chip">Mês atual</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+              <div class="sec"><i class="ph ph-magnifying-glass"></i>Buscar</div>
+              <div class="pri"><i class="ph ph-plus"></i>Novo lançamento</div>
+              <span style="width:28px;height:28px;border-radius:50%;background:#3f424d"></span>
+            </div>
+          </div>
+          <div style="padding:22px;display:flex;flex-direction:column;gap:14px">
+            <div class="g3">
+              <div class="tile">
+                <span class="lbl">Patrimônio líquido</span>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">
+                  <span class="kpi" style="font-size:29px">R$ 42.300</span>
+                  <svg width="96" height="34" viewBox="0 0 96 34" fill="none" style="opacity:.9"><polyline points="0,30 19,25 38,22 57,14 76,9 95,4" stroke="var(--ac)" stroke-width="1.5"></polyline></svg>
+                </div>
+                <div class="row"><span style="color:var(--pos)">+ R$ 2.200 vs. julho</span><span style="color:var(--dim)">+5,5%</span></div>
+              </div>
+              <div class="tile">
+                <span class="lbl">Saldo disponível</span>
+                <span class="kpi" style="font-size:29px">R$ 5.000</span>
+                <div class="bar"><i style="width:30%;background:var(--pos)"></i></div>
+                <div class="row"><span style="color:var(--mut)">Livre para gastar</span><span>R$ 1.500</span></div>
+                <div class="row"><span style="color:var(--mut)">Reservado em porquinhos</span><span style="color:var(--mut)">R$ 3.500</span></div>
+              </div>
+              <div class="tile">
+                <span class="lbl">Próxima fatura</span>
+                <span class="kpi" style="font-size:29px">R$ 2.340</span>
+                <div class="row"><span style="color:var(--mut)">Nubank · fecha 12/09</span><span>vence 20/09</span></div>
+                <div class="row"><span style="color:var(--mut)">Limite utilizado</span><span>29%</span></div>
+                <div class="bar"><i style="width:29%"></i></div>
+              </div>
+            </div>
+
+            <div class="tile" style="gap:16px">
+              <div class="row"><span style="font-size:14px;font-weight:500">Agosto 2026 · realizado</span><span style="color:var(--ac);font-size:12px">Ver lançamentos</span></div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+                <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Receitas</span><span class="kpi" style="font-size:21px;color:var(--pos)">R$ 15.000</span></div>
+                <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Despesas</span><span class="kpi" style="font-size:21px">R$ 9.200</span></div>
+                <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Dinheiro movido da conta para investimentos. Não é despesa: não reduz seu patrimônio, só muda onde ele está.">Aportes</span><span class="kpi" style="font-size:21px;color:var(--ac)">R$ 3.000</span></div>
+                <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Receitas − despesas − aportes. É o que ficou parado na conta.">Sobra em caixa</span><span class="kpi" style="font-size:21px">R$ 2.800</span></div>
+                <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl tip" data-tip="Quanto da sua receita você não consumiu: aportes + sobra em caixa ÷ receitas. Aqui: (3.000 + 2.800) ÷ 15.000.">Taxa de poupança</span><span class="kpi" style="font-size:21px;color:var(--pos)">38,7%</span></div>
+              </div>
+              <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px">
+                <span style="width:24%;background:#968ae0"></span><span style="width:18%;background:#7972a9"></span><span style="width:21%;background:#796cbf"></span><span style="width:16%;background:#5d5294"></span><span style="width:14%;background:#423a6a"></span><span style="width:7%;background:#3f424d"></span>
+              </div>
+              <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--mut)">
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#968ae0;margin-right:6px"></span>Moradia R$ 2.200</span>
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#7972a9;margin-right:6px"></span>Compromissos R$ 1.700</span>
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#796cbf;margin-right:6px"></span>Alimentação R$ 1.900</span>
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#5d5294;margin-right:6px"></span>Transporte R$ 1.480</span>
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#423a6a;margin-right:6px"></span>Lazer R$ 1.290</span>
+                <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#3f424d;margin-right:6px"></span>Outros R$ 630</span>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 352px;gap:14px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="tile" style="gap:14px">
+                  <div class="row"><span style="font-size:14px;font-weight:500">Setembro 2026 · previsto</span><span class="chip">Projeção</span></div>
+                  <div class="g4">
+                    <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Receitas</span><span class="kpi" style="font-size:19px;color:var(--pos)">R$ 15.000</span></div>
+                    <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Despesas</span><span class="kpi" style="font-size:19px">R$ 5.200</span></div>
+                    <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Faturas</span><span class="kpi" style="font-size:19px">R$ 2.800</span></div>
+                    <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Resultado</span><span class="kpi" style="font-size:19px;color:var(--ac)">+ R$ 7.000</span></div>
+                  </div>
+                  <div class="row" style="padding-top:10px;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Saldo projetado no fim de setembro</span><span class="kpi" style="font-size:15px">R$ 10.000</span></div>
+                </div>
+                <div class="tile" style="gap:14px">
+                  <div class="row"><span style="font-size:14px;font-weight:500">Faturas projetadas</span><span style="color:var(--ac);font-size:12px">Ver detalhe</span></div>
+                  <div style="display:flex;align-items:flex-end;gap:14px;height:104px;padding-top:6px">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--mut)">2.340</span><span style="width:100%;height:78px;background:#5d5294;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">ago</span></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--mut)">1.870</span><span style="width:100%;height:62px;background:#423a6a;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(145,132,217,.5)"></span><span style="font-size:10.5px;color:var(--dim)">set</span></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--mut)">1.620</span><span style="width:100%;height:54px;background:#423a6a;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(145,132,217,.5)"></span><span style="font-size:10.5px;color:var(--dim)">out</span></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--mut)">1.420</span><span style="width:100%;height:47px;background:#423a6a;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(145,132,217,.5)"></span><span style="font-size:10.5px;color:var(--dim)">nov</span></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--mut)">1.180</span><span style="width:100%;height:39px;background:#423a6a;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(145,132,217,.5)"></span><span style="font-size:10.5px;color:var(--dim)">dez</span></div>
+                  </div>
+                  <div style="display:flex;gap:16px;font-size:11px;color:var(--dim)"><span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#5d5294;margin-right:6px"></span>Realizado + confirmado</span><span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#423a6a;box-shadow:inset 0 0 0 1px rgba(145,132,217,.6);margin-right:6px"></span>Projetado</span></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <sc-if value="{{ mostrarAlertas }}" hint-placeholder-val="{{ true }}">
+                <div class="tile" style="gap:10px">
+                  <div class="row"><span style="font-size:14px;font-weight:500">Alertas</span><span class="chip">2</span></div>
+                  <div class="al"><i class="ph ph-warning-circle" style="color:var(--warn)"></i><span><strong style="font-weight:500">85% do limite de alimentação</strong><br><span style="color:var(--mut)">R$ 1.275 de R$ 1.500 · faltam 6 dias no mês</span></span></div>
+                  <div class="al"><i class="ph ph-trend-up" style="color:var(--warn)"></i><span><strong style="font-weight:500">Fatura de setembro 32% maior</strong><br><span style="color:var(--mut)">Duas parcelas novas entraram em setembro</span></span></div>
+                  <div class="al"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span><strong style="font-weight:500">Transporte abaixo da média</strong><br><span style="color:var(--mut)">R$ 1.480 · 12% menos que a média de 6 meses</span></span></div>
+                </div>
+                </sc-if>
+                <div class="tile" style="gap:14px">
+                  <div class="row"><span style="font-size:14px;font-weight:500">Porquinhos</span><span style="color:var(--ac);font-size:12px">Ver todos</span></div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <div class="row"><span style="display:flex;align-items:center;gap:7px"><i class="ph ph-airplane-tilt" style="color:var(--mut)"></i>Viagem</span><span>R$ 7.500 <span style="color:var(--dim)">/ 12.000</span></span></div>
+                    <div class="bar"><i style="width:62.5%"></i></div>
+                    <div class="row"><span style="color:var(--pos);font-size:11.5px">No ritmo para dezembro</span><span style="color:var(--dim);font-size:11.5px">62,5%</span></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <div class="row"><span style="display:flex;align-items:center;gap:7px"><i class="ph ph-shield-check" style="color:var(--mut)"></i>Reserva</span><span>R$ 9.000 <span style="color:var(--dim)">/ 30.000</span></span></div>
+                    <div class="bar"><i style="width:30%"></i></div>
+                    <div class="row"><span style="color:var(--warn);font-size:11.5px">R$ 600 abaixo do ritmo</span><span style="color:var(--dim);font-size:11.5px">30%</span></div>
+                  </div>
+                </div>
+                <div class="tile" style="gap:10px">
+                  <div class="row"><span style="font-size:14px;font-weight:500">Próximos eventos</span><span style="color:var(--ac);font-size:12px">Calendário</span></div>
+                  <div class="row"><span style="color:var(--mut)">05/09 · Salário</span><span style="color:var(--pos)">+ R$ 15.000</span></div>
+                  <div class="row"><span style="color:var(--mut)">05/09 · Aluguel</span><span>− R$ 2.000</span></div>
+                  <div class="row"><span style="color:var(--mut)">10/09 · Internet</span><span>− R$ 100</span></div>
+                  <div class="row"><span style="color:var(--mut)">20/09 · Fatura Nubank</span><span>− R$ 2.340</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="1b">
+    <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Nav no topo + duas colunas espelhadas: “Agora” e “Próximo mês” lado a lado. A comparação é a tela, não um bloco dentro dela.</div>
+    <div class="dv-card" style="width:1280px">
+      <div style="display:flex;flex-direction:column;min-height:760px">
+        <div class="tbar" style="height:60px;gap:22px">
+          <div style="display:flex;align-items:center;gap:9px;margin-right:8px"><span style="width:18px;height:18px;border-radius:5px;background:var(--ac)"></span><span style="font-size:15px;font-weight:500">Gadgetzan</span></div>
+          <div style="display:flex;gap:20px;font-size:13px;color:var(--mut)">
+            <span style="color:#d2cefd;box-shadow:0 12px 0 -10px var(--ac)">Dashboard</span><span>Lançamentos</span><span>Contas</span><span>Cartões</span><span>Investimentos</span><span>Porquinhos</span><span style="display:flex;align-items:center;gap:5px">Mais <i class="ph ph-caret-down" style="font-size:11px"></i></span>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+            <div class="sec"><i class="ph ph-flask"></i>Simular</div>
+            <div class="pri"><i class="ph ph-plus"></i>Novo lançamento</div>
+            <span style="width:28px;height:28px;border-radius:50%;background:#3f424d"></span>
+          </div>
+        </div>
+        <div style="padding:24px 26px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span class="lbl">Patrimônio líquido</span>
+              <div style="display:flex;align-items:baseline;gap:12px"><span class="kpi" style="font-size:38px">R$ 42.300</span><span style="font-size:13px;color:var(--pos)">+5,5% no mês</span></div>
+              <span style="font-size:12px;color:var(--dim)">Disponível R$ 5.000 · Investido R$ 37.300</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+              <div style="display:flex;align-items:flex-end;gap:9px;height:62px;width:300px">
+                <span style="flex:1;height:52%;background:#3f424d;border-radius:3px 3px 0 0"></span>
+                <span style="flex:1;height:60%;background:#3f424d;border-radius:3px 3px 0 0"></span>
+                <span style="flex:1;height:66%;background:#3f424d;border-radius:3px 3px 0 0"></span>
+                <span style="flex:1;height:78%;background:#5d5294;border-radius:3px 3px 0 0"></span>
+                <span style="flex:1;height:88%;background:#5d5294;border-radius:3px 3px 0 0"></span>
+                <span style="flex:1;height:100%;background:var(--ac);border-radius:3px 3px 0 0"></span>
+              </div>
+              <div style="display:flex;gap:9px;width:300px;font-size:10px;color:var(--dim)"><span style="flex:1;text-align:center">mar</span><span style="flex:1;text-align:center">abr</span><span style="flex:1;text-align:center">mai</span><span style="flex:1;text-align:center">jun</span><span style="flex:1;text-align:center">jul</span><span style="flex:1;text-align:center;color:#e9e9ed">ago</span></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:15px;font-weight:500">Agora</span><span class="chip">Agosto 2026 · realizado</span></div>
+              <div class="tile" style="gap:12px">
+                <div class="row"><span style="color:var(--mut)">Receitas</span><span class="kpi" style="color:var(--pos)">R$ 15.000</span></div>
+                <div class="row"><span style="color:var(--mut)">Despesas</span><span class="kpi">R$ 9.200</span></div>
+                <div class="row"><span style="color:var(--mut)">Compromissos <span class="chip" style="margin-left:5px">inclusos</span></span><span class="kpi" style="color:var(--mut)">R$ 1.700</span></div>
+                <div class="row"><span style="color:var(--mut)"><span class="tip" data-tip="Dinheiro movido da conta para investimentos. Não é despesa: não reduz seu patrimônio, só muda onde ele está.">Aportes</span></span><span class="kpi" style="color:var(--ac)">R$ 3.000</span></div>
+                <div class="row" style="padding-top:10px;border-top:1px solid rgba(233,233,237,.09)"><span>Sobra em caixa</span><span class="kpi" style="font-size:20px;color:var(--pos)">+ R$ 2.800</span></div>
+                <div class="row"><span style="color:var(--mut)"><span class="tip" data-tip="Quanto da sua receita você não consumiu: aportes + sobra em caixa ÷ receitas. Aqui: (3.000 + 2.800) ÷ 15.000.">Taxa de poupança</span></span><span style="color:var(--pos)">38,7%</span></div>
+              </div>
+              <div class="tile" style="gap:10px">
+                <span class="lbl">Disponível hoje</span>
+                <span class="kpi" style="font-size:26px">R$ 5.000</span>
+                <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px"><span style="width:40%;background:#5d5294"></span><span style="width:30%;background:#423a6a"></span><span style="width:30%;background:var(--pos)"></span></div>
+                <div class="row"><span style="color:var(--mut)">Viagem</span><span>R$ 2.000</span></div>
+                <div class="row"><span style="color:var(--mut)">Reserva</span><span>R$ 1.500</span></div>
+                <div class="row"><span style="color:var(--pos)">Livre para gastar</span><span style="color:var(--pos)">R$ 1.500</span></div>
+              </div>
+              <div class="tile" style="gap:10px">
+                <span class="lbl">Fatura atual · Nubank</span>
+                <div class="row"><span class="kpi" style="font-size:22px">R$ 2.340</span><span style="font-size:12px;color:var(--mut)">fecha 12/09</span></div>
+                <div class="bar"><i style="width:29%"></i></div>
+                <div class="row"><span style="color:var(--mut)">Limite R$ 8.000</span><span style="color:var(--mut)">Disponível R$ 5.660</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;padding-left:20px;border-left:1px solid rgba(233,233,237,.1)">
+              <div style="display:flex;align-items:center;gap:10px"><span style="font-size:15px;font-weight:500;color:#d2cefd">Próximo mês</span><span class="chip" style="color:#d2cefd;background:rgba(145,132,217,.16)">Setembro 2026 · previsto</span></div>
+              <div class="tile" style="gap:12px;box-shadow:inset 0 0 0 1px rgba(145,132,217,.28)">
+                <div class="row"><span style="color:var(--mut)">Receitas previstas</span><span class="kpi" style="color:var(--pos)">R$ 15.000</span></div>
+                <div class="row"><span style="color:var(--mut)">Despesas previstas</span><span class="kpi">R$ 5.200</span></div>
+                <div class="row"><span style="color:var(--mut)">Faturas previstas</span><span class="kpi">R$ 2.800</span></div>
+                <div class="row" style="padding-top:10px;border-top:1px solid rgba(233,233,237,.09)"><span>Resultado previsto</span><span class="kpi" style="font-size:20px;color:var(--ac)">+ R$ 7.000</span></div>
+                <div class="row"><span style="color:var(--mut)">Saldo projetado</span><span>R$ 10.000</span></div>
+              </div>
+              <div class="tile" style="gap:10px">
+                <span class="lbl">Já comprometido em setembro</span>
+                <span class="kpi" style="font-size:26px">R$ 5.140</span>
+                <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px"><span style="width:39%;background:#5d5294"></span><span style="width:33%;background:#423a6a"></span><span style="width:28%;background:#3f424d"></span></div>
+                <div class="row"><span style="color:var(--mut)">Recorrentes fixas</span><span>R$ 2.340</span></div>
+                <div class="row"><span style="color:var(--mut)">Parcelas em curso</span><span>R$ 1.800</span></div>
+                <div class="row"><span style="color:var(--mut)">Assinaturas no cartão</span><span>R$ 1.000</span></div>
+              </div>
+              <div class="al" style="align-items:flex-start"><i class="ph ph-warning-circle" style="color:var(--warn)"></i><span><strong style="font-weight:500">Fatura de setembro 32% maior que agosto</strong><br><span style="color:var(--mut)">Duas parcelas novas (Notebook 2/10 e Curso 3/6) entram em setembro.</span></span></div>
+              <div class="al" style="align-items:flex-start"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span><strong style="font-weight:500">Capacidade de poupar mantida</strong><br><span style="color:var(--mut)">Mesmo com as parcelas, sobra R$ 7.000 em setembro.</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dv-opt" id="1c">
+    <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Linha do tempo primeiro: passado → hoje → 5 meses à frente em um eixo só, com o simulador embutido. Mais autoral, mais alinhado à tese “assistente de decisão”.</div>
+    <div class="dv-card" style="width:1280px">
+      <div style="display:flex;min-height:700px">
+        <div style="width:62px;flex:none;border-right:1px solid rgba(233,233,237,.1);padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:16px">
+          <span style="width:20px;height:20px;border-radius:6px;background:var(--ac);margin-bottom:8px"></span>
+          <i class="ph ph-squares-four" style="font-size:18px;color:#d2cefd"></i>
+          <i class="ph ph-list-dashes" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-bank" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-credit-card" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-chart-line-up" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-piggy-bank" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-gauge" style="font-size:18px;color:var(--dim)"></i>
+          <i class="ph ph-gear-six" style="font-size:18px;color:var(--dim);margin-top:auto"></i>
+        </div>
+        <div style="flex:1;min-width:0;padding:26px 30px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px">
+            <div>
+              <span class="lbl">Sua trajetória</span>
+              <div style="display:flex;align-items:baseline;gap:14px;margin-top:5px"><span class="kpi" style="font-size:34px">R$ 42.300</span><span style="font-size:13px;color:var(--mut)">patrimônio líquido · hoje</span></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="seg"><span class="seg-opt">3 meses</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">6 meses</span><span class="seg-opt">12 meses</span><span class="seg-opt">Tudo</span></div>
+              <div class="sec"><i class="ph ph-plus"></i>Lançamento</div><div class="pri"><i class="ph ph-flask"></i>Simular compra</div>
+            </div>
+          </div>
+
+          <div style="position:relative;padding:0 0 6px">
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:16px;align-items:end;height:170px">
+              <span style="height:54%;background:#3f424d;border-radius:4px 4px 0 0"></span>
+              <span style="height:56%;background:#3f424d;border-radius:4px 4px 0 0"></span>
+              <span style="height:59%;background:var(--ac);border-radius:4px 4px 0 0"></span>
+              <span style="height:69%;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px var(--ac);background:rgba(145,132,217,.1)"></span>
+              <span style="height:79%;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px var(--ac);background:rgba(145,132,217,.1)"></span>
+              <span style="height:89%;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px var(--ac);background:rgba(145,132,217,.1)"></span>
+              <span style="height:100%;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px var(--ac);background:rgba(145,132,217,.1)"></span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:16px;border-top:1px solid rgba(233,233,237,.12);padding-top:12px">
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">JUN</span><span class="mono" style="font-size:12px;color:var(--mut)">38.500</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">JUL</span><span class="mono" style="font-size:12px;color:var(--mut)">40.100</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#e9e9ed">AGO · hoje</span><span class="mono" style="font-size:12px">42.300</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#d2cefd">SET</span><span class="mono" style="font-size:12px;color:#d2cefd">49.300</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#d2cefd">OUT</span><span class="mono" style="font-size:12px;color:#d2cefd">56.600</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#d2cefd">NOV</span><span class="mono" style="font-size:12px;color:#d2cefd">64.100</span></div>
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:#d2cefd">DEZ</span><span class="mono" style="font-size:12px;color:#d2cefd">71.900</span></div>
+            </div>
+            <div style="display:flex;gap:20px;margin-top:12px;font-size:11px;color:var(--dim)"><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#3f424d;vertical-align:middle;margin-right:6px"></span>Realizado</span><span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;box-shadow:inset 0 0 0 1px var(--ac);vertical-align:middle;margin-right:6px"></span>Projetado com suas recorrências, compromissos e parcelas</span></div>
+          </div>
+
+          <div class="g3">
+            <div class="tile"><span class="lbl">Livre para gastar hoje</span><span class="kpi" style="font-size:24px">R$ 1.500</span><span style="font-size:11.5px;color:var(--dim)">de R$ 5.000 disponíveis · R$ 3.500 em porquinhos</span></div>
+            <div class="tile"><span class="lbl">Comprometido até dez</span><span class="kpi" style="font-size:24px">R$ 8.430</span><span style="font-size:11.5px;color:var(--dim)">parcelas + assinaturas já contratadas</span></div>
+            <div class="tile"><span class="lbl">Sobra média projetada</span><span class="kpi" style="font-size:24px;color:var(--ac)">R$ 7.100<span style="font-size:13px;color:var(--dim)"> /mês</span></span><span style="font-size:11.5px;color:var(--dim)">média set–dez</span></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="tile" style="gap:12px">
+              <div class="row"><span style="font-size:14px;font-weight:500">Posso comprar isso?</span><span class="chip">simulação rápida</span></div>
+              <div style="display:flex;gap:10px;align-items:flex-end">
+                <div style="flex:1"><span class="lbl">Valor</span><div style="margin-top:5px;padding:8px 10px;border-radius:8px;background:#232532;box-shadow:inset 0 0 0 1px var(--line);font-size:14px" class="mono">R$ 3.000,00</div></div>
+                <div style="flex:1"><span class="lbl">Em</span><div style="margin-top:5px;padding:8px 10px;border-radius:8px;background:#232532;box-shadow:inset 0 0 0 1px var(--line);font-size:13px;display:flex;justify-content:space-between">10× Nubank<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+                <div class="pri">Simular</div>
+              </div>
+              <div class="al" style="align-items:flex-start"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span><strong style="font-weight:500">Cabe</strong> — utilização do cartão vai a 66% (limite recomendado 70%) e a meta “Viagem” continua em dezembro.</span></div>
+            </div>
+            <div class="tile" style="gap:10px">
+              <div class="row"><span style="font-size:14px;font-weight:500">Este mês</span><span style="color:var(--ac);font-size:12px">Detalhar</span></div>
+              <div class="row"><span style="color:var(--mut)">Receitas</span><span class="kpi" style="color:var(--pos)">R$ 15.000</span></div>
+              <div class="row"><span style="color:var(--mut)">Despesas</span><span class="kpi">R$ 9.200</span></div>
+              <div class="row"><span style="color:var(--mut)">Aportes</span><span class="kpi" style="color:var(--ac)">R$ 3.000</span></div>
+              <div class="row"><span style="color:var(--mut)">Sobra em caixa</span><span class="kpi" style="color:var(--pos)">+ R$ 2.800</span></div>
+              <div class="bar" style="margin-top:4px"><i style="width:61%;background:var(--pos)"></i></div>
+              <span style="font-size:11.5px;color:var(--dim)">61% da receita gasta · <span class="tip" data-tip="Aportes + sobra em caixa ÷ receitas.">taxa de poupança 38,7%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Futuro e decisão · telas de conteúdo (dentro do shell de <a class="dv-oid" href="#1a" style="text-transform:none;letter-spacing:0">1a</a>)</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1d">
+    <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Próximos meses — navegação de 6 meses, cada mês com previsto e saldo projetado</div>
+    <div class="dv-card" style="width:1180px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div><h4 class="ttl">Próximos meses</h4><span style="font-size:12px;color:var(--dim)">Projeção baseada em recorrências, parcelas e faturas já conhecidas</span></div>
+        <div style="display:flex;gap:8px"><div class="sec"><i class="ph ph-caret-left"></i></div><div class="mstep"><span>Set 2026 — Fev 2027</span></div><div class="sec"><i class="ph ph-caret-right"></i></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+        <div class="tile" style="gap:7px;box-shadow:inset 0 0 0 1px rgba(145,132,217,.3)">
+          <div class="row"><span style="font-weight:500">Setembro</span><span class="chip" style="color:#d2cefd;background:rgba(145,132,217,.16)">próx.</span></div>
+          <div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">15.000</span></div>
+          <div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>5.200</span></div>
+          <div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>2.800</span></div>
+          <div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+7.000</span></div>
+          <span style="font-size:11px;color:var(--dim)">Saldo proj. R$ 10.000</span>
+        </div>
+        <div class="tile" style="gap:7px"><div class="row"><span style="font-weight:500">Outubro</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">15.000</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>5.200</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>1.620</span></div><div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+8.180</span></div><span style="font-size:11px;color:var(--dim)">Saldo proj. R$ 17.300</span></div>
+        <div class="tile" style="gap:7px"><div class="row"><span style="font-weight:500">Novembro</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">15.000</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>5.400</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>1.420</span></div><div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+8.180</span></div><span style="font-size:11px;color:var(--dim)">Saldo proj. R$ 24.900</span></div>
+        <div class="tile" style="gap:7px"><div class="row"><span style="font-weight:500">Dezembro</span><i class="ph ph-warning-circle" style="color:var(--warn);font-size:13px"></i></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">22.500</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>7.900</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>1.180</span></div><div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+13.420</span></div><span style="font-size:11px;color:var(--dim)">13º incluído</span></div>
+        <div class="tile" style="gap:7px;opacity:.72"><div class="row"><span style="font-weight:500">Janeiro</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">15.000</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>5.900</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>980</span></div><div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+8.120</span></div><span style="font-size:11px;color:var(--dim)">Confiança menor</span></div>
+        <div class="tile" style="gap:7px;opacity:.72"><div class="row"><span style="font-weight:500">Fevereiro</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Receitas</span><span style="color:var(--pos)">15.000</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Despesas</span><span>5.200</span></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Faturas</span><span>640</span></div><div class="row" style="padding-top:7px;border-top:1px solid rgba(233,233,237,.09)"><span style="font-size:11.5px">Resultado</span><span class="kpi" style="color:var(--ac)">+9.160</span></div><span style="font-size:11px;color:var(--dim)">Confiança menor</span></div>
+      </div>
+      <div class="tile" style="gap:14px">
+        <div class="row"><span style="font-size:14px;font-weight:500">Composição do que já está comprometido</span><div style="display:flex;gap:14px;font-size:11px;color:var(--dim)"><span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#968ae0;margin-right:5px"></span>Confirmado</span><span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#5d5294;margin-right:5px"></span>Recorrente</span><span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#3f424d;margin-right:5px"></span>Projetado</span></div></div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end;height:128px">
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:34%;background:#968ae0;border-radius:4px 4px 0 0"></span><span style="height:30%;background:#5d5294"></span><span style="height:10%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:16%;background:#968ae0;border-radius:4px 4px 0 0"></span><span style="height:30%;background:#5d5294"></span><span style="height:14%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:12%;background:#968ae0;border-radius:4px 4px 0 0"></span><span style="height:30%;background:#5d5294"></span><span style="height:16%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:8%;background:#968ae0;border-radius:4px 4px 0 0"></span><span style="height:30%;background:#5d5294"></span><span style="height:22%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:30%;background:#5d5294;border-radius:4px 4px 0 0"></span><span style="height:18%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%"><span style="height:30%;background:#5d5294;border-radius:4px 4px 0 0"></span><span style="height:12%;background:#3f424d;border-radius:0 0 4px 4px"></span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1e">
+    <div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Faturas projetadas — mês a mês, com origem de cada valor</div>
+    <div class="dv-card" style="width:760px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div><h4 class="ttl">Faturas projetadas · Nubank</h4><span style="font-size:12px;color:var(--dim)">Fechamento dia 12 · vencimento dia 20</span></div>
+      <table class="table">
+        <thead><tr><th>Mês</th><th>Compras</th><th>Parcelas</th><th>Assinaturas</th><th style="text-align:right">Total</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Agosto</td><td class="mono">1.140</td><td class="mono">1.000</td><td class="mono">200</td><td class="mono" style="text-align:right">2.340</td><td><span class="tag tag-neutral">Realizado</span></td></tr>
+          <tr><td>Setembro</td><td class="mono">—</td><td class="mono">1.600</td><td class="mono">270</td><td class="mono" style="text-align:right">1.870</td><td><span class="tag tag-accent">Confirmado</span></td></tr>
+          <tr><td>Outubro</td><td class="mono">—</td><td class="mono">1.350</td><td class="mono">270</td><td class="mono" style="text-align:right">1.620</td><td><span class="tag tag-outline">Projetado</span></td></tr>
+          <tr><td>Novembro</td><td class="mono">—</td><td class="mono">1.150</td><td class="mono">270</td><td class="mono" style="text-align:right">1.420</td><td><span class="tag tag-outline">Projetado</span></td></tr>
+          <tr><td>Dezembro</td><td class="mono">—</td><td class="mono">910</td><td class="mono">270</td><td class="mono" style="text-align:right">1.180</td><td><span class="tag tag-outline">Projetado</span></td></tr>
+        </tbody>
+      </table>
+      <div class="al" style="align-items:flex-start"><i class="ph ph-info" style="color:var(--mut)"></i><span><span style="color:var(--mut)">Projetado</span> soma parcelas contratadas e assinaturas recorrentes. Compras avulsas futuras não são estimadas — a fatura real tende a ser maior.</span></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1f">
+    <div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Detalhe de parcelamento — as 10 parcelas e onde cada uma cai</div>
+    <div class="dv-card" style="width:420px"><div class="sheet" style="gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Compra parcelada</span><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <h4 class="ttl">Notebook</h4>
+      <div class="row"><span style="color:var(--mut)">Valor total</span><span class="kpi">R$ 6.000</span></div>
+      <div class="row"><span style="color:var(--mut)">Parcelas</span><span>10 × R$ 600</span></div>
+      <div class="row"><span style="color:var(--mut)">Cartão</span><span>Nubank</span></div>
+      <div class="row"><span style="color:var(--mut)">Compra</span><span>08/08/2026</span></div>
+      <div class="bar" style="margin:6px 0"><i style="width:10%"></i></div>
+      <span style="font-size:11.5px;color:var(--dim)">1 de 10 paga · restam R$ 5.400</span>
+      <div style="display:flex;flex-direction:column;gap:1px;margin-top:6px">
+        <div class="row" style="padding:7px 0"><span>1/10 · Agosto</span><span class="mono">R$ 600 <span class="tag tag-neutral" style="margin-left:6px">paga</span></span></div>
+        <div class="row" style="padding:7px 0"><span>2/10 · Setembro</span><span class="mono">R$ 600 <span class="tag tag-accent" style="margin-left:6px">na fatura</span></span></div>
+        <div class="row" style="padding:7px 0;color:var(--mut)"><span>3/10 · Outubro</span><span class="mono">R$ 600</span></div>
+        <div class="row" style="padding:7px 0;color:var(--mut)"><span>4/10 · Novembro</span><span class="mono">R$ 600</span></div>
+        <div class="row" style="padding:7px 0;color:var(--mut)"><span>5/10 · Dezembro</span><span class="mono">R$ 600</span></div>
+        <div class="row" style="padding:7px 0;color:var(--dim)"><span>6–10/10 · jan a mai 2027</span><span class="mono">R$ 3.000</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px"><div class="sec" style="flex:1;justify-content:center">Ver na fatura</div><div class="sec" style="flex:1;justify-content:center">Editar</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1g">
+    <div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Simulador de compra — entrada. Nenhum lançamento é criado.</div>
+    <div class="dv-card" style="width:460px"><div class="sheet" style="gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Simulação</span><span class="chip">não gera lançamento</span></div>
+      <h4 class="ttl">Simular compra</h4>
+      <div class="field"><label>O que você quer comprar?</label><input class="input" value="Bicicleta" readonly></div>
+      <div class="field"><label>Valor</label><input class="input mono" value="R$ 3.000,00" readonly></div>
+      <div class="field"><label>Categoria</label><div class="input" style="display:flex;align-items:center;justify-content:space-between"><span><i class="ph ph-bicycle" style="margin-right:7px;color:var(--mut)"></i>Transporte</span><i class="ph ph-caret-down" style="color:var(--mut)"></i></div><span style="font-size:11px;color:var(--dim);margin-top:5px;display:block">A categoria define contra qual limite a simulação é checada.</span></div>
+      <div class="field"><label>Forma de pagamento</label>
+        <div style="display:flex;gap:8px;margin-top:2px">
+          <div class="seg"><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Cartão</span><span class="seg-opt">Débito</span><span class="seg-opt">Pix</span></div>
+        </div>
+      </div>
+      <div class="field"><label>Cartão</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Nubank · disponível R$ 5.660<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Parcelamento</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">10× de R$ 300,00<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Quando</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Este mês (agosto)<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center"><i class="ph ph-flask"></i>Simular impacto</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1h">
+    <div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Resultado da simulação — antes × depois como elemento visual dominante</div>
+    <div class="dv-card" style="width:1180px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px">
+        <div><h4 class="ttl">Impacto da compra · Bicicleta</h4><span style="font-size:12px;color:var(--dim)">R$ 3.000 em 10× de R$ 300 no cartão Nubank · simulação, nada foi lançado</span></div>
+        <div style="display:flex;gap:8px"><div class="sec">Ajustar simulação</div><div class="pri"><i class="ph ph-check"></i>Registrar compra de verdade</div></div>
+      </div>
+      <div class="al" style="align-items:flex-start;background:rgba(145,132,217,.1);box-shadow:inset 0 0 0 1px rgba(145,132,217,.3)"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span style="font-size:12.5px"><strong style="font-weight:500">A compra cabe, com uma ressalva.</strong> Ela não estoura nenhum limite e sua meta “Viagem” continua alcançável em dezembro. Mas a utilização do cartão vai a 66% e sua capacidade de poupar em setembro cai R$ 300/mês até maio.</span></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px">
+        <div class="tile" style="gap:9px"><span class="lbl">Fatura atual · agosto</span><div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:15px;color:var(--dim);text-decoration:line-through">2.340</span><i class="ph ph-arrow-right" style="font-size:12px;color:var(--mut)"></i><span class="kpi" style="font-size:22px">R$ 2.640</span></div><div class="bar"><i style="width:33%"></i></div><span style="font-size:11px;color:var(--mut)">+ R$ 300</span></div>
+        <div class="tile" style="gap:9px"><span class="lbl">Próxima fatura · setembro</span><div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:15px;color:var(--dim);text-decoration:line-through">1.870</span><i class="ph ph-arrow-right" style="font-size:12px;color:var(--mut)"></i><span class="kpi" style="font-size:22px">R$ 2.170</span></div><div class="bar"><i style="width:27%"></i></div><span style="font-size:11px;color:var(--mut)">+ R$ 300</span></div>
+        <div class="tile" style="gap:9px"><span class="lbl">Limite disponível</span><div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:15px;color:var(--dim);text-decoration:line-through">5.660</span><i class="ph ph-arrow-right" style="font-size:12px;color:var(--mut)"></i><span class="kpi" style="font-size:22px;color:var(--warn)">R$ 2.660</span></div><div class="bar"><i style="width:66%;background:var(--warn)"></i></div><span style="font-size:11px;color:var(--warn)">Utilização 66% · recomendado até 70%</span></div>
+        <div class="tile" style="gap:9px"><span class="lbl">Limite de transporte · mensal</span><div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:15px;color:var(--dim);text-decoration:line-through">1.480</span><i class="ph ph-arrow-right" style="font-size:12px;color:var(--mut)"></i><span class="kpi" style="font-size:22px">R$ 1.780</span></div><div class="bar"><i style="width:89%;background:var(--warn)"></i></div><span style="font-size:11px;color:var(--mut)">89% de R$ 2.000 · a parcela entra em transporte por 10 meses</span></div>
+        <div class="tile" style="gap:9px"><span class="lbl">Livre para gastar</span><div style="display:flex;align-items:baseline;gap:9px"><span class="mono" style="font-size:15px;color:var(--dim);text-decoration:line-through">1.500</span><i class="ph ph-arrow-right" style="font-size:12px;color:var(--mut)"></i><span class="kpi" style="font-size:22px">R$ 1.200</span></div><div class="bar"><i style="width:24%;background:var(--pos)"></i></div><span style="font-size:11px;color:var(--mut)">Porquinhos intactos</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:14px;align-items:start">
+        <div class="tile" style="gap:14px">
+          <div class="row"><span style="font-size:14px;font-weight:500">Saldo projetado · sem a compra × com a compra</span><div style="display:flex;gap:14px;font-size:11px;color:var(--dim)"><span><span style="display:inline-block;width:16px;height:1px;background:#75798c;vertical-align:middle;margin-right:5px"></span>Sem</span><span><span style="display:inline-block;width:16px;height:1px;background:var(--ac);vertical-align:middle;margin-right:5px"></span>Com</span></div></div>
+          <svg width="700" height="150" viewBox="0 0 700 150" fill="none"><polyline points="0,120 140,96 280,74 420,52 560,30 699,12" stroke="#75798c" stroke-width="1.5"></polyline><polyline points="0,120 140,104 280,84 420,64 560,44 699,27" stroke="var(--ac)" stroke-width="1.5" stroke-dasharray="4 4"></polyline></svg>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;border-top:1px solid rgba(233,233,237,.1);padding-top:12px">
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">SETEMBRO</span><span class="mono" style="font-size:12.5px;color:var(--mut)">10.000</span><span class="mono" style="font-size:12.5px;color:#d2cefd">9.700</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">OUTUBRO</span><span class="mono" style="font-size:12.5px;color:var(--mut)">17.300</span><span class="mono" style="font-size:12.5px;color:#d2cefd">16.700</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">NOVEMBRO</span><span class="mono" style="font-size:12.5px;color:var(--mut)">24.900</span><span class="mono" style="font-size:12.5px;color:#d2cefd">24.000</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">DEZEMBRO</span><span class="mono" style="font-size:12.5px;color:var(--mut)">32.800</span><span class="mono" style="font-size:12.5px;color:#d2cefd">31.600</span></div>
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:var(--dim)">JANEIRO</span><span class="mono" style="font-size:12.5px;color:var(--mut)">40.900</span><span class="mono" style="font-size:12.5px;color:#d2cefd">39.400</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="tile" style="gap:10px">
+            <span style="font-size:14px;font-weight:500">Impacto nas metas</span>
+            <div class="row"><span style="display:flex;align-items:center;gap:7px"><i class="ph ph-airplane-tilt" style="color:var(--mut)"></i>Viagem · dez</span><span style="color:var(--pos);font-size:11.5px">Mantida</span></div>
+            <div class="bar"><i style="width:62.5%"></i></div>
+            <div class="row"><span style="display:flex;align-items:center;gap:7px"><i class="ph ph-shield-check" style="color:var(--mut)"></i>Reserva · jun/27</span><span style="color:var(--warn);font-size:11.5px">Atrasa 1 mês</span></div>
+            <div class="bar"><i style="width:30%;background:var(--warn)"></i></div>
+            <span style="font-size:11.5px;color:var(--mut)">Aporte mensal possível cai de R$ 4.000 para R$ 3.700.</span>
+          </div>
+          <div class="al" style="align-items:flex-start"><i class="ph ph-lightbulb" style="color:var(--ac)"></i><span><strong style="font-weight:500">Alternativa</strong><br><span style="color:var(--mut)">Em 6× de R$ 500 a utilização fica em 66% mas a Reserva volta ao prazo original — o comprometimento termina em fevereiro.</span></span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Dia a dia · lançamentos</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1i">
+    <div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Lançamentos — histórico agrupado por dia, com filtros e totais do período</div>
+    <div class="dv-card" style="width:1180px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div><h4 class="ttl">Lançamentos</h4><span style="font-size:12px;color:var(--dim)">Agosto 2026 · 34 lançamentos</span></div>
+        <div style="display:flex;gap:8px"><div class="sec"><i class="ph ph-funnel"></i>Filtros</div><div class="sec"><i class="ph ph-download-simple"></i>Exportar</div><div class="pri"><i class="ph ph-plus"></i>Novo lançamento</div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <div class="seg"><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Tudo</span><span class="seg-opt">Despesas</span><span class="seg-opt">Receitas</span><span class="seg-opt">Transferências</span><span class="seg-opt">Investimentos</span></div>
+        <span class="chip"><i class="ph ph-bank" style="margin-right:5px"></i>Conta: todas</span>
+        <span class="chip"><i class="ph ph-tag" style="margin-right:5px"></i>Categoria: todas</span>
+        <span class="chip" style="color:#d2cefd;background:rgba(145,132,217,.16)">Período: agosto <i class="ph ph-x" style="margin-left:5px"></i></span>
+        <div style="margin-left:auto;display:flex;gap:20px;font-size:12px"><span style="color:var(--mut)">Entradas <span class="mono" style="color:var(--pos)">+15.000</span></span><span style="color:var(--mut)">Saídas <span class="mono">−9.200</span></span><span style="color:var(--mut)">Saldo <span class="mono" style="color:var(--pos)">+5.800</span></span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px 6px"><span class="lbl">27 de agosto · quinta</span><span class="mono" style="font-size:11.5px;color:var(--dim)">−2.000</span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-arrows-left-right" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Transferência</span><br><span style="font-size:11.5px;color:var(--dim)">Nubank → Inter</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="tag tag-neutral">Transferência</span><span class="mono" style="color:var(--mut)">R$ 2.000</span></span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px 6px"><span class="lbl">26 de agosto · quarta</span><span class="mono" style="font-size:11.5px;color:var(--dim)">−410</span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-shopping-cart" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Supermercado Pão de Açúcar</span><br><span style="font-size:11.5px;color:var(--dim)">Alimentação · Cartão Nubank</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="chip">Variável</span><span class="mono">− R$ 350,00</span></span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-coffee" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Padaria</span><br><span style="font-size:11.5px;color:var(--dim)">Alimentação · Inter débito</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="chip">Variável</span><span class="mono">− R$ 60,00</span></span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px 6px"><span class="lbl">25 de agosto · terça</span><span class="mono" style="font-size:11.5px;color:var(--pos)">+15.000</span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-arrow-down-left" style="font-size:16px;color:var(--pos)"></i><span><span style="font-weight:500">Salário</span><br><span style="font-size:11.5px;color:var(--dim)">Receita · Nubank · recorrente</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="tag tag-accent">Recorrente</span><span class="mono" style="color:var(--pos)">+ R$ 15.000,00</span></span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px 6px"><span class="lbl">24 de agosto · segunda</span><span class="mono" style="font-size:11.5px;color:var(--dim)">−659,90</span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-monitor-play" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Netflix</span><br><span style="font-size:11.5px;color:var(--dim)">Lazer · Cartão Nubank · recorrente</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="tag tag-accent">Recorrente</span><span class="mono">− R$ 59,90</span></span></div>
+        <div class="row" style="padding:11px 12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-laptop" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Notebook</span><br><span style="font-size:11.5px;color:var(--dim)">Eletrônicos · Cartão Nubank · 1/10</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="tag tag-outline">10× R$ 600</span><span class="mono">− R$ 600,00</span></span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1j">
+    <div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Novo lançamento — despesa parcelada no cartão, com prévia do impacto antes de salvar</div>
+    <div class="dv-card" style="width:460px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Novo lançamento</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="seg" style="align-self:stretch"><span class="seg-opt" style="flex:1;justify-content:center;color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Despesa</span><span class="seg-opt" style="flex:1;justify-content:center">Receita</span><span class="seg-opt" style="flex:1;justify-content:center">Transf.</span><span class="seg-opt" style="flex:1;justify-content:center">Invest.</span><span class="seg-opt" style="flex:1;justify-content:center">Resgate</span></div>
+      <div class="field"><label>Descrição</label><input class="input" value="Notebook" readonly></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Valor</label><input class="input mono" value="R$ 6.000,00" readonly></div><div class="field" style="flex:1"><label>Data</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">08/08/2026<i class="ph ph-calendar-blank" style="color:var(--mut)"></i></div></div></div>
+      <div class="field"><label>Categoria</label><div class="input" style="display:flex;align-items:center;justify-content:space-between"><span><i class="ph ph-laptop" style="margin-right:7px;color:var(--mut)"></i>Eletrônicos</span><i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Pagar com</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Cartão Nubank<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <div class="field" style="flex:1"><label>Parcelamento</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">10×<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+        <div class="field" style="flex:1"><label>Valor da parcela</label><div class="input mono" style="color:var(--mut)">R$ 600,00</div></div>
+      </div>
+      <label class="radio" style="margin-top:2px"><input type="checkbox"><span class="dot" style="border-radius:4px"></span>Despesa fixa (repete todo mês)</label>
+      <div class="tile" style="gap:9px;background:#292b31">
+        <span class="lbl">Impacto ao salvar</span>
+        <div class="row"><span style="color:var(--mut)">Fatura de agosto</span><span class="mono">1.740 <i class="ph ph-arrow-right" style="font-size:10px"></i> 2.340</span></div>
+        <div class="row"><span style="color:var(--mut)">Faturas até mai/2027</span><span class="mono">+ R$ 600 / mês</span></div>
+        <div class="row"><span style="color:var(--mut)">Limite disponível</span><span class="mono">6.260 <i class="ph ph-arrow-right" style="font-size:10px"></i> 5.660</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar lançamento</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1k">
+    <div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Detalhe do lançamento</div>
+    <div class="dv-card" style="width:420px"><div class="sheet" style="gap:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Despesa</span><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div style="display:flex;align-items:center;gap:12px"><i class="ph ph-shopping-cart" style="font-size:22px;color:var(--mut)"></i><div><h4 class="ttl" style="font-size:18px">Supermercado Pão de Açúcar</h4><span style="font-size:12px;color:var(--dim)">26 de agosto de 2026 · 19:42</span></div></div>
+      <span class="kpi" style="font-size:32px">− R$ 350,00</span>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Categoria</span><span><i class="ph ph-fork-knife" style="margin-right:6px;color:var(--mut)"></i>Alimentação</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Pago com</span><span>Cartão Nubank</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Fatura</span><span style="color:var(--ac)">Agosto 2026 · vence 20/09</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Tipo</span><span>Variável · à vista</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Limite de alimentação</span><span style="color:var(--warn)">R$ 1.275 de R$ 1.500</span></div>
+      <div class="bar"><i style="width:85%;background:var(--warn)"></i></div>
+      <div class="field" style="margin-top:6px"><label>Observação</label><div class="input" style="color:var(--dim)">Compra do mês</div></div>
+      <div style="display:flex;gap:8px;margin-top:4px"><div class="sec" style="flex:1;justify-content:center"><i class="ph ph-trash"></i>Excluir</div><div class="sec" style="flex:1;justify-content:center">Duplicar</div><div class="pri" style="flex:1;justify-content:center">Editar</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1l">
+    <div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Transferência — entre contas, sem virar receita nem despesa</div>
+    <div class="dv-card" style="width:440px"><div class="sheet" style="gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Transferência</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="tile" style="gap:12px;background:#232532">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:32px;height:32px;border-radius:8px;background:#3f424d;display:grid;place-items:center"><i class="ph ph-bank" style="color:var(--mut)"></i></span><div style="flex:1"><span class="lbl">De</span><div style="font-size:13.5px">Nubank · R$ 3.200</div></div><i class="ph ph-caret-down" style="color:var(--mut)"></i></div>
+        <div style="display:flex;justify-content:center"><i class="ph ph-arrow-down" style="color:var(--ac)"></i></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:32px;height:32px;border-radius:8px;background:#3f424d;display:grid;place-items:center"><i class="ph ph-bank" style="color:var(--mut)"></i></span><div style="flex:1"><span class="lbl">Para</span><div style="font-size:13.5px">Inter · R$ 1.800</div></div><i class="ph ph-caret-down" style="color:var(--mut)"></i></div>
+      </div>
+      <div class="field"><label>Valor</label><input class="input mono" value="R$ 2.000,00" readonly></div>
+      <div class="field"><label>Data</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">27/08/2026<i class="ph ph-calendar-blank" style="color:var(--mut)"></i></div></div>
+      <div class="al"><i class="ph ph-info" style="color:var(--mut)"></i><span>Transferências não entram em receitas nem despesas — só mudam onde o dinheiro está.</span></div>
+      <div class="tile" style="gap:8px;background:#292b31">
+        <span class="lbl">Depois da transferência</span>
+        <div class="row"><span style="color:var(--mut)">Nubank</span><span class="mono">3.200 <i class="ph ph-arrow-right" style="font-size:10px"></i> 1.200</span></div>
+        <div class="row"><span style="color:var(--mut)">Inter</span><span class="mono">1.800 <i class="ph ph-arrow-right" style="font-size:10px"></i> 3.800</span></div>
+        <div class="row"><span style="color:var(--mut)">Total disponível</span><span class="mono">R$ 5.000 <span style="color:var(--dim)">(igual)</span></span></div>
+      </div>
+      <div style="display:flex;gap:8px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Confirmar transferência</div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Contas, cartões e investimentos</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1m">
+    <div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Contas — disponível separado de investido e de reservado</div>
+    <div class="dv-card" style="width:760px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Contas</h4><span style="font-size:12px;color:var(--dim)">2 contas · 1 cartão · 3 investimentos</span></div><div class="sec"><i class="ph ph-plus"></i>Nova conta</div></div>
+      <div style="display:flex;gap:14px">
+        <div class="tile" style="flex:1"><span class="lbl">Disponível</span><span class="kpi" style="font-size:24px">R$ 5.000</span></div>
+        <div class="tile" style="flex:1"><span class="lbl">Investido</span><span class="kpi" style="font-size:24px">R$ 37.300</span></div>
+        <div class="tile" style="flex:1"><span class="lbl">Reservado em porquinhos</span><span class="kpi" style="font-size:24px;color:var(--mut)">R$ 3.500</span></div>
+      </div>
+      <div class="tile" style="gap:12px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;height:34px;border-radius:9px;background:#3f424d;display:grid;place-items:center"><i class="ph ph-bank" style="color:var(--mut)"></i></span><div style="flex:1"><div style="font-weight:500">Nubank</div><span style="font-size:11.5px;color:var(--dim)">Conta corrente · 1 cartão · 2 investimentos</span></div><span class="kpi" style="font-size:19px">R$ 3.200</span></div>
+        <div style="padding-left:46px;display:flex;flex-direction:column;gap:8px">
+          <div class="row" style="color:var(--mut)"><span><i class="ph ph-credit-card" style="margin-right:7px"></i>Cartão Nubank · fatura R$ 2.340</span><span>disponível R$ 5.660</span></div>
+          <div class="row" style="color:var(--mut)"><span><i class="ph ph-chart-line-up" style="margin-right:7px"></i>CDB · R$ 25.000</span><span>+0,9% no mês</span></div>
+          <div class="row" style="color:var(--mut)"><span><i class="ph ph-chart-line-up" style="margin-right:7px"></i>Tesouro Selic · R$ 8.000</span><span>+0,8% no mês</span></div>
+        </div>
+      </div>
+      <div class="tile" style="gap:12px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;height:34px;border-radius:9px;background:#3f424d;display:grid;place-items:center"><i class="ph ph-bank" style="color:var(--mut)"></i></span><div style="flex:1"><div style="font-weight:500">Inter</div><span style="font-size:11.5px;color:var(--dim)">Conta corrente · 1 investimento</span></div><span class="kpi" style="font-size:19px">R$ 1.800</span></div>
+        <div style="padding-left:46px"><div class="row" style="color:var(--mut)"><span><i class="ph ph-chart-line-up" style="margin-right:7px"></i>Fundo multimercado · R$ 4.300</span><span>−0,3% no mês</span></div></div>
+      </div>
+      <div class="row" style="padding-top:6px;border-top:1px solid rgba(233,233,237,.1)"><span style="font-weight:500">Total disponível</span><span class="kpi" style="font-size:19px">R$ 5.000</span></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1n">
+    <div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Detalhe da conta</div>
+    <div class="dv-card" style="width:720px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:12px"><i class="ph ph-arrow-left" style="color:var(--mut)"></i><h4 class="ttl">Nubank</h4><span class="chip" style="margin-left:auto">Conta corrente</span></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <div><span class="lbl">Saldo disponível</span><div class="kpi" style="font-size:32px">R$ 3.200</div></div>
+        <div style="display:flex;gap:8px"><div class="sec"><i class="ph ph-arrows-left-right"></i>Transferir</div><div class="pri"><i class="ph ph-plus"></i>Lançamento</div></div>
+      </div>
+      <div class="g3">
+        <div class="tile"><span class="lbl">Entradas em agosto</span><span class="kpi" style="font-size:18px;color:var(--pos)">R$ 15.000</span></div>
+        <div class="tile"><span class="lbl">Saídas em agosto</span><span class="kpi" style="font-size:18px">R$ 13.800</span></div>
+        <div class="tile"><span class="lbl">Saldo projetado 30/09</span><span class="kpi" style="font-size:18px;color:var(--ac)">R$ 6.900</span></div>
+      </div>
+      <span class="lbl" style="margin-top:6px">Últimos lançamentos</span>
+      <table class="table">
+        <tbody>
+          <tr><td>27/08</td><td>Transferência para Inter</td><td><span class="tag tag-neutral">Transf.</span></td><td class="mono" style="text-align:right;color:var(--mut)">− 2.000</td></tr>
+          <tr><td>25/08</td><td>Salário</td><td><span class="tag tag-accent">Recorrente</span></td><td class="mono" style="text-align:right;color:var(--pos)">+ 15.000</td></tr>
+          <tr><td>10/08</td><td>Internet</td><td><span class="tag tag-accent">Recorrente</span></td><td class="mono" style="text-align:right">− 100</td></tr>
+          <tr><td>05/08</td><td>Aluguel</td><td><span class="tag tag-accent">Recorrente</span></td><td class="mono" style="text-align:right">− 2.000</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1o">
+    <div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Cartões + fatura atual na mesma tela</div>
+    <div class="dv-card" style="width:760px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Cartões</h4><div class="sec"><i class="ph ph-plus"></i>Novo cartão</div></div>
+      <div class="tile" style="gap:14px;box-shadow:inset 0 0 0 1px rgba(145,132,217,.28)">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;height:34px;border-radius:9px;background:#3f424d;display:grid;place-items:center"><i class="ph ph-credit-card" style="color:var(--mut)"></i></span><div style="flex:1"><div style="font-weight:500">Cartão Nubank</div><span style="font-size:11.5px;color:var(--dim)">Vinculado à conta Nubank · fecha dia 12 · vence dia 20</span></div></div>
+        <div class="g3">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Limite</span><span class="kpi" style="font-size:18px">R$ 8.000</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Comprometido</span><span class="kpi" style="font-size:18px">R$ 2.340</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="lbl">Disponível</span><span class="kpi" style="font-size:18px;color:var(--pos)">R$ 5.660</span></div>
+        </div>
+        <div class="bar"><i style="width:29%"></i></div>
+        <span style="font-size:11.5px;color:var(--dim)">29% de utilização · seu limite recomendado é 70%</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Fatura atual · agosto 2026</span><div class="mstep" style="font-size:12px"><i class="ph ph-caret-left"></i><span>Agosto</span><i class="ph ph-caret-right"></i></div></div>
+      <table class="table">
+        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>
+          <tr><td>26/08</td><td>Supermercado Pão de Açúcar</td><td>Alimentação</td><td class="mono" style="text-align:right">350,00</td></tr>
+          <tr><td>24/08</td><td>Netflix <span class="tag tag-accent" style="margin-left:6px">Recorrente</span></td><td>Lazer</td><td class="mono" style="text-align:right">59,90</td></tr>
+          <tr><td>24/08</td><td>Notebook <span class="tag tag-outline" style="margin-left:6px">1/10</span></td><td>Eletrônicos</td><td class="mono" style="text-align:right">600,00</td></tr>
+          <tr><td>18/08</td><td>Posto Ipiranga</td><td>Transporte</td><td class="mono" style="text-align:right">280,00</td></tr>
+          <tr><td>15/08</td><td>Curso de inglês <span class="tag tag-outline" style="margin-left:6px">3/6</span></td><td>Educação</td><td class="mono" style="text-align:right">400,00</td></tr>
+        </tbody>
+      </table>
+      <div class="row" style="padding-top:6px"><span style="color:var(--mut)">Total da fatura</span><span class="kpi" style="font-size:20px">R$ 2.340,00</span></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1p">
+    <div class="dv-olabel"><a class="dv-oid" href="#1p">1p</a>Investimentos — aporte não é despesa</div>
+    <div class="dv-card" style="width:720px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Investimentos</h4><span style="font-size:12px;color:var(--dim)">Aportes e resgates movem dinheiro, não geram despesa</span></div><div style="display:flex;gap:8px"><div class="sec">Resgatar</div><div class="pri"><i class="ph ph-plus"></i>Aportar</div></div></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <div><span class="lbl">Total investido</span><div class="kpi" style="font-size:32px">R$ 37.300</div><span style="font-size:12px;color:var(--pos)">+ R$ 320 no mês · +0,87%</span></div>
+        <svg width="260" height="56" viewBox="0 0 260 56" fill="none"><polyline points="0,48 52,40 104,34 156,22 208,14 259,6" stroke="var(--ac)" stroke-width="1.5"></polyline></svg>
+      </div>
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px"><span style="width:67%;background:#968ae0"></span><span style="width:21.5%;background:#5d5294"></span><span style="width:11.5%;background:#3f424d"></span></div>
+      <table class="table">
+        <thead><tr><th>Ativo</th><th>Conta</th><th style="text-align:right">Aplicado</th><th style="text-align:right">Valor atual</th><th style="text-align:right">Rendimento</th></tr></thead>
+        <tbody>
+          <tr><td>CDB · 110% CDI</td><td>Nubank</td><td class="mono" style="text-align:right">23.600</td><td class="mono" style="text-align:right">25.000</td><td class="mono" style="text-align:right;color:var(--pos)">+5,9%</td></tr>
+          <tr><td>Tesouro Selic 2029</td><td>Nubank</td><td class="mono" style="text-align:right">7.700</td><td class="mono" style="text-align:right">8.000</td><td class="mono" style="text-align:right;color:var(--pos)">+3,9%</td></tr>
+          <tr><td>Fundo multimercado</td><td>Inter</td><td class="mono" style="text-align:right">4.400</td><td class="mono" style="text-align:right">4.300</td><td class="mono" style="text-align:right;color:var(--neg)">−2,3%</td></tr>
+        </tbody>
+      </table>
+      <div class="al"><i class="ph ph-info" style="color:var(--mut)"></i><span>R$ 3.500 do total investido estão reservados para porquinhos (Viagem e Reserva).</span></div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Planejamento · recorrências, calendário e limites</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1q">
+    <div class="dv-olabel"><a class="dv-oid" href="#1q">1q</a>Recorrências — a fonte de toda projeção, com total mensal comprometido</div>
+    <div class="dv-card" style="width:760px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Recorrências</h4><span style="font-size:12px;color:var(--dim)">Tudo que se repete todo mês — é isso que alimenta as projeções</span></div><div class="pri"><i class="ph ph-plus"></i>Nova recorrência</div></div>
+      <div style="display:flex;gap:14px">
+        <div class="tile" style="flex:1"><span class="lbl">Receitas fixas</span><span class="kpi" style="font-size:20px;color:var(--pos)">R$ 15.000</span></div>
+        <div class="tile" style="flex:1"><span class="lbl">Despesas fixas</span><span class="kpi" style="font-size:20px">R$ 2.459,90</span></div>
+        <div class="tile" style="flex:1"><span class="lbl">Compromissos</span><span class="kpi" style="font-size:20px">R$ 1.700</span></div>
+        <div class="tile" style="flex:1"><span class="lbl">Sobra fixa mensal</span><span class="kpi" style="font-size:20px;color:var(--ac)">R$ 10.840</span></div>
+      </div>
+      <span class="lbl">Receitas</span>
+      <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-arrow-down-left" style="font-size:16px;color:var(--pos)"></i><span><span style="font-weight:500">Salário</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 5 · Nubank</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--pos)">R$ 15.000 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><span class="lbl">Compromissos</span><span style="font-size:11px;color:var(--dim)">obrigações assumidas com terceiros — separadas de custo de vida e de gasto discricionário</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-users-three" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Ajuda familiar</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 5 · Nubank · Compromissos</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono">R$ 1.200 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-hand-heart" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Igreja · dízimo e ofertas</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 10 · Nubank · Compromissos</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono">R$ 500 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+      </div>
+      <span class="lbl" style="margin-top:4px">Despesas</span>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-house" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Aluguel</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 5 · Nubank · Moradia</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono">R$ 2.000 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-wifi-high" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Internet</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 10 · Nubank · Moradia</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono">R$ 100 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-monitor-play" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Netflix</span><br><span style="font-size:11.5px;color:var(--dim)">Mensal · dia 15 · Cartão Nubank · Lazer</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="mono">R$ 59,90 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+        <div class="row" style="padding:12px;border-radius:7px;background:#232532;opacity:.55"><span style="display:flex;align-items:center;gap:11px"><i class="ph ph-barbell" style="font-size:16px;color:var(--mut)"></i><span><span style="font-weight:500">Academia</span><br><span style="font-size:11.5px;color:var(--dim)">Pausada desde julho</span></span></span><span style="display:flex;align-items:center;gap:14px"><span class="chip">Pausada</span><span class="mono">R$ 180 / mês</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></span></div>
+      </div>
+      <div class="al"><i class="ph ph-info" style="color:var(--mut)"></i><span>Pausar uma recorrência remove suas ocorrências futuras das projeções, sem apagar o histórico.</span></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1r">
+    <div class="dv-olabel"><a class="dv-oid" href="#1r">1r</a>Nova recorrência (fluxo 1: salário) com prévia das próximas ocorrências</div>
+    <div class="dv-card" style="width:440px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Nova recorrência</h4><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div class="seg" style="align-self:stretch"><span class="seg-opt" style="flex:1;justify-content:center;color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Receita</span><span class="seg-opt" style="flex:1;justify-content:center">Despesa</span></div>
+      <div class="field"><label>Nome</label><input class="input" value="Salário" readonly></div>
+      <div class="field"><label>Valor</label><input class="input mono" value="R$ 15.000,00" readonly></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Frequência</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Mensal<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div><div class="field" style="flex:1"><label>Dia</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">5<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div></div>
+      <div class="field"><label>Conta de recebimento</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Nubank<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="field"><label>Término</label><div class="input" style="display:flex;align-items:center;justify-content:space-between">Sem data de término<i class="ph ph-caret-down" style="color:var(--mut)"></i></div></div>
+      <div class="tile" style="gap:8px;background:#292b31">
+        <span class="lbl">Próximas ocorrências</span>
+        <div class="row"><span style="color:var(--mut)">05/09/2026</span><span class="mono" style="color:var(--pos)">+ 15.000</span></div>
+        <div class="row"><span style="color:var(--mut)">05/10/2026</span><span class="mono" style="color:var(--pos)">+ 15.000</span></div>
+        <div class="row"><span style="color:var(--mut)">05/11/2026</span><span class="mono" style="color:var(--pos)">+ 15.000</span></div>
+        <span style="font-size:11px;color:var(--dim)">Passará a aparecer como receita prevista em Próximos meses e no Calendário.</span>
+      </div>
+      <div style="display:flex;gap:8px"><div class="sec" style="flex:1;justify-content:center">Cancelar</div><div class="pri" style="flex:2;justify-content:center">Salvar recorrência</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1s">
+    <div class="dv-olabel"><a class="dv-oid" href="#1s">1s</a>Calendário financeiro — quando o dinheiro entra e sai, com saldo corrente</div>
+    <div class="dv-card" style="width:900px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Calendário</h4><span style="font-size:12px;color:var(--dim)">Setembro 2026 · previsto</span></div><div style="display:flex;gap:8px;align-items:center"><div class="seg"><span class="seg-opt">Mês</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Agenda</span></div><div class="mstep" style="font-size:12px"><i class="ph ph-caret-left"></i><span>Setembro</span><i class="ph ph-caret-right"></i></div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">05</span><i class="ph ph-arrow-down-left" style="color:var(--pos)"></i><span>Salário <span class="tag tag-accent" style="margin-left:6px">Recorrente</span></span></span><span style="display:flex;gap:18px"><span class="mono" style="color:var(--pos)">+ 15.000,00</span><span class="mono" style="color:var(--dim)">17.000</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">05</span><i class="ph ph-house" style="color:var(--mut)"></i><span>Aluguel <span class="tag tag-accent" style="margin-left:6px">Recorrente</span></span></span><span style="display:flex;gap:18px"><span class="mono">− 2.000,00</span><span class="mono" style="color:var(--dim)">15.000</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">10</span><i class="ph ph-wifi-high" style="color:var(--mut)"></i><span>Internet</span></span><span style="display:flex;gap:18px"><span class="mono">− 100,00</span><span class="mono" style="color:var(--dim)">14.900</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">12</span><i class="ph ph-credit-card" style="color:var(--mut)"></i><span>Fatura Nubank fecha</span></span><span style="display:flex;gap:18px"><span class="mono" style="color:var(--mut)">R$ 1.870,00</span><span class="mono" style="color:var(--dim)">—</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">15</span><i class="ph ph-monitor-play" style="color:var(--mut)"></i><span>Netflix <span class="chip" style="margin-left:6px">no cartão</span></span></span><span style="display:flex;gap:18px"><span class="mono" style="color:var(--mut)">− 59,90</span><span class="mono" style="color:var(--dim)">14.900</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532;box-shadow:inset 0 0 0 1px rgba(145,132,217,.3)"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">20</span><i class="ph ph-credit-card" style="color:var(--ac)"></i><span>Fatura Nubank vence</span></span><span style="display:flex;gap:18px"><span class="mono">− 2.340,00</span><span class="mono" style="color:var(--dim)">12.560</span></span></div>
+          <div class="row" style="padding:12px;border-radius:7px;background:#232532"><span style="display:flex;align-items:center;gap:14px"><span class="mono" style="color:var(--dim);width:34px">28</span><i class="ph ph-piggy-bank" style="color:var(--mut)"></i><span>Aporte Viagem</span></span><span style="display:flex;gap:18px"><span class="mono" style="color:var(--mut)">→ 1.000,00</span><span class="mono" style="color:var(--dim)">11.560</span></span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="tile" style="gap:9px"><span class="lbl">Setembro em uma linha</span><div class="row"><span style="color:var(--mut)">Entra</span><span class="mono" style="color:var(--pos)">+ 15.000</span></div><div class="row"><span style="color:var(--mut)">Sai</span><span class="mono">− 4.440</span></div><div class="row" style="padding-top:8px;border-top:1px solid rgba(233,233,237,.09)"><span>Fim do mês</span><span class="kpi">R$ 11.560</span></div></div>
+          <div class="tile" style="gap:9px"><span class="lbl">Menor saldo do mês</span><span class="kpi" style="font-size:20px">R$ 2.000</span><span style="font-size:11.5px;color:var(--dim)">dia 4, antes do salário. Sem risco de saldo negativo.</span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1t">
+    <div class="dv-olabel"><a class="dv-oid" href="#1t">1t</a>Limites — utilização por categoria, sem tom punitivo</div>
+    <div class="dv-card" style="width:720px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Limites</h4><span style="font-size:12px;color:var(--dim)">Agosto 2026 · 6 dias restantes</span></div><div class="pri"><i class="ph ph-plus"></i>Novo limite</div></div>
+      <div class="tile" style="gap:10px">
+        <div class="row"><span style="font-weight:500">Limite mensal total</span><span class="mono">R$ 8.400 <span style="color:var(--dim)">de R$ 10.000</span></span></div>
+        <div class="bar" style="height:9px"><i style="width:84%"></i></div>
+        <div class="row"><span style="color:var(--mut);font-size:11.5px">Disponível R$ 1.600</span><span style="color:var(--mut);font-size:11.5px">84% · ritmo compatível com o mês</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="tile" style="gap:8px"><div class="row"><span><i class="ph ph-fork-knife" style="margin-right:8px;color:var(--mut)"></i>Alimentação</span><span class="mono">1.275 <span style="color:var(--dim)">/ 1.500</span></span></div><div class="bar"><i style="width:85%;background:var(--warn)"></i></div><div class="row"><span style="color:var(--warn);font-size:11.5px">85% usado · faltam R$ 225 para 6 dias</span><span style="color:var(--dim);font-size:11.5px">Mensal</span></div></div>
+        <div class="tile" style="gap:8px"><div class="row"><span><i class="ph ph-car" style="margin-right:8px;color:var(--mut)"></i>Transporte</span><span class="mono">1.480 <span style="color:var(--dim)">/ 2.000</span></span></div><div class="bar"><i style="width:74%"></i></div><div class="row"><span style="color:var(--pos);font-size:11.5px">12% abaixo da média de 6 meses</span><span style="color:var(--dim);font-size:11.5px">Mensal</span></div></div>
+        <div class="tile" style="gap:8px"><div class="row"><span><i class="ph ph-confetti" style="margin-right:8px;color:var(--mut)"></i>Lazer</span><span class="mono" style="color:var(--neg)">1.290 <span style="color:var(--dim)">/ 1.200</span></span></div><div class="bar"><i style="width:100%;background:var(--neg)"></i></div><div class="row"><span style="color:var(--neg);font-size:11.5px">R$ 90 acima do limite</span><span style="color:var(--dim);font-size:11.5px">Mensal</span></div></div>
+        <div class="tile" style="gap:8px"><div class="row"><span><i class="ph ph-credit-card" style="margin-right:8px;color:var(--mut)"></i>Utilização do cartão Nubank</span><span class="mono">29% <span style="color:var(--dim)">/ 70%</span></span></div><div class="bar"><i style="width:41%"></i></div><div class="row"><span style="color:var(--mut);font-size:11.5px">R$ 2.340 comprometidos de R$ 8.000</span><span style="color:var(--dim);font-size:11.5px">Contínuo</span></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1u">
+    <div class="dv-olabel"><a class="dv-oid" href="#1u">1u</a>Detalhe do limite + criação (fluxo 7)</div>
+    <div class="dv-card" style="width:420px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Limite de categoria</span><i class="ph ph-x" style="color:var(--mut)"></i></div>
+      <div style="display:flex;align-items:center;gap:11px"><i class="ph ph-fork-knife" style="font-size:20px;color:var(--mut)"></i><h4 class="ttl" style="font-size:18px">Alimentação</h4></div>
+      <div class="row"><span style="color:var(--mut)">Limite</span><div class="input mono" style="width:150px;text-align:right">R$ 1.500,00</div></div>
+      <div class="row"><span style="color:var(--mut)">Período</span><div class="seg"><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Mensal</span><span class="seg-opt">Semanal</span></div></div>
+      <div class="row"><span style="color:var(--mut)">Avisar em</span><div class="seg"><span class="seg-opt">70%</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">80%</span><span class="seg-opt">90%</span></div></div>
+      <div class="bar" style="height:9px;margin-top:6px"><i style="width:85%;background:var(--warn)"></i></div>
+      <div class="row"><span style="color:var(--warn);font-size:12px">R$ 1.275 usados · 85%</span><span style="color:var(--dim);font-size:12px">Restam R$ 225</span></div>
+      <span class="lbl" style="margin-top:6px">Últimos 6 meses</span>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:76px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:44px;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:var(--dim)">mar</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:50px;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:var(--dim)">abr</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:38px;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:var(--dim)">mai</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:46px;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:var(--dim)">jun</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:52px;background:#5d5294;border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:var(--dim)">jul</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:58px;background:var(--warn);border-radius:3px 3px 0 0"></span><span style="font-size:10px;color:#e9e9ed">ago</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px"><div class="sec" style="flex:1;justify-content:center">Remover limite</div><div class="pri" style="flex:1;justify-content:center">Salvar</div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Metas, patrimônio e análise</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1v">
+    <div class="dv-olabel"><a class="dv-oid" href="#1v">1v</a>Porquinhos — reservado × livre para gastar explícito no topo</div>
+    <div class="dv-card" style="width:760px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Porquinhos</h4><div class="pri"><i class="ph ph-plus"></i>Novo porquinho</div></div>
+      <div class="tile" style="gap:11px">
+        <div class="row"><span style="color:var(--mut)">Saldo disponível</span><span class="kpi" style="font-size:19px">R$ 5.000</span></div>
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><span style="width:40%;background:#968ae0"></span><span style="width:30%;background:#5d5294"></span><span style="width:30%;background:var(--pos)"></span></div>
+        <div class="row"><span style="color:var(--mut)">− Viagem</span><span class="mono">R$ 2.000</span></div>
+        <div class="row"><span style="color:var(--mut)">− Reserva</span><span class="mono">R$ 1.500</span></div>
+        <div class="row" style="padding-top:9px;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--pos)">Livre para gastar</span><span class="kpi" style="color:var(--pos)">R$ 1.500</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="tile" style="gap:10px"><div style="display:flex;align-items:center;gap:9px"><i class="ph ph-airplane-tilt" style="color:var(--mut)"></i><span style="font-weight:500">Viagem</span><span class="chip" style="margin-left:auto">dez/2026</span></div><span class="kpi" style="font-size:22px">R$ 7.500 <span style="font-size:13px;color:var(--dim)">/ 12.000</span></span><div class="bar"><i style="width:62.5%"></i></div><div class="row"><span style="color:var(--pos);font-size:11.5px">No ritmo</span><span style="color:var(--dim);font-size:11.5px">Faltam R$ 4.500</span></div></div>
+        <div class="tile" style="gap:10px"><div style="display:flex;align-items:center;gap:9px"><i class="ph ph-shield-check" style="color:var(--mut)"></i><span style="font-weight:500">Reserva de emergência</span><span class="chip" style="margin-left:auto">jun/2027</span></div><span class="kpi" style="font-size:22px">R$ 9.000 <span style="font-size:13px;color:var(--dim)">/ 30.000</span></span><div class="bar"><i style="width:30%;background:var(--warn)"></i></div><div class="row"><span style="color:var(--warn);font-size:11.5px">R$ 600 abaixo do ritmo</span><span style="color:var(--dim);font-size:11.5px">Faltam R$ 21.000</span></div></div>
+        <div class="tile" style="gap:10px"><div style="display:flex;align-items:center;gap:9px"><i class="ph ph-graduation-cap" style="color:var(--mut)"></i><span style="font-weight:500">Curso</span><span class="chip" style="margin-left:auto">mar/2027</span></div><span class="kpi" style="font-size:22px">R$ 1.200 <span style="font-size:13px;color:var(--dim)">/ 4.000</span></span><div class="bar"><i style="width:30%"></i></div><div class="row"><span style="color:var(--mut);font-size:11.5px">Aporte de R$ 400/mês</span><span style="color:var(--dim);font-size:11.5px">Faltam R$ 2.800</span></div></div>
+        <div class="tile" style="gap:10px;box-shadow:inset 0 0 0 1px var(--line);background:transparent;align-items:center;justify-content:center;min-height:132px;color:var(--mut)"><i class="ph ph-plus" style="font-size:20px"></i><span style="font-size:12.5px">Criar porquinho</span><span style="font-size:11px;color:var(--dim);text-align:center;max-width:200px">Reserve parte do saldo para um objetivo sem abrir outra conta.</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1w">
+    <div class="dv-olabel"><a class="dv-oid" href="#1w">1w</a>Detalhe do porquinho — previsão de atingimento e histórico de aportes</div>
+    <div class="dv-card" style="width:430px"><div class="sheet" style="gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">Porquinho</span><i class="ph ph-dots-three-vertical" style="color:var(--mut)"></i></div>
+      <div style="display:flex;align-items:center;gap:11px"><i class="ph ph-airplane-tilt" style="font-size:22px;color:var(--ac)"></i><h4 class="ttl">Viagem</h4></div>
+      <div style="display:flex;align-items:baseline;gap:10px"><span class="kpi" style="font-size:30px">R$ 7.500</span><span style="font-size:13px;color:var(--dim)">de R$ 12.000</span></div>
+      <div class="bar" style="height:10px"><i style="width:62.5%"></i></div>
+      <div class="row"><span style="color:var(--mut);font-size:12px">62,5% guardado</span><span style="color:var(--mut);font-size:12px">Faltam R$ 4.500</span></div>
+      <div class="al" style="align-items:flex-start;margin-top:4px"><i class="ph ph-check-circle" style="color:var(--pos)"></i><span><strong style="font-weight:500">Você está no ritmo.</strong><br><span style="color:var(--mut)">Mantendo R$ 1.000/mês, a meta é atingida em dezembro de 2026 — no prazo.</span></span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Data alvo</span><span>Dezembro 2026</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Aporte mensal alvo</span><span class="mono">R$ 1.000</span></div>
+      <div class="row" style="padding:9px 0;border-top:1px solid rgba(233,233,237,.09)"><span style="color:var(--mut)">Guardado em</span><span>CDB · Nubank</span></div>
+      <span class="lbl" style="margin-top:6px">Movimentações</span>
+      <div class="row" style="font-size:12px"><span style="color:var(--mut)">28/08 · Aporte mensal</span><span class="mono" style="color:var(--pos)">+ 1.000</span></div>
+      <div class="row" style="font-size:12px"><span style="color:var(--mut)">28/07 · Aporte mensal</span><span class="mono" style="color:var(--pos)">+ 1.000</span></div>
+      <div class="row" style="font-size:12px"><span style="color:var(--mut)">12/07 · Resgate (passagem)</span><span class="mono">− 500</span></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><div class="sec" style="flex:1;justify-content:center">Resgatar</div><div class="pri" style="flex:1;justify-content:center"><i class="ph ph-plus"></i>Guardar</div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1x">
+    <div class="dv-olabel"><a class="dv-oid" href="#1x">1x</a>Patrimônio líquido — evolução separada do fluxo de caixa</div>
+    <div class="dv-card" style="width:720px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Patrimônio líquido</h4><span style="font-size:12px;color:var(--dim)">Disponível + investido, sem contar entradas e saídas do mês</span></div><div class="seg"><span class="seg-opt">6M</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">12M</span><span class="seg-opt">Tudo</span></div></div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between"><div><span class="kpi" style="font-size:34px">R$ 42.300</span><div style="font-size:12.5px;color:var(--pos);margin-top:3px">+ R$ 11.100 em 6 meses · +35,6%</div></div><div style="display:flex;gap:22px"><div><span class="lbl">Disponível</span><div class="kpi" style="font-size:17px">R$ 5.000</div></div><div><span class="lbl">Investido</span><div class="kpi" style="font-size:17px">R$ 37.300</div></div></div></div>
+      <div style="display:flex;align-items:flex-end;gap:12px;height:150px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--dim)">31.200</span><span style="width:100%;height:64px;background:#3f424d;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">mar</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--dim)">34.100</span><span style="width:100%;height:76px;background:#3f424d;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">abr</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--dim)">35.800</span><span style="width:100%;height:83px;background:#3f424d;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">mai</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--dim)">38.500</span><span style="width:100%;height:94px;background:#5d5294;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">jun</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:var(--dim)">40.100</span><span style="width:100%;height:101px;background:#5d5294;border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:var(--dim)">jul</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="mono" style="font-size:10.5px;color:#e9e9ed">42.300</span><span style="width:100%;height:110px;background:var(--ac);border-radius:4px 4px 0 0"></span><span style="font-size:10.5px;color:#e9e9ed">ago</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;opacity:.6"><span class="mono" style="font-size:10.5px;color:var(--dim)">49.300</span><span style="width:100%;height:126px;border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px var(--ac)"></span><span style="font-size:10.5px;color:var(--dim)">set</span></div>
+      </div>
+      <div class="al"><i class="ph ph-trend-up" style="color:var(--pos)"></i><span>Crescimento médio de R$ 1.850/mês nos últimos 6 meses — acima da sua meta de R$ 1.500.</span></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1y">
+    <div class="dv-olabel"><a class="dv-oid" href="#1y">1y</a>Análise de gastos — categorias, fixo × variável, comparação com meses anteriores</div>
+    <div class="dv-card" style="width:900px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Análise</h4><span style="font-size:12px;color:var(--dim)">Agosto 2026 · comparado com julho</span></div><div style="display:flex;gap:8px"><div class="seg"><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">Categoria</span><span class="seg-opt">Cartão</span><span class="seg-opt">Conta</span></div><div class="sec"><i class="ph ph-funnel"></i>Período</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-house" style="margin-right:8px;color:var(--mut)"></i>Moradia</span><span class="mono">R$ 2.200</span></div><div class="bar"><i style="width:100%;background:#968ae0"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">Fixo · 24% das despesas</span><span style="color:var(--mut);font-size:11.5px">= igual a julho</span></div></div>
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-users-three" style="margin-right:8px;color:var(--mut)"></i>Compromissos</span><span class="mono">R$ 1.700</span></div><div class="bar"><i style="width:77%;background:#7972a9"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">Ajuda familiar R$ 1.200 · Igreja R$ 500 · 18%</span><span style="color:var(--mut);font-size:11.5px">= igual a julho</span></div></div>
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-fork-knife" style="margin-right:8px;color:var(--mut)"></i>Alimentação</span><span class="mono">R$ 1.900</span></div><div class="bar"><i style="width:86%;background:#796cbf"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">Variável · 21% · limite R$ 1.500 estourado</span><span style="color:var(--warn);font-size:11.5px">↑ 12% vs. julho</span></div></div>
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-car" style="margin-right:8px;color:var(--mut)"></i>Transporte</span><span class="mono">R$ 1.480</span></div><div class="bar"><i style="width:67%;background:#5d5294"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">Variável · 16%</span><span style="color:var(--pos);font-size:11.5px">↓ 9% vs. julho</span></div></div>
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-confetti" style="margin-right:8px;color:var(--mut)"></i>Lazer</span><span class="mono">R$ 1.290</span></div><div class="bar"><i style="width:59%;background:#423a6a"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">Variável · 14%</span><span style="color:var(--warn);font-size:11.5px">↑ 21% vs. julho</span></div></div>
+          <div class="tile" style="gap:9px"><div class="row"><span><i class="ph ph-dots-three-circle" style="margin-right:8px;color:var(--mut)"></i>Outros</span><span class="mono">R$ 630</span></div><div class="bar"><i style="width:29%;background:#3f424d"></i></div><div class="row"><span style="color:var(--dim);font-size:11.5px">4 categorias · 7%</span><span style="color:var(--mut);font-size:11.5px">↓ 3% vs. julho</span></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="tile" style="gap:10px"><span class="lbl">Natureza do gasto</span><div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px"><span style="width:36%;background:#968ae0"></span><span style="width:18%;background:#7972a9"></span><span style="width:46%;background:#3f424d"></span></div><div class="row"><span style="color:var(--mut)">Fixo (custo de vida)</span><span class="mono">R$ 3.310 · 36%</span></div><div class="row"><span style="color:var(--mut)">Compromissos</span><span class="mono">R$ 1.700 · 18%</span></div><div class="row"><span style="color:var(--mut)">Variável (discricionário)</span><span class="mono">R$ 4.190 · 46%</span></div><span style="font-size:11px;color:var(--dim)">Só os 46% variáveis são realmente ajustáveis no curto prazo.</span></div>
+          <div class="tile" style="gap:10px"><span class="lbl">Despesas por mês</span><div style="display:flex;align-items:flex-end;gap:7px;height:70px"><span style="flex:1;height:52%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:61%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:48%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:70%;background:#3f424d;border-radius:3px 3px 0 0"></span><span style="flex:1;height:82%;background:#5d5294;border-radius:3px 3px 0 0"></span><span style="flex:1;height:92%;background:var(--ac);border-radius:3px 3px 0 0"></span></div><div class="row"><span style="color:var(--dim);font-size:11px">mar → ago</span><span style="color:var(--mut);font-size:11px">média R$ 8.100</span></div></div>
+          <div class="al" style="align-items:flex-start"><i class="ph ph-lightbulb" style="color:var(--ac)"></i><span><strong style="font-weight:500">Onde está a variação</strong><br><span style="color:var(--mut)">R$ 610 dos R$ 900 acima da média vieram de Alimentação e Lazer, ambos variáveis.</span></span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="dv-sub"><span>Sistema · alertas, ajustes e estados</span></div>
+<div class="dv-opts">
+
+  <div class="dv-opt" id="1z">
+    <div class="dv-olabel"><a class="dv-oid" href="#1z">1z</a>Alertas e insights — agrupados por urgência, cada um com uma ação</div>
+    <div class="dv-card" style="width:720px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><div><h4 class="ttl">Alertas e insights</h4><span style="font-size:12px;color:var(--dim)">3 pedem atenção · 2 são boas notícias</span></div><div class="sec"><i class="ph ph-sliders-horizontal"></i>Configurar</div></div>
+      <span class="lbl">Pedem atenção</span>
+      <div class="tile" style="gap:9px"><div style="display:flex;gap:11px"><i class="ph ph-warning-circle" style="color:var(--warn);font-size:17px"></i><div style="flex:1"><div style="font-weight:500">85% do limite de alimentação usado</div><span style="font-size:12px;color:var(--mut)">R$ 1.275 de R$ 1.500, com 6 dias restantes. No ritmo atual você fecha o mês em R$ 1.590.</span></div></div><div style="display:flex;gap:8px;padding-left:28px"><div class="sec" style="font-size:11.5px;padding:5px 10px">Ver gastos</div><div class="sec" style="font-size:11.5px;padding:5px 10px">Ajustar limite</div></div></div>
+      <div class="tile" style="gap:9px"><div style="display:flex;gap:11px"><i class="ph ph-trend-up" style="color:var(--warn);font-size:17px"></i><div style="flex:1"><div style="font-weight:500">Fatura de setembro 32% maior que agosto</div><span style="font-size:12px;color:var(--mut)">Duas parcelas novas entram em setembro: Notebook (2/10) e Curso (3/6).</span></div></div><div style="display:flex;gap:8px;padding-left:28px"><div class="sec" style="font-size:11.5px;padding:5px 10px">Ver fatura projetada</div></div></div>
+      <div class="tile" style="gap:9px"><div style="display:flex;gap:11px"><i class="ph ph-piggy-bank" style="color:var(--warn);font-size:17px"></i><div style="flex:1"><div style="font-weight:500">Reserva R$ 600 abaixo do ritmo</div><span style="font-size:12px;color:var(--mut)">Para chegar aos R$ 30.000 em junho/2027 o aporte precisa subir de R$ 1.400 para R$ 1.550/mês.</span></div></div><div style="display:flex;gap:8px;padding-left:28px"><div class="sec" style="font-size:11.5px;padding:5px 10px">Aumentar aporte</div><div class="sec" style="font-size:11.5px;padding:5px 10px">Mudar prazo</div></div></div>
+      <span class="lbl" style="margin-top:6px">Boas notícias</span>
+      <div class="tile" style="gap:9px"><div style="display:flex;gap:11px"><i class="ph ph-check-circle" style="color:var(--pos);font-size:17px"></i><div style="flex:1"><div style="font-weight:500">Transporte 12% abaixo da média</div><span style="font-size:12px;color:var(--mut)">R$ 1.480 contra média de R$ 1.680 nos últimos 6 meses.</span></div></div></div>
+      <div class="tile" style="gap:9px"><div style="display:flex;gap:11px"><i class="ph ph-check-circle" style="color:var(--pos);font-size:17px"></i><div style="flex:1"><div style="font-weight:500">Patrimônio cresce acima da sua meta</div><span style="font-size:12px;color:var(--mut)">R$ 1.850/mês de média contra meta de R$ 1.500.</span></div></div></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1aa">
+    <div class="dv-olabel"><a class="dv-oid" href="#1aa">1aa</a>Categorias e ajustes</div>
+    <div class="dv-card" style="width:620px"><div style="padding:24px 26px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><h4 class="ttl">Categorias</h4><div class="sec"><i class="ph ph-plus"></i>Nova categoria</div></div>
+      <table class="table">
+        <thead><tr><th>Categoria</th><th>Tipo</th><th>Limite</th><th style="text-align:right">Gasto em ago</th></tr></thead>
+        <tbody>
+          <tr><td><i class="ph ph-house" style="margin-right:8px;color:var(--mut)"></i>Moradia</td><td>Fixo</td><td class="mono">—</td><td class="mono" style="text-align:right">2.200</td></tr>
+          <tr><td><i class="ph ph-fork-knife" style="margin-right:8px;color:var(--mut)"></i>Alimentação</td><td>Variável</td><td class="mono">1.500</td><td class="mono" style="text-align:right;color:var(--warn)">1.900</td></tr>
+          <tr><td><i class="ph ph-car" style="margin-right:8px;color:var(--mut)"></i>Transporte</td><td>Variável</td><td class="mono">2.000</td><td class="mono" style="text-align:right">1.480</td></tr>
+          <tr><td><i class="ph ph-confetti" style="margin-right:8px;color:var(--mut)"></i>Lazer</td><td>Variável</td><td class="mono">1.200</td><td class="mono" style="text-align:right;color:var(--neg)">1.290</td></tr>
+          <tr><td><i class="ph ph-graduation-cap" style="margin-right:8px;color:var(--mut)"></i>Educação</td><td>Fixo</td><td class="mono">—</td><td class="mono" style="text-align:right">400</td></tr>
+          <tr><td><i class="ph ph-users-three" style="margin-right:8px;color:var(--mut)"></i>Ajuda familiar</td><td>Compromisso</td><td class="mono">—</td><td class="mono" style="text-align:right">1.200</td></tr>
+          <tr><td><i class="ph ph-hand-heart" style="margin-right:8px;color:var(--mut)"></i>Igreja e doações</td><td>Compromisso</td><td class="mono">—</td><td class="mono" style="text-align:right">500</td></tr>
+        </tbody>
+      </table>
+      <div class="hr"></div>
+      <h4 class="ttl" style="font-size:17px">Ajustes</h4>
+      <div class="row"><span style="color:var(--mut)">Utilização recomendada do cartão</span><div class="seg"><span class="seg-opt">60%</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">70%</span><span class="seg-opt">80%</span></div></div>
+      <div class="row"><span style="color:var(--mut)">Meses de projeção</span><div class="seg"><span class="seg-opt">3</span><span class="seg-opt" style="color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)">6</span><span class="seg-opt">12</span></div></div>
+      <div class="row"><span style="color:var(--mut)">Ocultar valores na tela</span><label class="radio"><input type="checkbox"><span class="dot"></span></label></div>
+      <div class="row"><span style="color:var(--mut)">Alertas por e-mail</span><label class="radio"><input type="checkbox" checked><span class="dot"></span></label></div>
+    </div></div>
+  </div>
+
+  <div class="dv-opt" id="1ab">
+    <div class="dv-olabel"><a class="dv-oid" href="#1ab">1ab</a>Estados — vazio, carregando, erro e projeção sem dados suficientes</div>
+    <div class="dv-card" style="width:900px"><div style="padding:24px 26px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="tile" style="gap:11px;align-items:flex-start;min-height:170px;justify-content:center">
+        <span class="lbl">Vazio · primeiro acesso</span>
+        <i class="ph ph-list-dashes" style="font-size:26px;color:#595d6c"></i>
+        <div style="font-weight:500">Nenhum lançamento ainda</div>
+        <span style="font-size:12px;color:var(--mut);max-width:320px">Comece cadastrando seu salário como recorrência — as projeções dos próximos meses aparecem em seguida.</span>
+        <div style="display:flex;gap:8px"><div class="pri" style="font-size:11.5px;padding:6px 11px">Cadastrar salário</div><div class="sec" style="font-size:11.5px;padding:6px 11px">Novo lançamento</div></div>
+      </div>
+      <div class="tile" style="gap:11px;min-height:170px;justify-content:center">
+        <span class="lbl">Carregando</span>
+        <span style="width:150px;height:26px;border-radius:6px;background:#3f424d;opacity:.6"></span>
+        <span style="width:100%;height:9px;border-radius:5px;background:#3f424d;opacity:.5"></span>
+        <span style="width:78%;height:9px;border-radius:5px;background:#3f424d;opacity:.4"></span>
+        <span style="width:54%;height:9px;border-radius:5px;background:#3f424d;opacity:.3"></span>
+        <span style="font-size:11.5px;color:var(--dim)">Calculando projeções…</span>
+      </div>
+      <div class="tile" style="gap:11px;align-items:flex-start;min-height:170px;justify-content:center">
+        <span class="lbl">Erro</span>
+        <i class="ph ph-warning-octagon" style="font-size:26px;color:var(--neg)"></i>
+        <div style="font-weight:500">Não foi possível carregar suas contas</div>
+        <span style="font-size:12px;color:var(--mut);max-width:320px">Seus dados estão salvos. Tente novamente em alguns instantes.</span>
+        <div class="sec" style="font-size:11.5px;padding:6px 11px"><i class="ph ph-arrow-clockwise"></i>Tentar novamente</div>
+      </div>
+      <div class="tile" style="gap:11px;align-items:flex-start;min-height:170px;justify-content:center">
+        <span class="lbl">Projeção com pouca informação</span>
+        <i class="ph ph-chart-line" style="font-size:26px;color:#595d6c"></i>
+        <div style="font-weight:500">Projeção pouco confiável</div>
+        <span style="font-size:12px;color:var(--mut);max-width:340px">Com 1 mês de histórico só conseguimos projetar suas recorrências e parcelas. Gastos variáveis passam a ser estimados a partir do terceiro mês.</span>
+        <div class="sec" style="font-size:11.5px;padding:6px 11px">Ver o que já é projetado</div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<p class="dv-next">Próximos passos: “escolho o shell de <a class="dv-oid" href="#1a">1a</a> (ou <a class="dv-oid" href="#1b">1b</a> / <a class="dv-oid" href="#1c">1c</a>) e aplico em todas as telas” · “versão mobile das telas críticas” · “aprofundar o simulador <a class="dv-oid" href="#1h">1h</a> em variações” · “telas de fluxo passo a passo (protótipo clicável)”</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;acento&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#9184d9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#9184d9&quot;,&quot;#84b7d9&quot;,&quot;#8fd0a8&quot;,&quot;#d9b184&quot;],&quot;section&quot;:&quot;Aparência&quot;},&quot;sinalCores&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;colorido&quot;,&quot;options&quot;:[&quot;colorido&quot;,&quot;monocromático&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Aparência&quot;},&quot;mostrarAlertas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Conteúdo&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { this.apply(); }
+  componentDidUpdate() { this.apply(); }
+  apply() {
+    const r = document.documentElement.style;
+    const mono = this.props.sinalCores === 'monocromático';
+    r.setProperty('--ac', this.props.acento ?? '#9184d9');
+    r.setProperty('--pos', mono ? 'var(--ac)' : 'oklch(0.74 0.11 158)');
+    r.setProperty('--neg', mono ? '#e9e9ed' : 'oklch(0.70 0.13 22)');
+    r.setProperty('--warn', mono ? '#b2b6ca' : 'oklch(0.78 0.12 78)');
+  }
+  renderVals() {
+    return { mostrarAlertas: this.props.mostrarAlertas ?? true };
+  }
+}
+</script>
+</body>
+</html>

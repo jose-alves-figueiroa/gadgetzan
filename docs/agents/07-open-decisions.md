@@ -1,0 +1,45 @@
+# 07 — Open decisions and out of scope
+
+## Need an owner decision before coding the affected part
+
+**D1 — Does net worth subtract open invoices?**
+The mockup shows R$ 42,300 = available + invested, ignoring the R$ 2,340 invoice. Strictly speaking, an open invoice is debt. The schema already carries `Settings.netWorthSubtractsOpenInvoices` (default `false`, matching the mockup). Decide whether it should default to `true`.
+> **Resolved:** we're not implementing debt tracking for now. Keep the default `false`.
+
+**D2 — Floor for the projected balance alert.**
+The simulation warns when the projected balance gets "low." Today the criterion is `< 0`. Does a configurable floor make sense (e.g., "never below R$ 2,000")? Suggestion: a `minCashCents` field on `Settings`.
+> **Resolved:** yes. Added `Settings.minCashCents` to the schema (see `01-data-model.md`); used by R10 and R13.
+
+**D3 — 13th salary and irregular income.**
+The mockup shows December with R$ 22,500 (13th salary baked in). That requires either an annual recurrence or a confirmed future transaction. Decide which is the official path — suggestion: a `RecurrenceRule` with `frequency = YEARLY`.
+> **Resolved:** better not to bake it in automatically. The user either enters it manually once a month, or sets up a `YEARLY` recurrence themselves. No special-casing needed — `Frequency.YEARLY` already exists in the schema.
+
+**D4 — Does the total monthly limit include commitments?**
+If alimony and tithes count toward the monthly spend limit, the limit measures little (it's an obligation, not a choice). Suggestion: the total monthly limit **excludes** `COMMITMENT` by default, with a toggle.
+> **Resolved:** liked the suggestion — limit with a toggle. Added `Limit.includeCommitments` to the schema (see `01-data-model.md`).
+
+**D5 — Is one invoice per card per month enough?**
+Cards with foreign-currency invoices or supplementary cards create parallel invoices. Out of scope for now; `@@unique([cardId, referenceMonth])` assumes one per month.
+> **Resolved:** yes, that's fine. If we need another one later, we'll change it.
+
+**D6 — Investment return: manual or computed?**
+Today `currentCents` is updated by hand. Does a "return" transaction with a date make sense, to build a return history? Affects screen `1p`.
+> **Resolved:** no need to compute returns for now. Leave the relevant buttons/flow disabled (placeholder, no action) on the investments screen.
+
+## Out of scope (explicit disclaimer)
+
+**OFX/CSV import.** It's wanted and will come: the intended flow is to import a statement/invoice, have the app propose an interpretation (category, type, dedup against existing transactions), and have the user **approve it row by row**. **Don't build it now.** When modeling data, leave the path open:
+
+- `Transaction` can already receive `externalId String? @unique` and `importBatchId String?` — including these fields now is cheap and avoids a painful migration later;
+- keep transaction creation in a single service function (`createTransaction`), so the importer can reuse the same validation;
+- don't assume anywhere that every transaction was typed in by a human.
+
+**Also out of scope:** Open Finance / bank APIs, multi-user and shared accounts (the schema is ready, the UI isn't), a native mobile app (responsive web covers it), push notifications, export for an accountant, investment goals by asset class, debt/loan tracking, currency exchange.
+
+## Known design debts
+
+1. **Mobile wasn't designed.** `03-screens.md` carries the general rule; critical screens (new transaction, transfer, simulation, upcoming invoices, recurrences, limits, goals) deserve their own mockup before implementation.
+2. **The onboarding flow** exists as a described sequence (R14), not as a step-by-step mockup.
+3. **Investment detail** and **standalone card detail** have no dedicated mockup (today they live inside `1p` and `1o`).
+4. **Global search** shows up in the topbar but has no results screen.
+5. **Comparing two months side by side** was raised as a next step and hasn't been designed.
