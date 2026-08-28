@@ -1,5 +1,11 @@
 # 06 — Stack, structure, and deploy
 
+## Versioning policy
+
+Version numbers named anywhere in this document (Next.js, Prisma, PostgreSQL, Node.js, pnpm, etc.) are illustrative, not pins. Always install the current **LTS / latest stable GA release** of each technology at implementation time — never a pre-release, RC, dev, or preview tag, and never an old major once a newer stable major has shipped. Re-check the actual current stable version before writing it into `package.json`/`Dockerfile`; do not copy a version number below verbatim without verifying it's still current. LTS overrides any specific version mentioned elsewhere in this document. What stays authoritative from this document is the *behavior*: the stack choices themselves (Next.js App Router, Prisma, PostgreSQL, NextAuth, Docker Compose topology, auth flow), the folder structure, and the code conventions — not the literal version numbers.
+
+If a technology has no formal LTS line (e.g. Prisma ORM releases on plain SemVer with no designated long-term-support major), "LTS" means the latest stable GA release of the current major — not a release candidate, dev, or preview build.
+
 ## Stack
 
 - **Next.js** (App Router) + **TypeScript**

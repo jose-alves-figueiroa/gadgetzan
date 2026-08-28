@@ -38,6 +38,10 @@ If documentation conflicts, do not silently choose an interpretation. Stop and a
 
 ## Implementation Rules
 
+### Technology versions
+
+Default to the current LTS / latest stable GA release of every technology choice — never a pre-release, RC, dev, or preview build, and never an old major once a newer stable major has shipped. This overrides literal version numbers written in `docs/agents/06-stack-and-deploy.md`; what's authoritative from that document is behavior and structure, not the version pins. See `docs/agents/06-stack-and-deploy.md § Versioning policy`. Decide a version once per dependency; don't re-litigate it without a real reason (a security advisory, a breaking incompatibility).
+
 ### Follow the plan
 
 `docs/agents/PLAN.md` defines the implementation order.
