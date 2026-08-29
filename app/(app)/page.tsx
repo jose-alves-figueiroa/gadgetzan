@@ -4,6 +4,7 @@ import { listAccounts } from "@/lib/server/accounts";
 import { getDashboardData } from "@/lib/server/dashboard";
 import { getUpcomingMonths } from "@/lib/server/future";
 import { getCalendarMonth } from "@/lib/server/calendar";
+import { listGoalsWithProgress } from "@/lib/server/goals";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
@@ -12,10 +13,11 @@ export default async function DashboardPage() {
   const accounts = await listAccounts();
   if (accounts.length === 0) redirect("/onboarding");
 
-  const [data, { months }, calendar] = await Promise.all([
+  const [data, { months }, calendar, goals] = await Promise.all([
     getDashboardData(),
     getUpcomingMonths(),
     getCalendarMonth(0),
+    listGoalsWithProgress(),
   ]);
   const nextMonth = months[0];
   const upcomingEvents = calendar.agenda.filter((r) => r.date >= calendar.month.start).slice(0, 4);
@@ -118,9 +120,11 @@ export default async function DashboardPage() {
 
         <div className="flex flex-col gap-md">
           <Card className="gap-sm">
-            <span className="text-navhead uppercase text-neutral-700">Alertas</span>
+            <Link href="/alerts" className="text-navhead uppercase text-neutral-700 hover:text-text">
+              Alertas
+            </Link>
             {data.alerts.length > 0 ? (
-              data.alerts.slice(0, 3).map((alert) => (
+              data.alerts.map((alert) => (
                 <div key={alert.alertKey} className="flex flex-col gap-xs rounded-md bg-tile p-sm">
                   <span className="text-micro text-text">{alert.title}</span>
                 </div>
@@ -131,8 +135,24 @@ export default async function DashboardPage() {
           </Card>
 
           <Card className="gap-sm">
-            <span className="text-navhead uppercase text-neutral-700">Porquinhos</span>
-            <p className="text-micro text-dim">Chega no Stage 6.</p>
+            <Link href="/goals" className="text-navhead uppercase text-neutral-700 hover:text-text">
+              Porquinhos
+            </Link>
+            {goals.goals.length > 0 ? (
+              goals.goals.slice(0, 3).map((goal) => (
+                <div key={goal.id} className="flex flex-col gap-xs">
+                  <div className="flex items-center justify-between text-micro">
+                    <span className="text-text">{goal.name}</span>
+                    <span className="text-dim">
+                      {formatBRL(goal.savedCents, { compact: true })} / {formatBRL(goal.targetCents, { compact: true })}
+                    </span>
+                  </div>
+                  <Bar percent={(goal.savedCents / goal.targetCents) * 100} />
+                </div>
+              ))
+            ) : (
+              <p className="text-micro text-dim">Nenhum porquinho ainda.</p>
+            )}
           </Card>
 
           <Card className="gap-sm">

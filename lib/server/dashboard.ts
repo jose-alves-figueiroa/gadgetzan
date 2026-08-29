@@ -5,23 +5,22 @@ import { calculateSavingsRate } from "@/lib/finance/savings";
 import { calculateAccountBalance } from "@/lib/finance/accounts";
 import { calculateNetWorth } from "@/lib/finance/networth";
 import { calculateAvailableLimit } from "@/lib/finance/invoice";
-import { categoryLimitAlert, type Alert } from "@/lib/finance/alerts";
-import { calculateLimitUtilization } from "@/lib/finance/limits";
-import { isExpense } from "@/lib/finance/transactions";
-import { toPrismaDate, todayDateString } from "./clock";
+import { selectDashboardAlerts } from "@/lib/finance/alerts";
+import { todayDateString } from "./clock";
+import { getAllAlerts } from "./alerts";
 import type { FinanceTransaction } from "@/lib/finance/types";
 
 export async function getDashboardData() {
   const userId = await requireUserId();
   const today = todayDateString();
 
-  const [settings, accounts, investments, allTransactions, cards, limits] = await Promise.all([
+  const [settings, accounts, investments, allTransactions, cards, alerts] = await Promise.all([
     prisma.settings.findUniqueOrThrow({ where: { userId } }),
     prisma.account.findMany({ where: { userId, archivedAt: null } }),
     prisma.investment.findMany({ where: { userId, archivedAt: null } }),
     prisma.transaction.findMany({ where: { userId }, include: { category: true } }),
     prisma.card.findMany({ where: { userId, archivedAt: null } }),
-    prisma.limit.findMany({ where: { userId, archivedAt: null }, include: { category: true } }),
+    getAllAlerts(),
   ]);
 
   const toFinance = (t: (typeof allTransactions)[number]): FinanceTransaction => ({
@@ -69,36 +68,13 @@ export async function getDashboardData() {
     })
   );
 
-  const alerts: Alert[] = [];
-  for (const limit of limits) {
-    if (limit.scope !== "CATEGORY" || !limit.categoryId || !limit.amountCents) continue;
-    const spent = monthTransactions
-      .filter((t) => isExpense(t.kind) && t.categoryId === limit.categoryId)
-      .reduce((s, t) => s + t.amountCents, 0);
-    const utilization = calculateLimitUtilization(spent, limit.amountCents, limit.warnAtPercent);
-    const daysRemaining = Math.max(
-      0,
-      Math.ceil((new Date(month.end).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24))
-    );
-    const alert = categoryLimitAlert({
-      categoryId: limit.categoryId,
-      categoryName: limit.category?.name ?? "categoria",
-      spentCents: spent,
-      amountCents: limit.amountCents,
-      warnAtPercent: limit.warnAtPercent,
-      daysRemaining,
-      consecutiveMonthsExceeded: utilization.status === "exceeded" ? 1 : 0,
-    });
-    if (alert) alerts.push(alert);
-  }
-
   return {
     netWorth,
     availableBalance,
     monthLabel: month.label,
     monthSavings,
     cards: cardsWithLimit,
-    alerts,
+    alerts: selectDashboardAlerts(alerts),
     hasAnyData: accounts.length > 0,
   };
 }

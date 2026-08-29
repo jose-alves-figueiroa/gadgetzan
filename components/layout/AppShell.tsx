@@ -1,9 +1,9 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
-import { Modal } from "@/components/ui/Modal";
 import { NewTransactionModal } from "@/components/finance/NewTransactionModal";
 
 interface Option {
@@ -25,14 +25,14 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, accounts, cards, categories, investments }: AppShellProps) {
+  const router = useRouter();
   const [newTransactionOpen, setNewTransactionOpen] = useState(false);
-  const [simulateOpen, setSimulateOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
       <Sidebar
-        onSimulate={() => setSimulateOpen(true)}
+        onSimulate={() => router.push("/simulate")}
         drawerOpen={drawerOpen}
         onCloseDrawer={() => setDrawerOpen(false)}
       />
@@ -52,10 +52,6 @@ export function AppShell({ children, accounts, cards, categories, investments }:
         cards={cards}
         investments={investments}
       />
-
-      <Modal open={simulateOpen} onClose={() => setSimulateOpen(false)} title="Simular compra">
-        <p className="text-row text-muted">Em construção — chega no Stage 6.</p>
-      </Modal>
     </div>
   );
 }
