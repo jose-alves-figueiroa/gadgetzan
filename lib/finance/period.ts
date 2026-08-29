@@ -35,6 +35,18 @@ export function isValidMonthStartDay(day: number): boolean {
   return Number.isInteger(day) && day >= 1 && day <= 28;
 }
 
+/** Adds `delta` whole days to a plain date string, via UTC-midnight arithmetic (never time-of-day). */
+export function addDays(date: string, delta: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+
+/** pt-BR label for a calendar {year, month}, e.g. "Agosto 2026" — independent of monthStartDay. */
+export function monthLabel({ year, month }: { year: number; month: number }): string {
+  return `${MONTH_LABELS[month - 1]} ${year}`;
+}
+
 export function addMonths(
   { year, month }: { year: number; month: number },
   delta: number

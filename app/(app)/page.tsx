@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listAccounts } from "@/lib/server/accounts";
 import { getDashboardData } from "@/lib/server/dashboard";
+import { getUpcomingMonths } from "@/lib/server/future";
+import { getCalendarMonth } from "@/lib/server/calendar";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
@@ -9,13 +12,21 @@ export default async function DashboardPage() {
   const accounts = await listAccounts();
   if (accounts.length === 0) redirect("/onboarding");
 
-  const data = await getDashboardData();
+  const [data, { months }, calendar] = await Promise.all([
+    getDashboardData(),
+    getUpcomingMonths(),
+    getCalendarMonth(0),
+  ]);
+  const nextMonth = months[0];
+  const upcomingEvents = calendar.agenda.filter((r) => r.date >= calendar.month.start).slice(0, 4);
 
   return (
     <div className="flex flex-col gap-lg">
       <div className="grid grid-cols-3 gap-md">
         <Card className="gap-xs">
-          <span className="text-label uppercase text-dim">Patrimônio líquido</span>
+          <Link href="/net-worth" className="text-label uppercase text-dim hover:text-text">
+            Patrimônio líquido
+          </Link>
           <span className="tabular-money text-kpi-lg text-text">{formatBRL(data.netWorth, { compact: true })}</span>
         </Card>
         <Card className="gap-xs">
@@ -58,10 +69,52 @@ export default async function DashboardPage() {
       </Card>
 
       <div className="grid grid-cols-[1fr_352px] gap-md">
-        <Card className="gap-sm">
-          <span className="text-navhead uppercase text-neutral-700">Próximo mês previsto</span>
-          <p className="text-row text-dim">Projeção completa chega no Stage 5.</p>
-        </Card>
+        <div className="flex flex-col gap-md">
+          <Card className="gap-sm">
+            <Link href="/future" className="text-navhead uppercase text-neutral-700 hover:text-text">
+              Próximo mês previsto — {nextMonth.label}
+            </Link>
+            <div className="grid grid-cols-4 gap-md text-micro">
+              <ForecastStat label="Receitas" value={nextMonth.incomeCents} color="text-pos" />
+              <ForecastStat label="Despesas" value={-nextMonth.expensesCents} color="text-text" />
+              <ForecastStat label="Faturas" value={-nextMonth.invoicesCents} color="text-text" />
+              <ForecastStat
+                label="Resultado"
+                value={nextMonth.resultCents}
+                color={nextMonth.resultCents >= 0 ? "text-pos" : "text-neg"}
+              />
+            </div>
+            {nextMonth.lowConfidence ? (
+              <p className="text-micro text-dim">Sem histórico suficiente ainda para projetar despesas variáveis.</p>
+            ) : null}
+            <div className="flex items-center justify-between border-t border-line pt-sm text-row">
+              <span className="text-dim">Saldo projetado</span>
+              <span className="tabular-money text-text">{formatBRL(nextMonth.projectedBalanceCents, { compact: true })}</span>
+            </div>
+          </Card>
+
+          <Card className="gap-sm">
+            <span className="text-navhead uppercase text-neutral-700">Faturas projetadas</span>
+            <div className="flex gap-md">
+              {months.slice(0, 5).map((m) => {
+                const max = Math.max(...months.slice(0, 5).map((x) => x.invoicesCents), 1);
+                const heightPercent = m.invoicesCents > 0 ? Math.max(6, (m.invoicesCents / max) * 100) : 2;
+                return (
+                  <div key={`${m.year}-${m.month}`} className="flex flex-1 flex-col items-center gap-xs">
+                    <div className="flex h-20 w-full items-end">
+                      <div
+                        className="w-full rounded-sm border border-accent bg-accent/20"
+                        style={{ height: `${heightPercent}%` }}
+                        title={formatBRL(m.invoicesCents)}
+                      />
+                    </div>
+                    <span className="text-micro text-dim">{m.label.slice(0, 3)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
 
         <div className="flex flex-col gap-md">
           <Card className="gap-sm">
@@ -81,8 +134,33 @@ export default async function DashboardPage() {
             <span className="text-navhead uppercase text-neutral-700">Porquinhos</span>
             <p className="text-micro text-dim">Chega no Stage 6.</p>
           </Card>
+
+          <Card className="gap-sm">
+            <Link href="/calendar" className="text-navhead uppercase text-neutral-700 hover:text-text">
+              Próximos eventos
+            </Link>
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((row, index) => (
+                <div key={index} className="flex items-center justify-between text-micro">
+                  <span className="text-text">{row.label}</span>
+                  <span className="text-dim">{row.date.slice(8, 10)}/{row.date.slice(5, 7)}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-micro text-dim">Nenhum evento próximo.</p>
+            )}
+          </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ForecastStat({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex flex-col gap-xs">
+      <span className="text-dim">{label}</span>
+      <span className={`tabular-money ${color}`}>{formatBRL(value, { compact: true })}</span>
     </div>
   );
 }

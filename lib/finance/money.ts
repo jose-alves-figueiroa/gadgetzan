@@ -27,7 +27,8 @@ export function toCents(input: string): number {
  * forms should leave it off to always show cents.
  */
 export function formatBRL(cents: number, options: { compact?: boolean } = {}): string {
-  const value = cents / 100;
+  // Normalize -0 (e.g. from negating a zero total) so it never renders "-R$ 0".
+  const value = (cents === 0 ? 0 : cents) / 100;
   const isWhole = Number.isInteger(value);
   const showCents = !(options.compact && isWhole);
 

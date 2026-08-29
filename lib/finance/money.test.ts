@@ -35,4 +35,9 @@ describe("formatBRL", () => {
   it("compact mode still shows cents when they're non-zero", () => {
     expect(formatBRL(1_500_050, { compact: true })).toBe("R$ 15.000,50");
   });
+
+  it("never renders negative zero (e.g. from negating an empty total)", () => {
+    expect(formatBRL(-0, { compact: true })).toBe(formatBRL(0, { compact: true }));
+    expect(formatBRL(-0, { compact: true })).not.toMatch(/^-/);
+  });
 });

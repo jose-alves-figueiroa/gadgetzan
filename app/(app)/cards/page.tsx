@@ -28,7 +28,7 @@ export default async function CardsPage() {
           {await Promise.all(
             cards.map(async (card) => {
               const unpaid = await prisma.transaction.aggregate({
-                where: { userId, cardId: card.id, invoice: { paidAt: null } },
+                where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
                 _sum: { amountCents: true },
               });
               const { availableCents, utilizationPercent } = calculateAvailableLimit({

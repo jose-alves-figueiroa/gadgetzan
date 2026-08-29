@@ -29,7 +29,7 @@ export default async function CardDetailPage({
   const [accounts, unpaidAgg] = await Promise.all([
     listAccounts(),
     prisma.transaction.aggregate({
-      where: { userId, cardId: card.id, invoice: { paidAt: null } },
+      where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
       _sum: { amountCents: true },
     }),
   ]);
@@ -59,7 +59,12 @@ export default async function CardDetailPage({
 
   return (
     <div className="flex flex-col gap-lg">
-      <h1 className="text-title text-text">{card.name}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-title text-text">{card.name}</h1>
+        <Link href={`/cards/${id}/invoices`} className="text-micro text-accent hover:underline">
+          Faturas projetadas
+        </Link>
+      </div>
 
       <Card className="gap-md">
         <div className="flex items-center justify-between text-row">

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTransaction } from "@/lib/server/transactions";
 import { prisma } from "@/lib/db";
@@ -56,6 +57,12 @@ export default async function TransactionDetailPage({ params }: PageProps<"/tran
         <MetaRow label="Tipo" value={transaction.kind} />
         {transaction.installmentNo ? <MetaRow label="Parcela" value={String(transaction.installmentNo)} /> : null}
       </Card>
+
+      {transaction.purchaseId ? (
+        <Link href={`/purchases/${transaction.purchaseId}`} className="text-micro text-accent hover:underline">
+          Ver parcelamento completo
+        </Link>
+      ) : null}
 
       {limitBar ? (
         <Card className="gap-sm">

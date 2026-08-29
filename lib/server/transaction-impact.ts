@@ -5,6 +5,7 @@ import { requireUserId } from "./session";
 import { assignInvoice, calculateAvailableLimit } from "@/lib/finance/invoice";
 import { buildInstallmentPlan, type InstallmentPlanItem } from "@/lib/finance/installments";
 import { formatDateParts } from "@/lib/finance/period";
+import { isExpense } from "@/lib/finance/transactions";
 import { toPrismaDate } from "./clock";
 
 export interface CardImpactPreview {
@@ -53,13 +54,15 @@ export async function getCardImpactPreview(
       include: { transactions: true },
     }),
     prisma.transaction.aggregate({
-      where: { userId, cardId, invoice: { paidAt: null } },
+      where: { userId, cardId, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
       _sum: { amountCents: true },
     }),
   ]);
 
-  const currentInvoiceBeforeCents = currentInvoice?.transactions.reduce((s, t) => s + t.amountCents, 0) ?? 0;
-  const nextInvoiceBeforeCents = nextInvoice?.transactions.reduce((s, t) => s + t.amountCents, 0) ?? 0;
+  const currentInvoiceBeforeCents =
+    currentInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ?? 0;
+  const nextInvoiceBeforeCents =
+    nextInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ?? 0;
 
   const currentMonthKey = `${assignment.referenceMonth.year}-${assignment.referenceMonth.month}`;
   const nextMonthParts =

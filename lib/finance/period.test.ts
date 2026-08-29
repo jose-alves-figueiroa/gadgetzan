@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getFinancialMonth, isValidMonthStartDay } from "./period";
+import { addDays, getFinancialMonth, isValidMonthStartDay, monthLabel } from "./period";
 
 describe("getFinancialMonth (R5)", () => {
   it("a 04/09 transaction belongs to the month labeled August when monthStartDay=5", () => {
@@ -42,5 +42,21 @@ describe("isValidMonthStartDay (R5)", () => {
   it("rejects 0 and negative values", () => {
     expect(isValidMonthStartDay(0)).toBe(false);
     expect(isValidMonthStartDay(-1)).toBe(false);
+  });
+});
+
+describe("addDays", () => {
+  it("advances across a month boundary", () => {
+    expect(addDays("2026-08-30", 3)).toBe("2026-09-02");
+  });
+
+  it("goes backward across a year boundary", () => {
+    expect(addDays("2026-01-02", -5)).toBe("2025-12-28");
+  });
+});
+
+describe("monthLabel", () => {
+  it("formats a calendar month independent of monthStartDay", () => {
+    expect(monthLabel({ year: 2026, month: 9 })).toBe("Setembro 2026");
   });
 });
