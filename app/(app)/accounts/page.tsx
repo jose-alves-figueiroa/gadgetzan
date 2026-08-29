@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listAccounts } from "@/lib/server/accounts";
 import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
@@ -24,8 +25,32 @@ export default async function AccountsPage() {
   }
 
   const userId = await requireUserId();
-  const transactions = await prisma.transaction.findMany({ where: { userId } });
+  const [transactions, investments] = await Promise.all([
+    prisma.transaction.findMany({ where: { userId } }),
+    prisma.investment.findMany({ where: { userId, archivedAt: null } }),
+  ]);
   const today = todayDateString();
+
+  const balances = accounts.map((account) => ({
+    account,
+    balance: calculateAccountBalance(
+      account.id,
+      account.openingBalance,
+      transactions.map((t) => ({
+        id: t.id,
+        kind: t.kind,
+        amountCents: t.amountCents,
+        competenceDate: t.competenceDate.toISOString().slice(0, 10),
+        accountId: t.accountId,
+        toAccountId: t.toAccountId,
+        method: t.method,
+      })),
+      today
+    ),
+  }));
+
+  const totalAvailable = balances.filter((b) => b.account.includeInTotals).reduce((s, b) => s + b.balance, 0);
+  const totalInvested = investments.reduce((s, i) => s + i.currentCents, 0);
 
   return (
     <div className="flex flex-col gap-lg">
@@ -34,33 +59,33 @@ export default async function AccountsPage() {
         <CreateAccountModal />
       </div>
 
-      <div className="flex flex-col gap-md">
-        {accounts.map((account) => {
-          const balance = calculateAccountBalance(
-            account.id,
-            account.openingBalance,
-            transactions.map((t) => ({
-              id: t.id,
-              kind: t.kind,
-              amountCents: t.amountCents,
-              competenceDate: t.competenceDate.toISOString().slice(0, 10),
-              accountId: t.accountId,
-              toAccountId: t.toAccountId,
-              method: t.method,
-            })),
-            today
-          );
+      <div className="grid grid-cols-3 gap-md">
+        <Card className="gap-xs">
+          <span className="text-label uppercase text-dim">Disponível</span>
+          <span className="tabular-money text-kpi-md text-text">{formatBRL(totalAvailable)}</span>
+        </Card>
+        <Card className="gap-xs">
+          <span className="text-label uppercase text-dim">Investido</span>
+          <span className="tabular-money text-kpi-md text-text">{formatBRL(totalInvested)}</span>
+        </Card>
+        <Card className="gap-xs">
+          <span className="text-label uppercase text-dim">Reservado em porquinhos</span>
+          <span className="tabular-money text-kpi-md text-text">{formatBRL(0)}</span>
+        </Card>
+      </div>
 
-          return (
-            <Card key={account.id} className="flex-row items-center justify-between">
+      <div className="flex flex-col gap-md">
+        {balances.map(({ account, balance }) => (
+          <Link key={account.id} href={`/accounts/${account.id}`}>
+            <Card className="flex-row items-center justify-between hover:bg-text/4">
               <div className="flex flex-col gap-xs">
                 <span className="text-row font-medium text-text">{account.nickname}</span>
                 <span className="text-micro text-dim">{account.institution}</span>
               </div>
               <span className="tabular-money text-kpi-md text-text">{formatBRL(balance)}</span>
             </Card>
-          );
-        })}
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -35,6 +35,7 @@ export async function createCategory(input: z.input<typeof CategoryInput>) {
   }
 
   revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return category;
 }
 
@@ -57,4 +58,5 @@ export async function ensureDefaultCategories() {
 
   await prisma.category.createMany({ data: missing.map((c) => ({ ...c, userId })) });
   revalidatePath("/settings");
+  revalidatePath("/", "layout");
 }

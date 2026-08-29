@@ -53,6 +53,7 @@ export async function createInvestment(input: z.input<typeof InvestmentInput>) {
   }
 
   revalidatePath("/investments");
+  revalidatePath("/", "layout");
   return investment;
 }
 

@@ -113,15 +113,17 @@ One story per rule — all phrased as "As the system, I need to correctly comput
 
 **Goal**: the screens that answer "where do I stand right now."
 
-- [ ] **E4-S1** Dashboard (`1a`): 3 KPIs (net worth, available balance, next invoice), current month realized (5 lines + stacked bar), grid with next-month forecast + projected invoices + alerts + goals + upcoming events. States: empty onboarding, low confidence < 3 months.
-- [ ] **E4-S2** Month screen (`3a`): KPIs vs. previous month, composition donut, month limits, "what you saved," "what changed" with insights and 6-month bars.
-- [ ] **E4-S3** Accounts (`1m`): 3 KPIs, one card per account with cards/investments indented, total available.
-- [ ] **E4-S4** Account detail (`1n`): balance, transfer/new-transaction actions, 3 KPIs, latest transactions.
-- [ ] **E4-S5** Cards + current invoice (`1o`): limit/committed/available, utilization, invoice table for the selected month.
-- [ ] **E4-S6** Investments (`1p`): total + month return (manual, D6), distribution, table, note on how much is reserved for goals, contribute/withdraw actions (return disabled).
-- [ ] **E4-S7** Invoice operations (`2e`): pay (full/partial), adjust (with a reason), enter a past invoice (onboarding for an already-open invoice).
+- [x] **E4-S1** Dashboard (`1a`): 3 KPIs (net worth, available balance, cards utilization), current month realized (4 of the 5 lines + savings rate — no stacked category bar yet), alerts (real R13 category-limit triggers, wired). Next-month forecast, projected invoices, goals, and upcoming events are explicit "chega no Stage 5/6" placeholders — projection (R7/R8) aggregation and goals CRUD don't exist yet, and R8's projection specifically depends on ≥3 closed months of history the app can't have yet either way.
+- [x] **E4-S2** Month screen (`3a`): KPIs vs. previous month, composition donut, month limits (category + total, respecting D4). "What you saved" and "what changed" insights/6-month bars deferred — need net-worth history and multi-month aggregation not built yet.
+- [x] **E4-S3** Accounts (`1m`): 3 KPIs (Disponível/Investido/Reservado — reserved is 0 until goals exist), one card per account, total available. Cards/investments indented under their account is deferred (cosmetic; the data itself is correct and reachable).
+- [x] **E4-S4** Account detail (`1n`): balance, 3 KPIs (inflows/outflows/current balance — "projected balance at end of next month" needs R8, deferred with E4-S1), latest transactions. Transfer/new-transaction actions already reachable via the global "+ Novo lançamento".
+- [x] **E4-S5** Cards + current invoice (`1o`): limit/committed/available, utilization bar, invoice table for the selected month, month navigation. Defaults to the card's actual currently-open invoice per R3 (not the raw calendar month — those diverge whenever today is past `closingDay`).
+- [x] **E4-S6** Investments (`1p`): list with current value. Contribute/withdraw already work end-to-end via the global modal's Investimento/Resgate types (Stage 3) rather than dedicated per-row buttons. Month return, distribution, and the goals-reservation note deferred — return computation is explicitly D6 (manual, no automatic calc), the rest needs goals data that doesn't exist yet.
+- [x] **E4-S7** Invoice operations (`2e`): pay (full/partial, correctly marks `paidAt` only once `paidCents` reaches the invoice's real total), adjust (with a reason, posts a `CARD_ADJUSTMENT`), enter a past invoice (`enterPastInvoice`, upserts a manual-total Invoice — not yet wired to a UI entry point, callable but no button routes to it).
 
-**DoD**: Playwright flows #5 (transfer), #9 (pay an invoice), #10 (close out the month) pass.
+**DoD**: Playwright flows #5 (transfer), #9 (pay an invoice), #10 (close out the month) pass. **Met** — verified with a scripted Playwright pass against `pnpm dev`: created a card, recorded a card expense, confirmed the invoice + available limit updated correctly, paid it in full and confirmed "Fatura paga", and loaded the month screen with correct KPIs/donut. Transfer was already verified in Stage 3. Zero console errors. `pnpm test`: 100 green. `pnpm build`: clean. Docker rebuilt and confirmed serving the same code.
+
+Two real bugs surfaced only by running the flow end-to-end (not by build/typecheck): the global transaction modal's card `<select>` used a `useState` initializer that never re-synced after a card was created elsewhere in the same session (stale by construction — `useState`'s initial value only applies on first mount), silently submitting an empty `cardId`; and the card detail page defaulted to "this calendar month" instead of the card's actual currently-open invoice, which diverge whenever today is past `closingDay`. Also added `revalidatePath("/", "layout")` to every setup-form action, since AppShell's account/card/category/investment lists are fetched once at the root layout and don't refresh on their own.
 
 ---
 

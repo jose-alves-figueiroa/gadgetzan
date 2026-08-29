@@ -33,6 +33,7 @@ export async function createAccount(input: z.input<typeof AccountInput>) {
   });
 
   revalidatePath("/accounts");
+  revalidatePath("/", "layout"); // AppShell's account/card/category/investment lists are fetched at the root (app) layout
   return account;
 }
 

@@ -36,6 +36,7 @@ export async function createCard(input: z.input<typeof CardInput>) {
   });
 
   revalidatePath("/cards");
+  revalidatePath("/", "layout");
   return card;
 }
 

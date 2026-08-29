@@ -56,6 +56,12 @@ export function NewTransactionModal({
   const [impact, setImpact] = useState<CardImpactPreview | null>(null);
 
   useEffect(() => {
+    if (!cards.some((c) => c.id === cardId)) {
+      setCardId(cards[0]?.id ?? "");
+    }
+  }, [cards, cardId]);
+
+  useEffect(() => {
     if (type !== "EXPENSE" || method !== "CARD" || !cardId || !amountInput) {
       setImpact(null);
       return;

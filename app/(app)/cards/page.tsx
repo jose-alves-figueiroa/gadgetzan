@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listCards } from "@/lib/server/cards";
 import { listAccounts } from "@/lib/server/accounts";
 import { formatBRL } from "@/lib/finance/money";
@@ -36,18 +37,20 @@ export default async function CardsPage() {
               });
 
               return (
-                <Card key={card.id} className="gap-md">
-                  <div className="flex items-center justify-between">
-                    <span className="text-row font-medium text-text">{card.name}</span>
-                    <span className="tabular-money text-row text-dim">
-                      {formatBRL(availableCents)} disponível
-                    </span>
-                  </div>
-                  <Bar
-                    percent={utilizationPercent}
-                    severity={utilizationPercent >= 100 ? "neg" : utilizationPercent >= 80 ? "warn" : "accent"}
-                  />
-                </Card>
+                <Link key={card.id} href={`/cards/${card.id}`}>
+                  <Card className="gap-md hover:bg-text/4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-row font-medium text-text">{card.name}</span>
+                      <span className="tabular-money text-row text-dim">
+                        {formatBRL(availableCents)} disponível
+                      </span>
+                    </div>
+                    <Bar
+                      percent={utilizationPercent}
+                      severity={utilizationPercent >= 100 ? "neg" : utilizationPercent >= 80 ? "warn" : "accent"}
+                    />
+                  </Card>
+                </Link>
               );
             })
           )}
