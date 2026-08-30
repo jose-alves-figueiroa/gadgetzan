@@ -58,7 +58,13 @@ export function CreateAccountModal({ triggerLabel = "Nova conta" }: { triggerLab
             <Segmented options={TYPE_OPTIONS as unknown as { value: string; label: string }[]} value={type} onChange={(v) => setType(v as typeof type)} />
           </div>
           <Field name="openingBalance" label="Saldo atual" placeholder="0,00" required />
-          <Field name="openingDate" label="Data" type="date" required />
+          <Field
+            name="openingDate"
+            label="Data"
+            type="date"
+            defaultValue={new Date().toISOString().slice(0, 10)}
+            required
+          />
           <label className="flex items-center gap-sm text-row text-text">
             <input
               type="checkbox"

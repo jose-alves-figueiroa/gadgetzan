@@ -20,7 +20,7 @@ services:
     environment:
       DATABASE_URL: postgres://gadgetzan:${DB_PASSWORD}@db:5432/gadgetzan
       AUTH_SECRET: ${AUTH_SECRET}
-      AUTH_URL: ${AUTH_URL}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       TZ: America/Sao_Paulo
     ports:
       - "3000:3000"
