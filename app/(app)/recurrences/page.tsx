@@ -6,6 +6,7 @@ import { listCards } from "@/lib/server/cards";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateRecurrenceModal } from "@/components/finance/CreateRecurrenceModal";
 import { RecurrenceRow } from "@/components/finance/RecurrenceRow";
 
@@ -76,16 +77,17 @@ export default async function RecurrencesPage() {
                 <span className="text-navhead uppercase text-neutral-700">{group.label}</span>
                 <Card className="gap-0 divide-y divide-line p-0">
                   {group.list.map((rule) => (
-                    <RecurrenceRow
-                      key={rule.id}
-                      id={rule.id}
-                      description={rule.description}
-                      amountCents={rule.amountCents}
-                      frequency={rule.frequency}
-                      dayOfMonth={rule.dayOfMonth}
-                      categoryName={rule.category.name}
-                      status={rule.status}
-                    />
+                    <HighlightOnCreate key={rule.id} id={rule.id}>
+                      <RecurrenceRow
+                        id={rule.id}
+                        description={rule.description}
+                        amountCents={rule.amountCents}
+                        frequency={rule.frequency}
+                        dayOfMonth={rule.dayOfMonth}
+                        categoryName={rule.category.name}
+                        status={rule.status}
+                      />
+                    </HighlightOnCreate>
                   ))}
                 </Card>
               </div>

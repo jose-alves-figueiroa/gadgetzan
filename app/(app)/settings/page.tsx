@@ -2,6 +2,7 @@ import { listCategories } from "@/lib/server/categories";
 import { getSettings } from "@/lib/server/settings";
 import { Tag } from "@/components/ui/Tag";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateCategoryModal } from "@/components/finance/CreateCategoryModal";
 import { SettingsForm } from "@/components/finance/SettingsForm";
 
@@ -40,12 +41,14 @@ export default async function SettingsPage() {
         </TableHead>
         <TableBody>
           {categories.map((category) => (
-            <TableRow key={category.id}>
-              <TableCell className="text-text">{category.name}</TableCell>
-              <TableCell>
-                <Tag variant="neutral">{NATURE_LABEL[category.nature]}</Tag>
-              </TableCell>
-            </TableRow>
+            <HighlightOnCreate key={category.id} id={category.id}>
+              <TableRow>
+                <TableCell className="text-text">{category.name}</TableCell>
+                <TableCell>
+                  <Tag variant="neutral">{NATURE_LABEL[category.nature]}</Tag>
+                </TableCell>
+              </TableRow>
+            </HighlightOnCreate>
           ))}
         </TableBody>
       </Table>

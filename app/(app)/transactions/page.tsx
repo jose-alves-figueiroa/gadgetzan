@@ -5,6 +5,7 @@ import { formatBRL } from "@/lib/finance/money";
 import { isExpense, isIncome } from "@/lib/finance/transactions";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 
 export default async function TransactionsPage() {
   const transactions = await listTransactions();
@@ -56,26 +57,27 @@ export default async function TransactionsPage() {
               </div>
               <Card className="gap-0 divide-y divide-line p-0">
                 {dayTransactions.map((t) => (
-                  <Link
-                    key={t.id}
-                    href={`/transactions/${t.id}`}
-                    className="flex items-center justify-between px-md py-sm hover:bg-text/4"
-                  >
-                    <div className="flex flex-col gap-xs">
-                      <span className="text-row text-text">{t.description}</span>
-                      <span className="text-micro text-dim">
-                        {t.category?.name ?? "—"} · {t.account?.nickname ?? t.card?.name ?? "—"}
-                      </span>
-                    </div>
-                    <span
-                      className={`tabular-money text-row ${
-                        isIncome(t.kind) ? "text-pos" : isExpense(t.kind) ? "text-text" : "text-dim"
-                      }`}
+                  <HighlightOnCreate key={t.id} id={t.id}>
+                    <Link
+                      href={`/transactions/${t.id}`}
+                      className="flex items-center justify-between px-md py-sm hover:bg-text/4"
                     >
-                      {isIncome(t.kind) ? "+" : isExpense(t.kind) ? "−" : ""}
-                      {formatBRL(t.amountCents)}
-                    </span>
-                  </Link>
+                      <div className="flex flex-col gap-xs">
+                        <span className="text-row text-text">{t.description}</span>
+                        <span className="text-micro text-dim">
+                          {t.category?.name ?? "—"} · {t.account?.nickname ?? t.card?.name ?? "—"}
+                        </span>
+                      </div>
+                      <span
+                        className={`tabular-money text-row ${
+                          isIncome(t.kind) ? "text-pos" : isExpense(t.kind) ? "text-text" : "text-dim"
+                        }`}
+                      >
+                        {isIncome(t.kind) ? "+" : isExpense(t.kind) ? "−" : ""}
+                        {formatBRL(t.amountCents)}
+                      </span>
+                    </Link>
+                  </HighlightOnCreate>
                 ))}
               </Card>
             </div>

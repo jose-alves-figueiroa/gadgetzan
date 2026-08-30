@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createCategory } from "@/lib/server/categories";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 const NATURE_OPTIONS = [
   { value: "FIXED", label: "Fixa" },
@@ -29,12 +30,13 @@ export function CreateCategoryModal({ triggerLabel = "Nova categoria" }: { trigg
     const limitInput = String(formData.get("limitAmountCents") ?? "").trim();
 
     try {
-      await createCategory({
+      const category = await createCategory({
         name: String(formData.get("name") ?? ""),
         nature,
         icon: String(formData.get("icon") ?? "tag"),
         limitAmountCents: limitInput || null,
       });
+      markCreated(category.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createLimit } from "@/lib/server/limits";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 type Scope = "TOTAL_MONTH" | "CATEGORY" | "CARD_UTILIZATION";
 
@@ -34,7 +35,7 @@ export function CreateLimitModal({
     setSaving(true);
     const formData = new FormData(event.currentTarget);
     try {
-      await createLimit({
+      const limit = await createLimit({
         scope,
         categoryId: scope === "CATEGORY" ? String(formData.get("categoryId") ?? "") : null,
         cardId: scope === "CARD_UTILIZATION" ? String(formData.get("cardId") ?? "") : null,
@@ -43,6 +44,7 @@ export function CreateLimitModal({
         warnAtPercent: Number(formData.get("warnAtPercent") ?? 80),
         includeCommitments,
       });
+      markCreated(limit.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

@@ -30,7 +30,7 @@ export async function createGoal(input: z.input<typeof GoalInput>) {
   const userId = await requireUserId();
   const data = GoalInput.parse(input);
 
-  await prisma.goal.create({
+  const goal = await prisma.goal.create({
     data: {
       userId,
       name: data.name,
@@ -45,6 +45,7 @@ export async function createGoal(input: z.input<typeof GoalInput>) {
 
   revalidatePath("/goals");
   revalidatePath("/");
+  return goal;
 }
 
 export interface GoalWithProgress {

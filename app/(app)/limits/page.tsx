@@ -7,6 +7,7 @@ import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateLimitModal } from "@/components/finance/CreateLimitModal";
 
 const SEVERITY: Record<string, "accent" | "warn" | "neg"> = { ok: "accent", warning: "warn", exceeded: "neg" };
@@ -51,14 +52,16 @@ export default async function LimitsPage() {
       ) : (
         <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
           {others.map((limit) => (
-            <Card key={limit.id} className="gap-sm">
-              <span className="text-row text-text">{limit.label}</span>
-              <span className="tabular-money text-micro text-muted">
-                {formatBRL(limit.spentCents)} de {formatBRL(limit.amountCents)}
-              </span>
-              <Bar percent={limit.percent} severity={SEVERITY[limit.status]} />
-              <span className="text-micro text-dim">{limit.contextNote}</span>
-            </Card>
+            <HighlightOnCreate key={limit.id} id={limit.id}>
+              <Card className="gap-sm">
+                <span className="text-row text-text">{limit.label}</span>
+                <span className="tabular-money text-micro text-muted">
+                  {formatBRL(limit.spentCents)} de {formatBRL(limit.amountCents)}
+                </span>
+                <Bar percent={limit.percent} severity={SEVERITY[limit.status]} />
+                <span className="text-micro text-dim">{limit.contextNote}</span>
+              </Card>
+            </HighlightOnCreate>
           ))}
         </div>
       )}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createAccount } from "@/lib/server/accounts";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 const TYPE_OPTIONS = [
   { value: "CHECKING", label: "Conta corrente" },
@@ -27,7 +28,7 @@ export function CreateAccountModal({ triggerLabel = "Nova conta" }: { triggerLab
 
     const formData = new FormData(event.currentTarget);
     try {
-      await createAccount({
+      const account = await createAccount({
         institution: String(formData.get("institution") ?? ""),
         nickname: String(formData.get("nickname") ?? ""),
         type,
@@ -35,6 +36,7 @@ export function CreateAccountModal({ triggerLabel = "Nova conta" }: { triggerLab
         openingDate: String(formData.get("openingDate") ?? ""),
         includeInTotals,
       });
+      markCreated(account.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

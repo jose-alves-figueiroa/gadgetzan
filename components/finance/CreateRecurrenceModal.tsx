@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createRecurrenceRule } from "@/lib/server/recurrences";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 import { generateOccurrences } from "@/lib/finance/recurrence";
 import { addMonths, formatDateParts, parseDateParts } from "@/lib/finance/period";
 
@@ -52,7 +53,7 @@ export function CreateRecurrenceModal({
 
     const formData = new FormData(event.currentTarget);
     try {
-      await createRecurrenceRule({
+      const rule = await createRecurrenceRule({
         kind,
         description: String(formData.get("description") ?? ""),
         amountCents: String(formData.get("amountCents") ?? ""),
@@ -67,6 +68,7 @@ export function CreateRecurrenceModal({
         startDate,
         endDate: null,
       });
+      markCreated(rule.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

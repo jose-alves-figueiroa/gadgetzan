@@ -8,6 +8,7 @@ import { formatBRL } from "@/lib/finance/money";
 import { Bank } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateAccountModal } from "@/components/finance/CreateAccountModal";
 
 export default async function AccountsPage() {
@@ -82,13 +83,15 @@ export default async function AccountsPage() {
       <div className="flex flex-col gap-md">
         {balances.map(({ account, balance }) => (
           <Link key={account.id} href={`/accounts/${account.id}`}>
-            <Card className="flex-row items-center justify-between hover:bg-text/4">
-              <div className="flex flex-col gap-xs">
-                <span className="text-row font-medium text-text">{account.nickname}</span>
-                <span className="text-micro text-dim">{account.institution}</span>
-              </div>
-              <span className="tabular-money text-kpi-md text-text">{formatBRL(balance)}</span>
-            </Card>
+            <HighlightOnCreate id={account.id}>
+              <Card className="flex-row items-center justify-between hover:bg-text/4">
+                <div className="flex flex-col gap-xs">
+                  <span className="text-row font-medium text-text">{account.nickname}</span>
+                  <span className="text-micro text-dim">{account.institution}</span>
+                </div>
+                <span className="tabular-money text-kpi-md text-text">{formatBRL(balance)}</span>
+              </Card>
+            </HighlightOnCreate>
           </Link>
         ))}
       </div>

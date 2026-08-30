@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { createCard } from "@/lib/server/cards";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 interface AccountOption {
   id: string;
@@ -30,7 +31,7 @@ export function CreateCardModal({
 
     const formData = new FormData(event.currentTarget);
     try {
-      await createCard({
+      const card = await createCard({
         accountId: String(formData.get("accountId") ?? ""),
         name: String(formData.get("name") ?? ""),
         limitCents: String(formData.get("limitCents") ?? ""),
@@ -38,6 +39,7 @@ export function CreateCardModal({
         dueDay: Number(formData.get("dueDay")),
         utilizationTarget: null,
       });
+      markCreated(card.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

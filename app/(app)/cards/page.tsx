@@ -7,6 +7,7 @@ import { calculateAvailableLimit } from "@/lib/finance/invoice";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateCardModal } from "@/components/finance/CreateCardModal";
 import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
@@ -43,18 +44,20 @@ export default async function CardsPage() {
 
               return (
                 <Link key={card.id} href={`/cards/${card.id}`}>
-                  <Card className="gap-md hover:bg-text/4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-row font-medium text-text">{card.name}</span>
-                      <span className="tabular-money text-row text-dim">
-                        {formatBRL(availableCents)} disponível
-                      </span>
-                    </div>
-                    <Bar
-                      percent={utilizationPercent}
-                      severity={utilizationPercent >= 100 ? "neg" : utilizationPercent >= 80 ? "warn" : "accent"}
-                    />
-                  </Card>
+                  <HighlightOnCreate id={card.id}>
+                    <Card className="gap-md hover:bg-text/4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-row font-medium text-text">{card.name}</span>
+                        <span className="tabular-money text-row text-dim">
+                          {formatBRL(availableCents)} disponível
+                        </span>
+                      </div>
+                      <Bar
+                        percent={utilizationPercent}
+                        severity={utilizationPercent >= 100 ? "neg" : utilizationPercent >= 80 ? "warn" : "accent"}
+                      />
+                    </Card>
+                  </HighlightOnCreate>
                 </Link>
               );
             })

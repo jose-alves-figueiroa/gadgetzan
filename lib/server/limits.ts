@@ -49,7 +49,7 @@ export async function createLimit(input: z.input<typeof LimitInput>) {
     if (existing) throw new Error("Já existe um limite total do mês ativo.");
   }
 
-  await prisma.limit.create({
+  const limit = await prisma.limit.create({
     data: {
       userId,
       scope: data.scope,
@@ -64,6 +64,7 @@ export async function createLimit(input: z.input<typeof LimitInput>) {
 
   revalidatePath("/limits");
   revalidatePath("/");
+  return limit;
 }
 
 export async function archiveLimit(id: string) {

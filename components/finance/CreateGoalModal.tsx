@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { createGoal } from "@/lib/server/goals";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 const ICONS = ["🐷", "✈️", "🏠", "🚗", "🎓", "💍", "🏖️", "🎁"];
 
@@ -29,7 +30,7 @@ export function CreateGoalModal({
     setSaving(true);
     const formData = new FormData(event.currentTarget);
     try {
-      await createGoal({
+      const goal = await createGoal({
         name: String(formData.get("name") ?? ""),
         icon,
         targetCents: String(formData.get("targetCents") ?? ""),
@@ -38,6 +39,7 @@ export function CreateGoalModal({
         accountId: source === "account" ? String(formData.get("accountId") ?? "") : null,
         investmentId: source === "investment" ? String(formData.get("investmentId") ?? "") : null,
       });
+      markCreated(goal.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

@@ -7,6 +7,7 @@ import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateGoalModal } from "@/components/finance/CreateGoalModal";
 
 export default async function GoalsPage() {
@@ -59,27 +60,29 @@ export default async function GoalsPage() {
         <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
           {goals.map((goal) => (
             <Link key={goal.id} href={`/goals/${goal.id}`}>
-              <Card className="gap-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-title">{goal.icon}</span>
-                  {goal.targetDate ? <span className="text-micro text-dim">{goal.targetDate}</span> : null}
-                </div>
-                <span className="text-row text-text">{goal.name}</span>
-                <span className="tabular-money text-micro text-muted">
-                  {formatBRL(goal.savedCents, { compact: true })} de {formatBRL(goal.targetCents, { compact: true })}
-                </span>
-                <Bar percent={(goal.savedCents / goal.targetCents) * 100} />
-                {goal.pace ? (
-                  <span className={`text-micro ${goal.pace.status === "on_pace" ? "text-pos" : "text-warn"}`}>
-                    {goal.pace.status === "on_pace"
-                      ? "No ritmo"
-                      : `${formatBRL(goal.pace.behindByCents, { compact: true })} abaixo do ritmo`}
+              <HighlightOnCreate id={goal.id}>
+                <Card className="gap-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-title">{goal.icon}</span>
+                    {goal.targetDate ? <span className="text-micro text-dim">{goal.targetDate}</span> : null}
+                  </div>
+                  <span className="text-row text-text">{goal.name}</span>
+                  <span className="tabular-money text-micro text-muted">
+                    {formatBRL(goal.savedCents, { compact: true })} de {formatBRL(goal.targetCents, { compact: true })}
                   </span>
-                ) : null}
-                <span className="text-micro text-dim">
-                  Faltam {formatBRL(Math.max(0, goal.targetCents - goal.savedCents), { compact: true })}
-                </span>
-              </Card>
+                  <Bar percent={(goal.savedCents / goal.targetCents) * 100} />
+                  {goal.pace ? (
+                    <span className={`text-micro ${goal.pace.status === "on_pace" ? "text-pos" : "text-warn"}`}>
+                      {goal.pace.status === "on_pace"
+                        ? "No ritmo"
+                        : `${formatBRL(goal.pace.behindByCents, { compact: true })} abaixo do ritmo`}
+                    </span>
+                  ) : null}
+                  <span className="text-micro text-dim">
+                    Faltam {formatBRL(Math.max(0, goal.targetCents - goal.savedCents), { compact: true })}
+                  </span>
+                </Card>
+              </HighlightOnCreate>
             </Link>
           ))}
           <CreateGoalModal

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatBRL } from "@/lib/finance/money";
 import { pauseRecurrenceRule, endRecurrenceRule } from "@/lib/server/recurrences";
 import { Tag } from "@/components/ui/Tag";
+import { cn } from "@/lib/cn";
 
 interface RecurrenceRowProps {
   id: string;
@@ -13,9 +14,19 @@ interface RecurrenceRowProps {
   dayOfMonth: number | null;
   categoryName: string;
   status: "ACTIVE" | "PAUSED" | "ENDED";
+  className?: string;
 }
 
-export function RecurrenceRow({ id, description, amountCents, frequency, dayOfMonth, categoryName, status }: RecurrenceRowProps) {
+export function RecurrenceRow({
+  id,
+  description,
+  amountCents,
+  frequency,
+  dayOfMonth,
+  categoryName,
+  status,
+  className,
+}: RecurrenceRowProps) {
   const [busy, setBusy] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
 
@@ -35,7 +46,11 @@ export function RecurrenceRow({ id, description, amountCents, frequency, dayOfMo
 
   return (
     <div
-      className={`flex items-center justify-between rounded-md px-md py-sm ${currentStatus === "PAUSED" ? "opacity-55" : ""}`}
+      className={cn(
+        "flex items-center justify-between rounded-md px-md py-sm",
+        currentStatus === "PAUSED" && "opacity-55",
+        className
+      )}
     >
       <div className="flex flex-col gap-xs">
         <span className="text-row text-text">{description}</span>

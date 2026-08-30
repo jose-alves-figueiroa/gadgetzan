@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { createInvestment } from "@/lib/server/investments";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 
 const KIND_OPTIONS = [
   { value: "FIXED_INCOME", label: "Renda fixa" },
@@ -33,7 +34,7 @@ export function CreateInvestmentModal({
 
     const formData = new FormData(event.currentTarget);
     try {
-      await createInvestment({
+      const investment = await createInvestment({
         name: String(formData.get("name") ?? ""),
         kind: String(formData.get("kind") ?? "OTHER") as (typeof KIND_OPTIONS)[number]["value"],
         accountId: String(formData.get("accountId") ?? ""),
@@ -42,6 +43,7 @@ export function CreateInvestmentModal({
         liquidity: String(formData.get("liquidity") ?? "") || null,
         debitNow,
       });
+      markCreated(investment.id);
       setOpen(false);
       (event.target as HTMLFormElement).reset();
     } catch (err) {

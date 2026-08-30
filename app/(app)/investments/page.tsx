@@ -4,6 +4,7 @@ import { listAccounts } from "@/lib/server/accounts";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateInvestmentModal } from "@/components/finance/CreateInvestmentModal";
 
 export default async function InvestmentsPage() {
@@ -25,10 +26,12 @@ export default async function InvestmentsPage() {
       ) : (
         <div className="flex flex-col gap-md">
           {investments.map((investment) => (
-            <Card key={investment.id} className="flex-row items-center justify-between">
-              <span className="text-row font-medium text-text">{investment.name}</span>
-              <span className="tabular-money text-kpi-md text-text">{formatBRL(investment.currentCents)}</span>
-            </Card>
+            <HighlightOnCreate key={investment.id} id={investment.id}>
+              <Card className="flex-row items-center justify-between">
+                <span className="text-row font-medium text-text">{investment.name}</span>
+                <span className="tabular-money text-kpi-md text-text">{formatBRL(investment.currentCents)}</span>
+              </Card>
+            </HighlightOnCreate>
           ))}
         </div>
       )}

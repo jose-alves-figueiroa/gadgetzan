@@ -34,6 +34,7 @@ export type NewTransactionData = z.input<typeof NewTransactionInput>;
 export async function createTransaction(input: NewTransactionData) {
   const userId = await requireUserId();
   const data = NewTransactionInput.parse(input);
+  let created;
 
   if (data.method === "CARD") {
     const card = await prisma.card.findFirst({ where: { id: data.cardId!, userId } });
@@ -62,7 +63,7 @@ export async function createTransaction(input: NewTransactionData) {
 
       for (const item of plan) {
         const invoice = await findOrCreateInvoice(userId, card, item.referenceMonth, item.dueDate);
-        await prisma.transaction.create({
+        const tx = await prisma.transaction.create({
           data: {
             userId,
             kind: "EXPENSE",
@@ -79,11 +80,12 @@ export async function createTransaction(input: NewTransactionData) {
             note: data.note ?? null,
           },
         });
+        if (item.installmentNo === 1) created = tx;
       }
     } else {
       const assignment = assignInvoice(data.competenceDate, card.closingDay, card.dueDay);
       const invoice = await findOrCreateInvoice(userId, card, assignment.referenceMonth, assignment.dueDate);
-      await prisma.transaction.create({
+      created = await prisma.transaction.create({
         data: {
           userId,
           kind: data.kind,
@@ -100,7 +102,7 @@ export async function createTransaction(input: NewTransactionData) {
       });
     }
   } else {
-    await prisma.transaction.create({
+    created = await prisma.transaction.create({
       data: {
         userId,
         kind: data.kind,
@@ -118,6 +120,7 @@ export async function createTransaction(input: NewTransactionData) {
 
   revalidatePath("/transactions");
   revalidatePath("/");
+  return created;
 }
 
 const TransferInput = z.object({
@@ -136,7 +139,7 @@ export async function createTransfer(input: z.input<typeof TransferInput>) {
     throw new Error("A conta de origem e destino devem ser diferentes.");
   }
 
-  await prisma.transaction.create({
+  const transaction = await prisma.transaction.create({
     data: {
       userId,
       kind: "TRANSFER",
@@ -153,6 +156,7 @@ export async function createTransfer(input: z.input<typeof TransferInput>) {
   revalidatePath("/transactions");
   revalidatePath("/accounts");
   revalidatePath("/");
+  return transaction;
 }
 
 const InvestmentMoveInput = z.object({
@@ -171,7 +175,7 @@ export async function createInvestmentMove(input: z.input<typeof InvestmentMoveI
   const investment = await prisma.investment.findFirst({ where: { id: data.investmentId, userId } });
   if (!investment) throw new Error("Investimento não encontrado.");
 
-  await prisma.transaction.create({
+  const transaction = await prisma.transaction.create({
     data: {
       userId,
       kind: data.kind,
@@ -187,6 +191,7 @@ export async function createInvestmentMove(input: z.input<typeof InvestmentMoveI
   revalidatePath("/investments");
   revalidatePath("/accounts");
   revalidatePath("/");
+  return transaction;
 }
 
 export async function deleteTransaction(id: string) {

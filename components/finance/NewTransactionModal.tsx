@@ -7,6 +7,7 @@ import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { formatBRL } from "@/lib/finance/money";
 import { createTransaction, createTransfer, createInvestmentMove } from "@/lib/server/transactions";
+import { markCreated } from "@/components/ui/HighlightOnCreate";
 import { getCardImpactPreview, type CardImpactPreview } from "@/lib/server/transaction-impact";
 
 interface Option {
@@ -88,23 +89,25 @@ export function NewTransactionModal({
 
     try {
       if (type === "TRANSFER") {
-        await createTransfer({
+        const transaction = await createTransfer({
           accountId: String(formData.get("accountId") ?? ""),
           toAccountId: String(formData.get("toAccountId") ?? ""),
           amountCents: amountInput,
           competenceDate: date,
           note: null,
         });
+        markCreated(transaction.id);
       } else if (type === "INVESTMENT_IN" || type === "INVESTMENT_OUT") {
-        await createInvestmentMove({
+        const transaction = await createInvestmentMove({
           kind: type,
           investmentId: String(formData.get("investmentId") ?? ""),
           accountId: String(formData.get("accountId") ?? ""),
           amountCents: amountInput,
           competenceDate: date,
         });
+        markCreated(transaction.id);
       } else {
-        await createTransaction({
+        const transaction = await createTransaction({
           kind: type,
           description: String(formData.get("description") ?? ""),
           amountCents: amountInput,
@@ -117,6 +120,7 @@ export function NewTransactionModal({
           isFixed,
           note: null,
         });
+        if (transaction) markCreated(transaction.id);
       }
       onClose();
       (event.target as HTMLFormElement).reset();
