@@ -16,6 +16,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "create-user": "tsx scripts/create-user.ts",
+    "perf-check": "tsx scripts/perf-check.ts",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down --remove-orphans",
     "docker:logs": "docker compose logs -f"
