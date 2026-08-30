@@ -40,7 +40,7 @@ export default async function RecurrencesPage() {
         />
       </div>
 
-      <div className="grid grid-cols-4 gap-md">
+      <div className="grid grid-cols-2 gap-md md:grid-cols-4">
         <Card>
           <span className="text-label uppercase text-dim">Receita fixa</span>
           <span className="tabular-money text-kpi-md text-pos">{formatBRL(incomeTotal)}</span>

@@ -57,7 +57,7 @@ export default async function GoalsPage() {
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3">
           {goals.map((goal) => (
             <Link key={goal.id} href={`/goals/${goal.id}`}>
               <HighlightOnCreate id={goal.id}>

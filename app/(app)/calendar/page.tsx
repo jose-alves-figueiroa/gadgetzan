@@ -44,7 +44,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_280px] gap-md">
+      <div className="grid grid-cols-1 gap-md md:grid-cols-[1fr_280px]">
         <Card className="gap-xs">
           {mode === "agenda" ? (
             data.agenda.length > 0 ? (

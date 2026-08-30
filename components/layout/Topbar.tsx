@@ -27,7 +27,7 @@ export function Topbar({ onNewTransaction, onOpenDrawer }: TopbarProps) {
           type="button"
           aria-label="Abrir menu"
           onClick={onOpenDrawer}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-dim hover:text-text lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-dim hover:text-text max-md:min-h-11 max-md:min-w-11 lg:hidden"
         >
           <List size={18} />
         </button>
@@ -56,14 +56,14 @@ export function Topbar({ onNewTransaction, onOpenDrawer }: TopbarProps) {
         <button
           type="button"
           aria-label="Buscar"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-dim hover:text-text"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-dim hover:text-text max-md:min-h-11 max-md:min-w-11"
         >
           <MagnifyingGlass size={17} />
         </button>
         <button
           type="button"
           onClick={onNewTransaction}
-          className="flex items-center gap-sm rounded-md border border-accent px-md py-sm text-row text-accent transition-colors hover:bg-accent/12"
+          className="hidden items-center gap-sm rounded-md border border-accent px-md py-sm text-row text-accent transition-colors hover:bg-accent/12 md:flex"
         >
           <Plus size={15} />
           Novo lançamento

@@ -17,7 +17,7 @@ export default async function FuturePage() {
     <div className="flex flex-col gap-lg">
       <h1 className="text-title text-text">Próximos meses</h1>
 
-      <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3">
         {months.map((m, index) => (
           <Card
             key={`${m.year}-${m.month}`}

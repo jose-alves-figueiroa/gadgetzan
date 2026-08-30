@@ -38,7 +38,7 @@ export function Sidebar({ onSimulate, drawerOpen, onCloseDrawer }: SidebarProps)
                   href={item.href}
                   onClick={onCloseDrawer}
                   className={cn(
-                    "flex items-center gap-sm rounded-md px-md py-sm text-row transition-colors",
+                    "flex items-center gap-sm rounded-md px-md py-sm text-row transition-colors max-md:min-h-11",
                     active
                       ? "bg-accent/14 text-accent-300 shadow-[inset_0_0_0_1px_rgba(145,132,217,.35)]"
                       : "text-muted hover:text-text"
@@ -60,7 +60,7 @@ export function Sidebar({ onSimulate, drawerOpen, onCloseDrawer }: SidebarProps)
             onSimulate();
             onCloseDrawer();
           }}
-          className="flex items-center justify-center gap-sm rounded-md border border-accent px-md py-sm text-row text-accent transition-colors hover:bg-accent/12"
+          className="flex items-center justify-center gap-sm rounded-md border border-accent px-md py-sm text-row text-accent transition-colors max-md:min-h-11 hover:bg-accent/12"
         >
           <Flask size={15} />
           Simular compra
@@ -68,7 +68,7 @@ export function Sidebar({ onSimulate, drawerOpen, onCloseDrawer }: SidebarProps)
         <Link
           href="/settings"
           onClick={onCloseDrawer}
-          className="flex items-center gap-sm rounded-md px-md py-sm text-row text-muted transition-colors hover:text-text"
+          className="flex items-center gap-sm rounded-md px-md py-sm text-row text-muted transition-colors max-md:min-h-11 hover:text-text"
         >
           <GearSix size={15} />
           Ajustes

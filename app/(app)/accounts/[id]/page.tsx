@@ -50,7 +50,7 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
         <span className="tabular-money text-kpi-lg text-text">{formatBRL(balance)}</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-md">
+      <div className="grid grid-cols-2 gap-md md:grid-cols-3">
         <Card className="gap-xs">
           <span className="text-label uppercase text-dim">Entradas</span>
           <span className="tabular-money text-kpi-md text-pos">{formatBRL(inflows)}</span>

@@ -65,7 +65,7 @@ export default async function AccountsPage() {
         <CreateAccountModal />
       </div>
 
-      <div className="grid grid-cols-3 gap-md">
+      <div className="grid grid-cols-2 gap-md md:grid-cols-3">
         <Card className="gap-xs">
           <span className="text-label uppercase text-dim">Disponível</span>
           <span className="tabular-money text-kpi-md text-text">{formatBRL(totalAvailable)}</span>

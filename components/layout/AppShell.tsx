@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { MobileActionBar } from "./MobileActionBar";
 import { NewTransactionModal } from "@/components/finance/NewTransactionModal";
 
 interface Option {
@@ -42,8 +43,10 @@ export function AppShell({ children, accounts, cards, categories, investments, h
           onNewTransaction={() => setNewTransactionOpen(true)}
           onOpenDrawer={() => setDrawerOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-2xl">{children}</main>
+        <main className="flex-1 overflow-y-auto p-2xl pb-[calc(var(--spacing-2xl)+56px)] md:pb-2xl">{children}</main>
       </div>
+
+      <MobileActionBar onNewTransaction={() => setNewTransactionOpen(true)} onSimulate={() => router.push("/simulate")} />
 
       <NewTransactionModal
         open={newTransactionOpen}

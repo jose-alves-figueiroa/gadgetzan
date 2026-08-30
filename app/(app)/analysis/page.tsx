@@ -48,7 +48,7 @@ export default async function AnalysisPage({ searchParams }: PageProps<"/analysi
       </div>
       <span className="capitalize text-micro text-dim">{data.month.label}</span>
 
-      <div className="grid grid-cols-[1fr_320px] gap-md">
+      <div className="grid grid-cols-1 gap-md md:grid-cols-[1fr_320px]">
         <div className="flex flex-col gap-sm">
           {data.rows.length === 0 ? (
             <p className="text-micro text-dim">Nenhuma despesa neste mês.</p>

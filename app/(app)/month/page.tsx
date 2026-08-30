@@ -33,7 +33,7 @@ export default async function MonthPage({ searchParams }: PageProps<"/month">) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-md">
+      <div className="grid grid-cols-2 gap-md md:grid-cols-3">
         <KpiCard label="Receitas" value={current.income} previous={previous.income} />
         <KpiCard label="Despesas" value={current.expenses} previous={previous.expenses} invert />
         <KpiCard label="Sobra em caixa" value={current.cashLeftover} previous={previous.cashLeftover} />

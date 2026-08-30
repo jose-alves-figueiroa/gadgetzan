@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-lg">
-      <div className="grid grid-cols-3 gap-md">
+      <div className="grid grid-cols-2 gap-md md:grid-cols-3">
         <Card className="gap-xs">
           <Link href="/net-worth" className="text-label uppercase text-dim hover:text-text">
             Patrimônio líquido
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
 
       <Card className="gap-md">
         <span className="text-navhead uppercase capitalize text-neutral-700">{data.monthLabel} — realizado</span>
-        <div className="grid grid-cols-5 gap-md">
+        <div className="grid grid-cols-2 gap-md md:grid-cols-5">
           <RealizedStat label="Receitas" value={data.monthSavings.income} color="text-pos" />
           <RealizedStat label="Despesas" value={data.monthSavings.expenses} color="text-text" />
           <RealizedStat label="Aportes" value={data.monthSavings.contributions} color="text-text" />
@@ -71,13 +71,13 @@ export default async function DashboardPage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-[1fr_352px] gap-md">
+      <div className="grid grid-cols-1 gap-md md:grid-cols-[1fr_352px]">
         <div className="flex flex-col gap-md">
           <Card className="gap-sm">
             <Link href="/future" className="text-navhead uppercase text-neutral-700 hover:text-text">
               Próximo mês previsto — {nextMonth.label}
             </Link>
-            <div className="grid grid-cols-4 gap-md text-micro">
+            <div className="grid grid-cols-2 gap-md text-micro md:grid-cols-4">
               <ForecastStat label="Receitas" value={nextMonth.incomeCents} color="text-pos" />
               <ForecastStat label="Despesas" value={-nextMonth.expensesCents} color="text-text" />
               <ForecastStat label="Faturas" value={-nextMonth.invoicesCents} color="text-text" />

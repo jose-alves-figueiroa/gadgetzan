@@ -50,7 +50,7 @@ export default async function LimitsPage() {
           description="Crie um limite por categoria, cartão ou total mensal para acompanhar o quanto falta."
         />
       ) : (
-        <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3">
           {others.map((limit) => (
             <HighlightOnCreate key={limit.id} id={limit.id}>
               <Card className="gap-sm">
