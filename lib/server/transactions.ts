@@ -10,6 +10,15 @@ import { buildInstallmentPlan } from "@/lib/finance/installments";
 import { findOrCreateInvoice } from "./invoices";
 import { toPrismaDate } from "./clock";
 
+/** A transaction can't predate the account's own opening balance (05 § Form validations). */
+async function assertDateNotBeforeOpening(userId: string, accountId: string, competenceDate: string) {
+  const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
+  if (!account) throw new Error("Conta não encontrada.");
+  if (competenceDate < account.openingDate.toISOString().slice(0, 10)) {
+    throw new Error("A data não pode ser anterior ao saldo inicial da conta.");
+  }
+}
+
 const NewTransactionInput = z
   .object({
     kind: z.enum(["EXPENSE", "INCOME"]),
@@ -102,6 +111,7 @@ export async function createTransaction(input: NewTransactionData) {
       });
     }
   } else {
+    await assertDateNotBeforeOpening(userId, data.accountId!, data.competenceDate);
     created = await prisma.transaction.create({
       data: {
         userId,
@@ -138,6 +148,8 @@ export async function createTransfer(input: z.input<typeof TransferInput>) {
   if (data.accountId === data.toAccountId) {
     throw new Error("A conta de origem e destino devem ser diferentes.");
   }
+  await assertDateNotBeforeOpening(userId, data.accountId, data.competenceDate);
+  await assertDateNotBeforeOpening(userId, data.toAccountId, data.competenceDate);
 
   const transaction = await prisma.transaction.create({
     data: {
@@ -174,6 +186,7 @@ export async function createInvestmentMove(input: z.input<typeof InvestmentMoveI
 
   const investment = await prisma.investment.findFirst({ where: { id: data.investmentId, userId } });
   if (!investment) throw new Error("Investimento não encontrado.");
+  await assertDateNotBeforeOpening(userId, data.accountId, data.competenceDate);
 
   const transaction = await prisma.transaction.create({
     data: {

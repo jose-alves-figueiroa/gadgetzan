@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+
+# backups (scripts/backup.sh) — real financial data, never committed
+/backups/
 /test-results/
 /playwright-report/
 /blob-report/
