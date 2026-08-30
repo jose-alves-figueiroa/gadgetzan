@@ -5,9 +5,10 @@ import { requireUserId } from "@/lib/server/session";
 import { calculateAccountBalance } from "@/lib/finance/accounts";
 import { todayDateString } from "@/lib/server/clock";
 import { formatBRL } from "@/lib/finance/money";
+import { Bank } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateAccountModal } from "@/components/finance/CreateAccountModal";
-import { UnderConstruction } from "@/components/layout/UnderConstruction";
 
 export default async function AccountsPage() {
   const accounts = await listAccounts();
@@ -19,7 +20,11 @@ export default async function AccountsPage() {
           <h1 className="text-title text-text">Contas</h1>
           <CreateAccountModal />
         </div>
-        <UnderConstruction title="Nenhuma conta cadastrada ainda" />
+        <EmptyState
+          icon={Bank}
+          title="Nenhuma conta cadastrada ainda"
+          description="Cadastre sua primeira conta para começar a registrar saldos e lançamentos."
+        />
       </div>
     );
   }

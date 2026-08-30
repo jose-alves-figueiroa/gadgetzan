@@ -59,7 +59,7 @@ export default async function TransactionDetailPage({ params }: PageProps<"/tran
       </Card>
 
       {transaction.purchaseId ? (
-        <Link href={`/purchases/${transaction.purchaseId}`} className="text-micro text-accent hover:underline">
+        <Link href={`/purchases/${transaction.purchaseId}`} className="text-micro text-accent-300 hover:underline">
           Ver parcelamento completo
         </Link>
       ) : null}

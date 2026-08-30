@@ -1,12 +1,13 @@
+import { ArrowsClockwise } from "@phosphor-icons/react/dist/ssr";
 import { listRecurrenceRules } from "@/lib/server/recurrences";
 import { listCategories } from "@/lib/server/categories";
 import { listAccounts } from "@/lib/server/accounts";
 import { listCards } from "@/lib/server/cards";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateRecurrenceModal } from "@/components/finance/CreateRecurrenceModal";
 import { RecurrenceRow } from "@/components/finance/RecurrenceRow";
-import { UnderConstruction } from "@/components/layout/UnderConstruction";
 
 export default async function RecurrencesPage() {
   const [rules, categories, accounts, cards] = await Promise.all([
@@ -58,7 +59,11 @@ export default async function RecurrencesPage() {
       </div>
 
       {rules.length === 0 ? (
-        <UnderConstruction title="Nenhuma recorrência cadastrada ainda" />
+        <EmptyState
+          icon={ArrowsClockwise}
+          title="Nenhuma recorrência cadastrada ainda"
+          description="Cadastre um salário ou uma despesa fixa para que ela apareça nas projeções."
+        />
       ) : (
         <div className="flex flex-col gap-xl">
           {[

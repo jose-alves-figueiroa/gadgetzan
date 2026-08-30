@@ -1,3 +1,4 @@
+import { Gauge } from "@phosphor-icons/react/dist/ssr";
 import { listLimitsWithUsage } from "@/lib/server/limits";
 import { listCategories } from "@/lib/server/categories";
 import { prisma } from "@/lib/db";
@@ -5,6 +6,7 @@ import { requireUserId } from "@/lib/server/session";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateLimitModal } from "@/components/finance/CreateLimitModal";
 
 const SEVERITY: Record<string, "accent" | "warn" | "neg"> = { ok: "accent", warning: "warn", exceeded: "neg" };
@@ -41,7 +43,11 @@ export default async function LimitsPage() {
       ) : null}
 
       {limits.length === 0 ? (
-        <p className="text-micro text-dim">Nenhum limite cadastrado ainda.</p>
+        <EmptyState
+          icon={Gauge}
+          title="Nenhum limite cadastrado ainda"
+          description="Crie um limite por categoria, cartão ou total mensal para acompanhar o quanto falta."
+        />
       ) : (
         <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
           {others.map((limit) => (

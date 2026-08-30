@@ -1,7 +1,9 @@
 import { listCategories } from "@/lib/server/categories";
+import { getSettings } from "@/lib/server/settings";
 import { Tag } from "@/components/ui/Tag";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
 import { CreateCategoryModal } from "@/components/finance/CreateCategoryModal";
+import { SettingsForm } from "@/components/finance/SettingsForm";
 
 const NATURE_LABEL: Record<string, string> = {
   FIXED: "Fixa",
@@ -11,12 +13,21 @@ const NATURE_LABEL: Record<string, string> = {
 };
 
 export default async function SettingsPage() {
-  const categories = await listCategories();
+  const [categories, settings] = await Promise.all([listCategories(), getSettings()]);
 
   return (
     <div className="flex flex-col gap-lg">
+      <h1 className="text-title text-text">Ajustes</h1>
+
+      <SettingsForm
+        monthStartDay={settings.monthStartDay}
+        projectionMonths={settings.projectionMonths}
+        cardUtilizationTarget={settings.cardUtilizationTarget}
+        hideAmounts={settings.hideAmounts}
+      />
+
       <div className="flex items-center justify-between">
-        <h1 className="text-title text-text">Ajustes</h1>
+        <span className="text-navhead uppercase text-neutral-700">Categorias</span>
         <CreateCategoryModal />
       </div>
 

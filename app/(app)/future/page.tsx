@@ -1,6 +1,7 @@
 import { getUpcomingMonths } from "@/lib/server/future";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
+import { LowConfidence } from "@/components/ui/LowConfidence";
 import { cn } from "@/lib/cn";
 
 const CONFIDENCE_COLOR: Record<"CONFIRMED" | "RECURRING" | "PROJECTED", string> = {
@@ -38,9 +39,7 @@ export default async function FuturePage() {
               <span className="tabular-money text-text">{formatBRL(m.projectedBalanceCents, { compact: true })}</span>
             </div>
             {index >= 4 ? <p className="text-micro text-dim">Confiança menor — mais distante no tempo.</p> : null}
-            {m.lowConfidence ? (
-              <p className="text-micro text-dim">Sem histórico suficiente para projetar despesas variáveis.</p>
-            ) : null}
+            {m.lowConfidence ? <LowConfidence /> : null}
           </Card>
         ))}
       </div>

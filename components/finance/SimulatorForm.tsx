@@ -49,7 +49,7 @@ export function SimulatorForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex max-w-[440px] flex-col gap-lg">
-      <div className="inline-flex w-fit items-center gap-xs rounded-sm border border-accent px-md py-xs text-micro text-accent">
+      <div className="inline-flex w-fit items-center gap-xs rounded-sm border border-accent px-md py-xs text-micro text-accent-300">
         Não gera lançamento
       </div>
 

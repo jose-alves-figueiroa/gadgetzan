@@ -22,15 +22,16 @@ interface AppShellProps {
   cards: CardOption[];
   categories: Option[];
   investments: Option[];
+  hideAmounts: boolean;
 }
 
-export function AppShell({ children, accounts, cards, categories, investments }: AppShellProps) {
+export function AppShell({ children, accounts, cards, categories, investments, hideAmounts }: AppShellProps) {
   const router = useRouter();
   const [newTransactionOpen, setNewTransactionOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" data-hide-amounts={hideAmounts}>
       <Sidebar
         onSimulate={() => router.push("/simulate")}
         drawerOpen={drawerOpen}

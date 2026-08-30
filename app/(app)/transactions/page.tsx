@@ -1,15 +1,25 @@
 import Link from "next/link";
+import { ListDashes } from "@phosphor-icons/react/dist/ssr";
 import { listTransactions } from "@/lib/server/transactions";
 import { formatBRL } from "@/lib/finance/money";
 import { isExpense, isIncome } from "@/lib/finance/transactions";
 import { Card } from "@/components/ui/Card";
-import { UnderConstruction } from "@/components/layout/UnderConstruction";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default async function TransactionsPage() {
   const transactions = await listTransactions();
 
   if (transactions.length === 0) {
-    return <UnderConstruction title="Nenhum lançamento ainda" />;
+    return (
+      <div className="flex flex-col gap-lg">
+        <h1 className="text-title text-text">Lançamentos</h1>
+        <EmptyState
+          icon={ListDashes}
+          title="Nenhum lançamento ainda"
+          description="Use o botão “+ Novo lançamento”, no topo da tela, para registrar o primeiro."
+        />
+      </div>
+    );
   }
 
   const byDay = new Map<string, typeof transactions>();

@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { CreditCard } from "@phosphor-icons/react/dist/ssr";
 import { listCards } from "@/lib/server/cards";
 import { listAccounts } from "@/lib/server/accounts";
 import { formatBRL } from "@/lib/finance/money";
 import { calculateAvailableLimit } from "@/lib/finance/invoice";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateCardModal } from "@/components/finance/CreateCardModal";
-import { UnderConstruction } from "@/components/layout/UnderConstruction";
 import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
 
@@ -22,7 +23,11 @@ export default async function CardsPage() {
       </div>
 
       {cards.length === 0 ? (
-        <UnderConstruction title="Nenhum cartão cadastrado ainda" />
+        <EmptyState
+          icon={CreditCard}
+          title="Nenhum cartão cadastrado ainda"
+          description="Cadastre um cartão para acompanhar limite, fatura e utilização."
+        />
       ) : (
         <div className="flex flex-col gap-md">
           {await Promise.all(

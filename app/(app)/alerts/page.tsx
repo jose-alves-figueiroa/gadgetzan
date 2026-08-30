@@ -34,7 +34,7 @@ export default async function AlertsPage() {
                   <span className="text-row text-text">{alert.title}</span>
                   <div className="flex gap-md">
                     {alert.actions.map((action) => (
-                      <Link key={action} href={ROUTE_BY_ACTION[action] ?? "/"} className="text-micro text-accent hover:underline">
+                      <Link key={action} href={ROUTE_BY_ACTION[action] ?? "/"} className="text-micro text-accent-300 hover:underline">
                         {action}
                       </Link>
                     ))}
@@ -59,7 +59,7 @@ export default async function AlertsPage() {
       ) : null}
 
       <p className="text-micro text-dim">
-        <Link href="/settings" className="text-accent hover:underline">
+        <Link href="/settings" className="text-accent-300 hover:underline">
           Ajustes
         </Link>{" "}
         — limites, metas e categorias que alimentam estes alertas.

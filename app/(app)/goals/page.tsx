@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { PiggyBank } from "@phosphor-icons/react/dist/ssr";
 import { listGoalsWithProgress } from "@/lib/server/goals";
 import { listAccounts } from "@/lib/server/accounts";
 import { listInvestments } from "@/lib/server/investments";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateGoalModal } from "@/components/finance/CreateGoalModal";
 
 export default async function GoalsPage() {
@@ -41,7 +43,18 @@ export default async function GoalsPage() {
       </Card>
 
       {goals.length === 0 ? (
-        <p className="text-micro text-dim">Nenhum porquinho ainda.</p>
+        <EmptyState
+          icon={PiggyBank}
+          title="Nenhum porquinho ainda"
+          description="Crie uma meta para reservar dinheiro com um prazo e acompanhar o ritmo."
+          action={
+            <CreateGoalModal
+              accounts={accounts.map((a) => ({ id: a.id, nickname: a.nickname }))}
+              investments={investments.map((i) => ({ id: i.id, name: i.name }))}
+              triggerLabel="+ Criar porquinho"
+            />
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-md lg:grid-cols-3">
           {goals.map((goal) => (

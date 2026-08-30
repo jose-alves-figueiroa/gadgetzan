@@ -164,3 +164,10 @@
   font-variant-numeric: tabular-nums;
   font-family: var(--font-mono);
 }
+
+/* Settings.hideAmounts (1aa) — blurs every monetary value app-wide without
+   touching lib/finance/money.ts, which must stay UI-independent. */
+[data-hide-amounts="true"] .tabular-money {
+  filter: blur(5px);
+  user-select: none;
+}

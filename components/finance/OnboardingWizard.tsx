@@ -181,7 +181,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
     <div className="mx-auto flex max-w-[440px] flex-col gap-lg">
       <div className="flex items-center gap-sm text-micro text-dim">
         {STEP_LABELS.map((label, i) => (
-          <span key={label} className={i === step ? "text-accent" : ""}>
+          <span key={label} className={i === step ? "text-accent-300" : ""}>
             {label}
             {i < STEP_LABELS.length - 1 ? " · " : ""}
           </span>
@@ -291,7 +291,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
             <button
               type="button"
               onClick={() => setFixedExpenses([...fixedExpenses, { description: "", amountCents: "", dayOfMonth: "5" }])}
-              className="text-micro text-accent"
+              className="text-micro text-accent-300"
             >
               + Adicionar outra
             </button>

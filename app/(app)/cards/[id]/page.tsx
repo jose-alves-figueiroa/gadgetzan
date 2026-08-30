@@ -61,7 +61,7 @@ export default async function CardDetailPage({
     <div className="flex flex-col gap-lg">
       <div className="flex items-center justify-between">
         <h1 className="text-title text-text">{card.name}</h1>
-        <Link href={`/cards/${id}/invoices`} className="text-micro text-accent hover:underline">
+        <Link href={`/cards/${id}/invoices`} className="text-micro text-accent-300 hover:underline">
           Faturas projetadas
         </Link>
       </div>

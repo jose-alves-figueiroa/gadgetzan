@@ -27,7 +27,7 @@ export default async function SimulationResultPage({ searchParams }: PageProps<"
     <div className="flex flex-col gap-lg">
       <div className="flex items-center justify-between">
         <h1 className="text-title text-text">Resultado da simulação</h1>
-        <Link href="/simulate" className="text-micro text-accent hover:underline">
+        <Link href="/simulate" className="text-micro text-accent-300 hover:underline">
           Ajustar simulação
         </Link>
       </div>

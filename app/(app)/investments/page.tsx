@@ -1,9 +1,10 @@
+import { ChartLineUp } from "@phosphor-icons/react/dist/ssr";
 import { listInvestments } from "@/lib/server/investments";
 import { listAccounts } from "@/lib/server/accounts";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { CreateInvestmentModal } from "@/components/finance/CreateInvestmentModal";
-import { UnderConstruction } from "@/components/layout/UnderConstruction";
 
 export default async function InvestmentsPage() {
   const [investments, accounts] = await Promise.all([listInvestments(), listAccounts()]);
@@ -16,7 +17,11 @@ export default async function InvestmentsPage() {
       </div>
 
       {investments.length === 0 ? (
-        <UnderConstruction title="Nenhum investimento cadastrado ainda" />
+        <EmptyState
+          icon={ChartLineUp}
+          title="Nenhum investimento cadastrado ainda"
+          description="Registre um investimento para acompanhar valor aplicado e atual."
+        />
       ) : (
         <div className="flex flex-col gap-md">
           {investments.map((investment) => (

@@ -8,6 +8,7 @@ import { listGoalsWithProgress } from "@/lib/server/goals";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
+import { LowConfidence } from "@/components/ui/LowConfidence";
 
 export default async function DashboardPage() {
   const accounts = await listAccounts();
@@ -86,9 +87,7 @@ export default async function DashboardPage() {
                 color={nextMonth.resultCents >= 0 ? "text-pos" : "text-neg"}
               />
             </div>
-            {nextMonth.lowConfidence ? (
-              <p className="text-micro text-dim">Sem histórico suficiente ainda para projetar despesas variáveis.</p>
-            ) : null}
+            {nextMonth.lowConfidence ? <LowConfidence /> : null}
             <div className="flex items-center justify-between border-t border-line pt-sm text-row">
               <span className="text-dim">Saldo projetado</span>
               <span className="tabular-money text-text">{formatBRL(nextMonth.projectedBalanceCents, { compact: true })}</span>
