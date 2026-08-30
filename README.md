@@ -62,6 +62,8 @@ Aplicação de finanças pessoais, self-hosted e single-user. Ver `CLAUDE.md` e 
 
 Para atualizar uma instância existente: `git pull`, depois `docker compose up -d --build` de novo — o passo 3 só roda na primeira vez.
 
+> **Atualizando de uma instância anterior ao Stage 7:** renomeie `AUTH_URL` para `NEXTAUTH_URL` no seu `.env` antes de subir de novo. O next-auth v4 exige exatamente esse nome — `AUTH_URL` é ignorado silenciosamente, o que quebra o login sem erro visível.
+
 ## Backup e restore
 
 `scripts/backup.sh` faz `pg_dump` do serviço `db` em execução via `docker compose exec`, comprime e salva em `./backups/` (não versionado — são dados financeiros reais). Mantém os últimos 30 dias por padrão (`RETENTION_DAYS`).
