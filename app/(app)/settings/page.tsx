@@ -1,5 +1,6 @@
 import { listCategories } from "@/lib/server/categories";
 import { getSettings } from "@/lib/server/settings";
+import { resolveIcon } from "@/lib/icons";
 import { Tag } from "@/components/ui/Tag";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
 import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
@@ -42,26 +43,34 @@ export default async function SettingsPage() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {categories.map((category) => (
-            <HighlightOnCreate key={category.id} id={category.id}>
-              <TableRow>
-                <TableCell className="text-text">{category.name}</TableCell>
-                <TableCell>
-                  <Tag variant="neutral">{NATURE_LABEL[category.nature]}</Tag>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end">
-                    <CategoryActions
-                      id={category.id}
-                      name={category.name}
-                      nature={category.nature}
-                      icon={category.icon}
-                    />
-                  </div>
-                </TableCell>
-              </TableRow>
-            </HighlightOnCreate>
-          ))}
+          {categories.map((category) => {
+            const CategoryIcon = resolveIcon(category.icon);
+            return (
+              <HighlightOnCreate key={category.id} id={category.id}>
+                <TableRow edgeFade={false}>
+                  <TableCell className="text-text">
+                    <div className="flex items-center gap-sm">
+                      <CategoryIcon className="text-dim" />
+                      {category.name}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Tag variant="neutral">{NATURE_LABEL[category.nature]}</Tag>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <CategoryActions
+                        id={category.id}
+                        name={category.name}
+                        nature={category.nature}
+                        icon={category.icon}
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </HighlightOnCreate>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

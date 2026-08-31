@@ -17,11 +17,16 @@ export function TableBody(props: HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody {...props} />;
 }
 
-export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
+export function TableRow({
+  className,
+  edgeFade = true,
+  ...props
+}: HTMLAttributes<HTMLTableRowElement> & { edgeFade?: boolean }) {
   return (
     <tr
       className={cn(
-        "border-b border-line/60 transition-colors hover:bg-text/4 [mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)]",
+        "border-b border-line/60 transition-colors hover:bg-text/4",
+        edgeFade && "[mask-image:linear-gradient(to_right,transparent,black_48px,black_calc(100%-48px),transparent)]",
         className
       )}
       {...props}

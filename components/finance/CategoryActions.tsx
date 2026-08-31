@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { updateCategory, archiveCategory } from "@/lib/server/categories";
+import { resolveIcon } from "@/lib/icons";
 
 const NATURE_OPTIONS = [
   { value: "FIXED", label: "Fixa" },
@@ -26,9 +27,11 @@ export function CategoryActions({ id, name, nature: initialNature, icon }: Categ
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [nature, setNature] = useState(initialNature);
+  const [iconName, setIconName] = useState(icon);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [busy, setBusy] = useState(false);
+  const IconPreview = resolveIcon(iconName);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,7 +43,7 @@ export function CategoryActions({ id, name, nature: initialNature, icon }: Categ
       await updateCategory(id, {
         name: String(formData.get("name") ?? ""),
         nature,
-        icon: String(formData.get("icon") ?? "tag"),
+        icon: iconName,
       });
       setOpen(false);
       router.refresh();
@@ -78,7 +81,18 @@ export function CategoryActions({ id, name, nature: initialNature, icon }: Categ
               onChange={(v) => setNature(v as typeof nature)}
             />
           </div>
-          <Field name="icon" label="Ícone (Phosphor)" defaultValue={icon} />
+          <div className="flex items-end gap-md">
+            <Field
+              name="icon"
+              label="Ícone (Phosphor)"
+              value={iconName}
+              onChange={(e) => setIconName(e.target.value)}
+              className="flex-1"
+            />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line text-text">
+              <IconPreview />
+            </div>
+          </div>
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
             {saving ? "Salvando…" : "Salvar"}

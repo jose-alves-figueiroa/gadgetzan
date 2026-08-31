@@ -7,6 +7,7 @@ import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createCategory } from "@/lib/server/categories";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
+import { resolveIcon } from "@/lib/icons";
 
 const NATURE_OPTIONS = [
   { value: "FIXED", label: "Fixa" },
@@ -18,8 +19,10 @@ const NATURE_OPTIONS = [
 export function CreateCategoryModal({ triggerLabel = "Nova categoria" }: { triggerLabel?: string }) {
   const [open, setOpen] = useState(false);
   const [nature, setNature] = useState<(typeof NATURE_OPTIONS)[number]["value"]>("VARIABLE");
+  const [icon, setIcon] = useState("tag");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const IconPreview = resolveIcon(icon);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,11 +36,12 @@ export function CreateCategoryModal({ triggerLabel = "Nova categoria" }: { trigg
       const category = await createCategory({
         name: String(formData.get("name") ?? ""),
         nature,
-        icon: String(formData.get("icon") ?? "tag"),
+        icon,
         limitAmountCents: limitInput || null,
       });
       markCreated(category.id);
       setOpen(false);
+      setIcon("tag");
       (event.target as HTMLFormElement).reset();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar categoria.");
@@ -60,7 +64,19 @@ export function CreateCategoryModal({ triggerLabel = "Nova categoria" }: { trigg
               onChange={(v) => setNature(v as typeof nature)}
             />
           </div>
-          <Field name="icon" label="Ícone (Phosphor)" placeholder="tag" defaultValue="tag" />
+          <div className="flex items-end gap-md">
+            <Field
+              name="icon"
+              label="Ícone (Phosphor)"
+              placeholder="tag"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              className="flex-1"
+            />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line text-text">
+              <IconPreview />
+            </div>
+          </div>
           <Field name="limitAmountCents" label="Limite (opcional)" placeholder="0,00" />
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
