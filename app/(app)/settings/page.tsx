@@ -4,6 +4,7 @@ import { Tag } from "@/components/ui/Tag";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
 import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateCategoryModal } from "@/components/finance/CreateCategoryModal";
+import { CategoryActions } from "@/components/finance/CategoryActions";
 import { SettingsForm } from "@/components/finance/SettingsForm";
 
 const NATURE_LABEL: Record<string, string> = {
@@ -37,6 +38,7 @@ export default async function SettingsPage() {
           <TableRow>
             <TableHeaderCell>Nome</TableHeaderCell>
             <TableHeaderCell>Natureza</TableHeaderCell>
+            <TableHeaderCell className="text-right">Ações</TableHeaderCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -46,6 +48,16 @@ export default async function SettingsPage() {
                 <TableCell className="text-text">{category.name}</TableCell>
                 <TableCell>
                   <Tag variant="neutral">{NATURE_LABEL[category.nature]}</Tag>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <CategoryActions
+                      id={category.id}
+                      name={category.name}
+                      nature={category.nature}
+                      icon={category.icon}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             </HighlightOnCreate>

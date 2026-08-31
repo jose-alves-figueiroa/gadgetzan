@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
+import { toPrismaDate, todayDateString } from "./clock";
 import { DEFAULT_CATEGORIES } from "./default-categories";
 
 const CategoryInput = z.object({
@@ -37,6 +38,33 @@ export async function createCategory(input: z.input<typeof CategoryInput>) {
   revalidatePath("/settings");
   revalidatePath("/", "layout");
   return category;
+}
+
+const CategoryUpdateInput = z.object({
+  name: z.string().min(1, "Nome obrigatório."),
+  nature: z.enum(["FIXED", "VARIABLE", "COMMITMENT", "INCOME"]),
+  icon: z.string().min(1, "Ícone obrigatório."),
+});
+
+export async function updateCategory(id: string, input: z.input<typeof CategoryUpdateInput>) {
+  const userId = await requireUserId();
+  const data = CategoryUpdateInput.parse(input);
+
+  await prisma.category.updateMany({
+    where: { id, userId },
+    data: { name: data.name, nature: data.nature, icon: data.icon },
+  });
+
+  revalidatePath("/settings");
+  revalidatePath("/", "layout");
+}
+
+export async function archiveCategory(id: string) {
+  const userId = await requireUserId();
+  await prisma.category.updateMany({ where: { id, userId }, data: { archivedAt: toPrismaDate(todayDateString()) } });
+
+  revalidatePath("/settings");
+  revalidatePath("/", "layout");
 }
 
 export async function listCategories() {
