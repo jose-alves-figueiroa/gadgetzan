@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, cloneElement, isValidElement, useEffect, useState, type ReactElement } from "react";
+import { cloneElement, isValidElement, useEffect, useState, type ReactElement } from "react";
 
 const STORAGE_KEY = "gz:last-created";
 
@@ -15,7 +15,7 @@ export function markCreated(id: string) {
 
 interface HighlightOnCreateProps {
   id: string;
-  children: ReactElement<{ className?: string }>;
+  children: ReactElement<{ className?: string }> | ReactElement<{ className?: string }>[];
 }
 
 /**
@@ -46,7 +46,10 @@ export function HighlightOnCreate({ id, children }: HighlightOnCreateProps) {
     return () => clearTimeout(timeout);
   }, [id]);
 
-  const child = Children.only(children);
+  // Not React.Children.only: a client-component child crossing the Server→Client
+  // boundary (e.g. RecurrenceRow) can arrive here wrapped in a 1-item array
+  // instead of the bare element, which makes Children.only throw.
+  const child = Array.isArray(children) ? children[0] : children;
   if (!isValidElement(child)) return children;
 
   const existingClassName = (child.props as { className?: string }).className ?? "";
