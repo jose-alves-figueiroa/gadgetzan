@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { centsAny } from "@/lib/validation/money";
 import { requireUserId } from "./session";
-import { toPrismaDate } from "./clock";
+import { toPrismaDate, todayDateString } from "./clock";
 
 const AccountInput = z.object({
   institution: z.string().min(1, "Instituição obrigatória."),
@@ -43,4 +43,12 @@ export async function listAccounts() {
     where: { userId, archivedAt: null },
     orderBy: { nickname: "asc" },
   });
+}
+
+export async function archiveAccount(id: string) {
+  const userId = await requireUserId();
+  await prisma.account.updateMany({ where: { id, userId }, data: { archivedAt: toPrismaDate(todayDateString()) } });
+
+  revalidatePath("/accounts");
+  revalidatePath("/", "layout");
 }

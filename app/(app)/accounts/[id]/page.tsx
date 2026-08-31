@@ -7,6 +7,7 @@ import { todayDateString } from "@/lib/server/clock";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
+import { AccountActions } from "@/components/finance/AccountActions";
 
 export default async function AccountDetailPage({ params }: PageProps<"/accounts/[id]">) {
   const { id } = await params;
@@ -47,7 +48,10 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
           <h1 className="text-title text-text">{account.nickname}</h1>
           <span className="text-micro text-dim">{account.institution}</span>
         </div>
-        <span className="tabular-money text-kpi-lg text-text">{formatBRL(balance)}</span>
+        <div className="flex items-center gap-md">
+          <span className="tabular-money text-kpi-lg text-text">{formatBRL(balance)}</span>
+          <AccountActions id={account.id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-md md:grid-cols-3">
