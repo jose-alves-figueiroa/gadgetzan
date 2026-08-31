@@ -137,7 +137,7 @@ model Category {
 }
 ```
 
-Default categories suggested during onboarding (the user can edit them) — these are real, user-facing category names and stay in pt-BR: Moradia (FIXED), Alimentação (VARIABLE), Transporte (VARIABLE), Lazer (VARIABLE), Saúde (VARIABLE), Educação (FIXED), Ajuda familiar (COMMITMENT), Igreja e doações (COMMITMENT), Assinaturas (FIXED), Outros (VARIABLE), Salário (INCOME), Outras receitas (INCOME).
+Default categories suggested during onboarding (the user can edit them) — these are real, user-facing category names and stay in pt-BR: Ajuda familiar (COMMITMENT), Alimentação (VARIABLE), Assinaturas (FIXED), Bares e Restaurantes (VARIABLE), Combustível (VARIABLE), Compras Online (VARIABLE), Contas (FIXED), Cuidados Pessoais (VARIABLE), Educação (FIXED), Feira (VARIABLE), Igreja e doações (COMMITMENT), Lazer (VARIABLE), Moradia (FIXED), Outras receitas (INCOME), Outros (VARIABLE), Salário (INCOME), Saúde (VARIABLE), Transporte (VARIABLE), Viagem (VARIABLE). See `lib/server/default-categories.ts` for the exact list (name, nature, icon).
 
 ### Transaction
 
