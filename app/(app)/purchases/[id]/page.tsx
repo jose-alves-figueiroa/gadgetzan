@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPurchase } from "@/lib/server/purchases";
+import { listAccounts } from "@/lib/server/accounts";
 import { todayDateString } from "@/lib/server/clock";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
 import { Tag } from "@/components/ui/Tag";
+import { PayPurchaseRemainingModal } from "@/components/finance/PayPurchaseRemainingModal";
 
 const VISIBLE_INSTALLMENTS = 6;
 
@@ -16,6 +18,10 @@ export default async function PurchaseDetailPage({ params }: PageProps<"/purchas
 
   const today = todayDateString();
   const paidCount = purchase.transactions.filter((t) => t.invoice?.paidAt).length;
+  const remainingCents = purchase.transactions
+    .filter((t) => !t.invoice?.paidAt)
+    .reduce((s, t) => s + t.amountCents, 0);
+  const accounts = remainingCents > 0 ? await listAccounts() : [];
 
   const rows = purchase.transactions.map((t) => {
     const status: "paga" | "na fatura" | "futura" = t.invoice?.paidAt
@@ -53,6 +59,10 @@ export default async function PurchaseDetailPage({ params }: PageProps<"/purchas
         </div>
         <Bar percent={(paidCount / purchase.installments) * 100} />
       </Card>
+
+      {remainingCents > 0 ? (
+        <PayPurchaseRemainingModal purchaseId={purchase.id} remainingCents={remainingCents} accounts={accounts} />
+      ) : null}
 
       <Card className="gap-xs">
         {visible.map((t) => (

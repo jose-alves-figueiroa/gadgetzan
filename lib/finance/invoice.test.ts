@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assignInvoice, calculateAvailableLimit, calculateOutstandingBalance, closingForReferenceMonth } from "./invoice";
+import {
+  assignInvoice,
+  calculateAvailableLimit,
+  calculateOutstandingBalance,
+  closingForReferenceMonth,
+  groupRemainingInstallmentsByInvoice,
+} from "./invoice";
 
 describe("R3 — invoice assignment", () => {
   it("purchase on 10/08 with closingDay=12 lands on the August invoice, due 20/08", () => {
@@ -67,5 +73,46 @@ describe("R3 — partial payment leaves a visible outstanding balance", () => {
 
   it("an unpaid invoice is outstanding for its full total", () => {
     expect(calculateOutstandingBalance(1_000_00, null)).toBe(1_000_00);
+  });
+});
+
+describe("R4 — anticipating a purchase's remaining installments", () => {
+  it("groups unpaid installments by invoice, one entry per future month", () => {
+    const result = groupRemainingInstallmentsByInvoice([
+      { invoiceId: "aug", amountCents: 33_34, invoicePaid: false },
+      { invoiceId: "sep", amountCents: 33_33, invoicePaid: false },
+      { invoiceId: "oct", amountCents: 33_33, invoicePaid: false },
+    ]);
+    expect(result).toEqual([
+      { invoiceId: "aug", amountCents: 33_34 },
+      { invoiceId: "sep", amountCents: 33_33 },
+      { invoiceId: "oct", amountCents: 33_33 },
+    ]);
+  });
+
+  it("excludes installments whose invoice is already fully paid", () => {
+    const result = groupRemainingInstallmentsByInvoice([
+      { invoiceId: "aug", amountCents: 33_34, invoicePaid: true },
+      { invoiceId: "sep", amountCents: 33_33, invoicePaid: false },
+    ]);
+    expect(result).toEqual([{ invoiceId: "sep", amountCents: 33_33 }]);
+  });
+
+  it("excludes installments with no invoice at all", () => {
+    const result = groupRemainingInstallmentsByInvoice([{ invoiceId: null, amountCents: 33_34, invoicePaid: false }]);
+    expect(result).toEqual([]);
+  });
+
+  it("sums multiple installments landing on the same invoice", () => {
+    const result = groupRemainingInstallmentsByInvoice([
+      { invoiceId: "aug", amountCents: 10_00, invoicePaid: false },
+      { invoiceId: "aug", amountCents: 20_00, invoicePaid: false },
+    ]);
+    expect(result).toEqual([{ invoiceId: "aug", amountCents: 30_00 }]);
+  });
+
+  it("nothing left to anticipate once every installment's invoice is paid", () => {
+    const result = groupRemainingInstallmentsByInvoice([{ invoiceId: "aug", amountCents: 33_34, invoicePaid: true }]);
+    expect(result).toEqual([]);
   });
 });

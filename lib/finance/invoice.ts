@@ -68,6 +68,29 @@ export function calculateOutstandingBalance(invoiceTotalCents: number, paidCents
   return Math.max(0, invoiceTotalCents - (paidCents ?? 0));
 }
 
+export interface UnpaidInstallment {
+  invoiceId: string | null;
+  amountCents: number;
+  invoicePaid: boolean;
+}
+
+/**
+ * Groups a purchase's not-yet-paid installments by invoice, for settling
+ * them all today instead of waiting for each invoice's due date (R4/R3).
+ * Installments on an already-paid invoice, or with no invoice at all, are
+ * excluded — there's nothing left to anticipate for them.
+ */
+export function groupRemainingInstallmentsByInvoice(
+  installments: UnpaidInstallment[]
+): { invoiceId: string; amountCents: number }[] {
+  const totals = new Map<string, number>();
+  for (const installment of installments) {
+    if (!installment.invoiceId || installment.invoicePaid) continue;
+    totals.set(installment.invoiceId, (totals.get(installment.invoiceId) ?? 0) + installment.amountCents);
+  }
+  return [...totals.entries()].map(([invoiceId, amountCents]) => ({ invoiceId, amountCents }));
+}
+
 export function calculateAvailableLimit({
   limitCents,
   unpaidInvoiceTotalCents,
