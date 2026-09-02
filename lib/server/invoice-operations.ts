@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
 import { toPrismaDate, todayDateString } from "./clock";
+import { adjustInvoiceCore, applyInvoicePaymentCore } from "./transaction-core";
 
 const PayInvoiceInput = z.object({
   invoiceId: z.string().min(1),
@@ -19,37 +20,7 @@ export async function payInvoice(input: z.input<typeof PayInvoiceInput>) {
   const userId = await requireUserId();
   const data = PayInvoiceInput.parse(input);
 
-  const invoice = await prisma.invoice.findFirst({ where: { id: data.invoiceId, userId } });
-  if (!invoice) throw new Error("Fatura não encontrada.");
-
-  const transactionsAgg = await prisma.transaction.aggregate({
-    where: { invoiceId: invoice.id },
-    _sum: { amountCents: true },
-  });
-  const invoiceTotalCents = invoice.manualTotalCents ?? transactionsAgg._sum.amountCents ?? 0;
-  const paidSoFarCents = (invoice.paidCents ?? 0) + data.paidCents;
-
-  await prisma.$transaction([
-    prisma.transaction.create({
-      data: {
-        userId,
-        kind: "CARD_PAYMENT",
-        description: "Pagamento de fatura",
-        amountCents: data.paidCents,
-        competenceDate: toPrismaDate(data.paidDate),
-        accountId: data.accountId,
-        invoiceId: invoice.id,
-        method: "ACCOUNT",
-      },
-    }),
-    prisma.invoice.update({
-      where: { id: invoice.id },
-      data: {
-        paidCents: paidSoFarCents,
-        paidAt: paidSoFarCents >= invoiceTotalCents ? toPrismaDate(data.paidDate) : null,
-      },
-    }),
-  ]);
+  await applyInvoicePaymentCore(userId, data);
 
   revalidatePath("/cards");
   revalidatePath("/accounts");
@@ -67,21 +38,7 @@ export async function adjustInvoice(input: z.input<typeof AdjustInvoiceInput>) {
   const userId = await requireUserId();
   const data = AdjustInvoiceInput.parse(input);
 
-  const invoice = await prisma.invoice.findFirst({ where: { id: data.invoiceId, userId }, include: { card: true } });
-  if (!invoice) throw new Error("Fatura não encontrada.");
-
-  await prisma.transaction.create({
-    data: {
-      userId,
-      kind: "CARD_ADJUSTMENT",
-      description: data.reason,
-      amountCents: data.amountCents,
-      competenceDate: toPrismaDate(todayDateString()),
-      cardId: invoice.cardId,
-      invoiceId: invoice.id,
-      method: "CARD",
-    },
-  });
+  await adjustInvoiceCore(userId, { ...data, competenceDate: todayDateString() });
 
   revalidatePath("/cards");
   revalidatePath("/");

@@ -265,3 +265,26 @@ First access, in order — every step is skippable except the 1st:
 6. Optional: old open invoices (`2e`), investments (`2c`), goals, limits.
 
 While there are fewer than 3 closed months, projection screens show the low-confidence state (R8) instead of made-up numbers.
+
+---
+
+## R15 — CSV batch import
+
+Historical data can be imported in bulk from CSV files (one file per entity kind — despesas, receitas, transferencias, investimentos, porquinhos, faturas). See `docs/import-runbook.md` for the exact column format handed to whoever prepares the files.
+
+**Two phases, never one:**
+
+1. **Validate** (read-only) — parses every uploaded file, resolves every name (`categoria`, `conta`, `cartao`, `investimento`, `porquinho`) against existing records — **never auto-created**, same invariant as manual entry — and returns a per-row report (ok/warning/error) plus batch-level errors. Nothing is written.
+2. **Commit** — re-validates (never trusts a stale client report), then creates rows in a fixed order: `despesas → receitas → transferencias → investimentos → porquinhos → faturas`, skipping any row flagged `warning`. Within `faturas`, `ajuste` rows commit before `pagamento` rows for the same invoice — a payment's total must already reflect same-invoice adjustments (R3).
+
+**Tagging.** Every `Transaction` created by an import gets `importBatchId` (groups it under one `ImportBatch` — `01-data-model.md`) and `externalId` (required on every source row, used for dedup). A card purchase with `parcela_atual`/`total_parcelas` expands to one `externalId` per installment (`${id}#1`, `${id}#2`, ...).
+
+**In-progress installment purchases.** A row can express a card purchase that's already partway through its installments (`parcela_atual`/`total_parcelas`, e.g. 2 of 4) instead of the full purchase from installment 1. The importer seeds **only** the remaining installments (current through last) as plain `EXPENSE` transactions on the card, dated one invoice-month apart — no `Purchase` row is created (the earlier installments' real amounts and the original purchase date aren't known, and inventing them would be guessing). This means these imported purchases don't get the `/purchases/[id]` "N de M paga" grouping, but the money that matters — future invoice totals and available card limit (R3) — is correct, because the not-yet-elapsed installments exist as real rows.
+
+**Historical invoice payments.** A card invoice that was already paid off in real life must have a matching `faturas.csv` row with `tipo=pagamento`, or `calculateAvailableLimit` (R3) will treat it as unpaid forever and permanently understate available limit. The importer resolves/creates the `Invoice` for the given card + reference month the same way manual entry does (`findOrCreateInvoice`), then applies the payment exactly like paying a regular invoice — no special "past invoice" path, no `manualTotalCents` shortcut (that field is reserved for months genuinely absent from the import).
+
+**Account window.** Before allowing a commit, every account referenced in the files is checked against its own `openingDate`: if any row predates it, the whole commit is blocked with one aggregated message per account (not one per row) telling the user to fix the account's opening date/balance first. Without this, backdated history behind a "today" opening balance would silently corrupt account balance, net worth, and free-to-spend (R12) with no error ever surfacing.
+
+**Dedup.** `externalId` collisions default to **skip** — that row (or, for an installment purchase, that whole group) is left out of the commit with a warning, the rest of the batch proceeds normally. This is what makes re-uploading a corrected file after fixing a few rows safe.
+
+**Undo — recompute, never reverse a delta.** Deletes every `Transaction` tagged with the batch, then for every `Invoice` that lost a transaction, recomputes `paidCents`/`paidAt` from whatever's left (never subtracts a stored delta) — an invoice left with zero transactions and no `manualTotalCents` is deleted outright. Same for `Purchase`. Undo is idempotent (`ImportBatch.status` guards against running it twice) and is the accepted compensating action for a commit that stops partway through a bad row — there's no giant all-or-nothing transaction wrapping an entire batch.

@@ -155,7 +155,19 @@ Category table (name with icon, nature, limit, spend this month) + creation (`2d
 - **New category** `2d`: name, **nature** (fixed / variable / commitment), icon, optional limit.
 - **Invoice** `2e`: there is no invoice creation form. Three operations: **pay** (computed amount, amount paid, account, date, full/partial), **adjust** (difference + reason, entered as its own transaction), **enter a past invoice** (month + total, for someone starting to use the app with open invoices).
 
-## 28. States — mockup `1ab`
+## 28. Import batches — `/imports` — no mockup
+
+List of `ImportBatch` records: label, date, status (Confirmado/Desfeito), row/created counts, link to detail. Empty state prompts "Nova importação" (`/imports/new`). No mockup exists — the exact visual (list vs. table, where in the nav it lives) is a judgment call flagged in `07-open-decisions.md`, not a resolved design.
+
+## 29. New import — `/imports/new` — no mockup
+
+Batch label, one optional file input per entity kind (see `docs/import-runbook.md` for the column format), "Validar" (runs the read-only validation pass and shows a per-row report — ok/warning/error counts, batch-level account-window errors, per-row messages), then "Confirmar importação" once there are zero errors.
+
+## 30. Import batch detail — `/imports/[batchId]` — no mockup
+
+Label, date, status, row/created counts, table of the transactions the batch created. Actions: **Baixar CSV** (exports the created transactions back to CSV for reconciliation against the source) and **Desfazer** (undo — with confirmation, since it deletes everything the batch created).
+
+## 31. States — mockup `1ab`
 
 Four states every data screen needs:
 

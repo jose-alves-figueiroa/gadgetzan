@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flask, GearSix } from "@phosphor-icons/react/dist/ssr";
+import { Flask, GearSix, UploadSimple } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/cn";
 import { navGroups } from "./nav";
 
@@ -65,6 +65,14 @@ export function Sidebar({ onSimulate, drawerOpen, onCloseDrawer }: SidebarProps)
           <Flask size={15} />
           Simular compra
         </button>
+        <Link
+          href="/imports"
+          onClick={onCloseDrawer}
+          className="flex items-center gap-sm rounded-md px-md py-sm text-row text-muted transition-colors max-md:min-h-11 hover:text-text"
+        >
+          <UploadSimple size={15} />
+          Importações
+        </Link>
         <Link
           href="/settings"
           onClick={onCloseDrawer}

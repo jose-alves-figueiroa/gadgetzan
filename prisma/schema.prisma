@@ -71,6 +71,11 @@ enum InvestmentKind {
   OTHER
 }
 
+enum ImportBatchStatus {
+  COMMITTED
+  UNDONE
+}
+
 // ---------- User / Settings ----------
 
 model User {
@@ -92,6 +97,7 @@ model User {
   goals           Goal[]
   limits          Limit[]
   alertStates     AlertState[]
+  importBatches   ImportBatch[]
 }
 
 model Settings {
@@ -230,15 +236,17 @@ model Transaction {
   isFixed Boolean @default(false)
   note    String?
 
-  // reserved for the (out-of-scope-for-now) OFX/CSV importer — see docs/agents/07-open-decisions.md
-  externalId    String? @unique
+  // dedup/batch-tracking for the CSV importer — see docs/agents/07-open-decisions.md D7
+  externalId    String?      @unique
   importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])
 
   createdAt DateTime @default(now())
 
   @@index([userId, competenceDate])
   @@index([userId, categoryId, competenceDate])
   @@index([invoiceId])
+  @@index([importBatchId])
 }
 
 // ---------- Purchase (installment purchase) ----------
@@ -282,6 +290,26 @@ model Invoice {
 
   @@unique([cardId, referenceMonth])
   @@index([userId])
+}
+
+// ---------- ImportBatch ----------
+
+model ImportBatch {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  label        String
+  status       ImportBatchStatus @default(COMMITTED)
+  // raw uploaded CSV text per file kind, e.g. { "despesas": "...", "faturas": "..." } — audit/debug only
+  sourceFiles  Json
+  rowCount     Int
+  createdCount Int
+  createdAt    DateTime          @default(now())
+  undoneAt     DateTime?
+
+  transactions Transaction[]
+
+  @@index([userId, createdAt])
 }
 
 // ---------- RecurrenceRule ----------

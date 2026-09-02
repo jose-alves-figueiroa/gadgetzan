@@ -58,7 +58,12 @@ export async function payPurchaseRemaining(input: z.input<typeof PayRemainingInp
 
   const invoiceIds = remaining.map((r) => r.invoiceId);
   const [invoiceTotals, invoices] = await Promise.all([
-    prisma.transaction.groupBy({ by: ["invoiceId"], where: { invoiceId: { in: invoiceIds } }, _sum: { amountCents: true } }),
+    // EXPENSE/CARD_ADJUSTMENT only — a CARD_PAYMENT tied to the same invoice must never count into its own total.
+    prisma.transaction.groupBy({
+      by: ["invoiceId"],
+      where: { invoiceId: { in: invoiceIds }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
+      _sum: { amountCents: true },
+    }),
     prisma.invoice.findMany({ where: { id: { in: invoiceIds } } }),
   ]);
   const invoiceTotalMap = new Map(invoiceTotals.map((r) => [r.invoiceId, r._sum.amountCents ?? 0]));

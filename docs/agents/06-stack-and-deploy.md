@@ -51,17 +51,21 @@ app/
     simulate/result/page.tsx
     settings/page.tsx
     onboarding/page.tsx
+    imports/page.tsx
+    imports/new/page.tsx
+    imports/[batchId]/page.tsx
+    imports/[batchId]/export/route.ts
   api/auth/[...nextauth]/route.ts
 components/
   ui/            # Button, Field, Segmented, Card, Tag, Table, Modal, Bar, Donut, Tooltip
-  finance/       # KpiRow, MonthPicker, CategoryDonut, LimitBar, GoalCard, InvoiceTable, AlertCard
+  finance/       # KpiRow, MonthPicker, CategoryDonut, LimitBar, GoalCard, InvoiceTable, AlertCard, ImportWizard
   layout/        # Sidebar, Topbar, AppShell
 lib/
   finance/
     money.ts          # cents, pt-BR parsing and formatting
     period.ts         # financial month (R5)
     invoice.ts        # invoice assignment and total (R3)
-    installments.ts   # installment splitting (R4)
+    installments.ts   # installment splitting (R4), remaining-installment plan (R15)
     projection.ts     # projection and projected balance (R7, R8)
     savings.ts        # savings rate (R2)
     goals.ts          # goal pace (R9)
@@ -69,6 +73,18 @@ lib/
     networth.ts       # net worth (R11)
     simulate.ts       # pure simulation (R10)
     alerts.ts         # triggers (R13)
+    csv.ts            # CSV parsing (R15), no dependency
+    import.ts         # per-file row-shape validation (R15)
+  server/
+    transaction-core.ts   # Prisma-touching write primitives shared by Server Actions and the importer
+    imports/
+      resolve.ts           # name → id lookups
+      validate.ts          # Phase A — read-only
+      commit.ts            # Phase B — writes, fixed cross-file order
+      undo.ts               # recompute-from-remaining-state
+      export.ts             # batch → CSV for reconciliation
+      queries.ts             # listImportBatches, getImportBatch
+      actions.ts              # "use server" — thin wrappers
   auth.ts
   db.ts
 prisma/schema.prisma

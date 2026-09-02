@@ -5,19 +5,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
-import { assignInvoice } from "@/lib/finance/invoice";
-import { buildInstallmentPlan } from "@/lib/finance/installments";
-import { findOrCreateInvoice } from "./invoices";
+import {
+  assertDateNotBeforeOpening,
+  createExpenseOrIncomeCore,
+  createInvestmentMoveCore,
+  createTransferCore,
+} from "./transaction-core";
 import { toPrismaDate } from "./clock";
-
-/** A transaction can't predate the account's own opening balance (05 § Form validations). */
-async function assertDateNotBeforeOpening(userId: string, accountId: string, competenceDate: string) {
-  const account = await prisma.account.findFirst({ where: { id: accountId, userId } });
-  if (!account) throw new Error("Conta não encontrada.");
-  if (competenceDate < account.openingDate.toISOString().slice(0, 10)) {
-    throw new Error("A data não pode ser anterior ao saldo inicial da conta.");
-  }
-}
 
 const NewTransactionInput = z
   .object({
@@ -43,90 +37,12 @@ export type NewTransactionData = z.input<typeof NewTransactionInput>;
 export async function createTransaction(input: NewTransactionData) {
   const userId = await requireUserId();
   const data = NewTransactionInput.parse(input);
-  let created;
 
-  if (data.method === "CARD") {
-    const card = await prisma.card.findFirst({ where: { id: data.cardId!, userId } });
-    if (!card) throw new Error("Cartão não encontrado.");
-
-    if (data.installments > 1) {
-      const plan = buildInstallmentPlan(
-        data.amountCents,
-        data.installments,
-        data.competenceDate,
-        card.closingDay,
-        card.dueDay
-      );
-
-      const purchase = await prisma.purchase.create({
-        data: {
-          userId,
-          description: data.description,
-          totalCents: data.amountCents,
-          installments: data.installments,
-          cardId: card.id,
-          categoryId: data.categoryId,
-          purchaseDate: toPrismaDate(data.competenceDate),
-        },
-      });
-
-      for (const item of plan) {
-        const invoice = await findOrCreateInvoice(userId, card, item.referenceMonth, item.dueDate);
-        const tx = await prisma.transaction.create({
-          data: {
-            userId,
-            kind: "EXPENSE",
-            description: `${data.description} (${item.installmentNo}/${data.installments})`,
-            amountCents: item.amountCents,
-            competenceDate: toPrismaDate(data.competenceDate),
-            categoryId: data.categoryId,
-            method: "CARD",
-            cardId: card.id,
-            invoiceId: invoice.id,
-            purchaseId: purchase.id,
-            installmentNo: item.installmentNo,
-            isFixed: data.isFixed,
-            note: data.note ?? null,
-          },
-        });
-        if (item.installmentNo === 1) created = tx;
-      }
-    } else {
-      const assignment = assignInvoice(data.competenceDate, card.closingDay, card.dueDay);
-      const invoice = await findOrCreateInvoice(userId, card, assignment.referenceMonth, assignment.dueDate);
-      created = await prisma.transaction.create({
-        data: {
-          userId,
-          kind: data.kind,
-          description: data.description,
-          amountCents: data.amountCents,
-          competenceDate: toPrismaDate(data.competenceDate),
-          categoryId: data.categoryId,
-          method: "CARD",
-          cardId: card.id,
-          invoiceId: invoice.id,
-          isFixed: data.isFixed,
-          note: data.note ?? null,
-        },
-      });
-    }
-  } else {
+  if (data.method === "ACCOUNT") {
     await assertDateNotBeforeOpening(userId, data.accountId!, data.competenceDate);
-    created = await prisma.transaction.create({
-      data: {
-        userId,
-        kind: data.kind,
-        description: data.description,
-        amountCents: data.amountCents,
-        competenceDate: toPrismaDate(data.competenceDate),
-        categoryId: data.categoryId,
-        method: "ACCOUNT",
-        accountId: data.accountId,
-        isFixed: data.isFixed,
-        note: data.note ?? null,
-      },
-    });
   }
+
+  const created = await createExpenseOrIncomeCore(userId, data);
 
   revalidatePath("/transactions");
   revalidatePath("/");
@@ -151,19 +67,7 @@ export async function createTransfer(input: z.input<typeof TransferInput>) {
   await assertDateNotBeforeOpening(userId, data.accountId, data.competenceDate);
   await assertDateNotBeforeOpening(userId, data.toAccountId, data.competenceDate);
 
-  const transaction = await prisma.transaction.create({
-    data: {
-      userId,
-      kind: "TRANSFER",
-      description: "Transferência entre contas",
-      amountCents: data.amountCents,
-      competenceDate: toPrismaDate(data.competenceDate),
-      accountId: data.accountId,
-      toAccountId: data.toAccountId,
-      method: "ACCOUNT",
-      note: data.note ?? null,
-    },
-  });
+  const transaction = await createTransferCore(userId, data);
 
   revalidatePath("/transactions");
   revalidatePath("/accounts");
@@ -184,22 +88,8 @@ export async function createInvestmentMove(input: z.input<typeof InvestmentMoveI
   const userId = await requireUserId();
   const data = InvestmentMoveInput.parse(input);
 
-  const investment = await prisma.investment.findFirst({ where: { id: data.investmentId, userId } });
-  if (!investment) throw new Error("Investimento não encontrado.");
   await assertDateNotBeforeOpening(userId, data.accountId, data.competenceDate);
-
-  const transaction = await prisma.transaction.create({
-    data: {
-      userId,
-      kind: data.kind,
-      description: data.kind === "INVESTMENT_IN" ? `Aporte em ${investment.name}` : `Resgate de ${investment.name}`,
-      amountCents: data.amountCents,
-      competenceDate: toPrismaDate(data.competenceDate),
-      accountId: data.accountId,
-      investmentId: data.investmentId,
-      method: "ACCOUNT",
-    },
-  });
+  const transaction = await createInvestmentMoveCore(userId, data);
 
   revalidatePath("/investments");
   revalidatePath("/accounts");

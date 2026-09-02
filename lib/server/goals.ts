@@ -10,6 +10,7 @@ import { addMonths, formatDateParts, getFinancialMonth, parseDateParts } from "@
 import { calculateFreeToSpend, calculateGoalPace, type GoalPaceResult } from "@/lib/finance/goals";
 import { calculateAccountBalance } from "@/lib/finance/accounts";
 import type { FinanceTransaction } from "@/lib/finance/types";
+import { createGoalMoveCore } from "./transaction-core";
 
 const GoalInput = z
   .object({
@@ -179,24 +180,11 @@ const GoalMoveInput = z.object({
 export async function contributeToGoal(input: z.input<typeof GoalMoveInput>) {
   const userId = await requireUserId();
   const data = GoalMoveInput.parse(input);
-  const goal = await prisma.goal.findFirst({ where: { id: data.goalId, userId } });
-  if (!goal) throw new Error("Porquinho não encontrado.");
 
-  await prisma.transaction.create({
-    data: {
-      userId,
-      kind: "GOAL_IN",
-      description: `Guardado em ${goal.name}`,
-      amountCents: data.amountCents,
-      competenceDate: toPrismaDate(data.competenceDate),
-      goalId: goal.id,
-      accountId: goal.accountId,
-      method: goal.accountId ? "ACCOUNT" : undefined,
-    },
-  });
+  await createGoalMoveCore(userId, { ...data, kind: "GOAL_IN" });
 
   revalidatePath("/goals");
-  revalidatePath(`/goals/${goal.id}`);
+  revalidatePath(`/goals/${data.goalId}`);
   revalidatePath("/");
 }
 
@@ -204,23 +192,10 @@ export async function contributeToGoal(input: z.input<typeof GoalMoveInput>) {
 export async function withdrawFromGoal(input: z.input<typeof GoalMoveInput>) {
   const userId = await requireUserId();
   const data = GoalMoveInput.parse(input);
-  const goal = await prisma.goal.findFirst({ where: { id: data.goalId, userId } });
-  if (!goal) throw new Error("Porquinho não encontrado.");
 
-  await prisma.transaction.create({
-    data: {
-      userId,
-      kind: "GOAL_OUT",
-      description: `Resgatado de ${goal.name}`,
-      amountCents: data.amountCents,
-      competenceDate: toPrismaDate(data.competenceDate),
-      goalId: goal.id,
-      accountId: goal.accountId,
-      method: goal.accountId ? "ACCOUNT" : undefined,
-    },
-  });
+  await createGoalMoveCore(userId, { ...data, kind: "GOAL_OUT" });
 
   revalidatePath("/goals");
-  revalidatePath(`/goals/${goal.id}`);
+  revalidatePath(`/goals/${data.goalId}`);
   revalidatePath("/");
 }

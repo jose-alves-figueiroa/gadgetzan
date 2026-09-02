@@ -82,6 +82,18 @@ Status convention: `[x]` verified (by a Vitest test, an e2e flow, or direct code
 - [x] A dismissed alert doesn't reappear in the same month. — `alerts.test.ts`.
 - [x] Every alert has at least one clickable action. — `alerts.test.ts`.
 
+## Rule R15 — CSV batch import
+
+- [x] Validation never writes to the database — parses, resolves names, checks dedup/account-window, returns a report. — `import.test.ts` (row-shape), `csv.test.ts` (parsing); `validateImportCsvs` only issues `findMany`/`aggregate` reads.
+- [x] A row referencing a category/account/card/investment/goal name that doesn't exist is an error naming the exact text typed, never auto-created. — `lib/server/imports/validate.ts` `lookupOrFail`.
+- [x] A card expense with `parcela_atual`/`total_parcelas` (e.g. 2 of 4) seeds only installments 2–4, one invoice-month apart, no `Purchase` row. — `installments.test.ts` (`buildRemainingInstallmentPlan`); verified live: available card limit drops by exactly the sum of the seeded installments.
+- [x] A backdated row for an account whose `openingDate` is later produces one aggregated batch-level error (not one per row) and blocks commit entirely. — `lib/server/imports/validate.ts` `checkAccountWindows`; verified live.
+- [x] Re-uploading a file with a previously-imported `id_externo` skips that row/installment-group with a warning; the rest of the batch commits normally. — `flagExternalIdCollisions`.
+- [x] Undoing a batch deletes every transaction it created, recomputes (never reverses a delta) `paidCents`/`paidAt` on every affected invoice from what's left, deletes invoices/purchases left with nothing, and is idempotent (a second undo on the same batch is rejected). — `lib/server/imports/undo.ts`; verified live end-to-end (see below).
+- [x] A `faturas.csv` payment row correctly sets `Invoice.paidAt` so `calculateAvailableLimit` stops counting that invoice as unpaid. — verified live: card's available limit returns to the full `limitCents` after undo.
+
+**Verified live** (not yet an automated Playwright flow — see #11 below): uploaded a 2-row `despesas.csv` (one plain account expense, one card purchase at installment 2/4) against the running dev database. Validate correctly blocked commit on a backdated row (account-window check), then passed once the date was fixed. Commit created exactly 4 transactions (1 + 3 remaining installments). Card's available limit dropped by the sum of the 3 installments. Undo deleted all 4 transactions, deleted the 3 now-empty invoices, and restored the card's available limit to the original full limit.
+
 ## End-to-end flows (Playwright)
 
 All 10 implemented in `e2e/flows.spec.ts` (Stage 7, E7-S6) and passing, stable across repeat runs — see `e2e/README.md` for the isolated harness (dedicated database, never dev or Docker's data).
@@ -96,6 +108,7 @@ All 10 implemented in `e2e/flows.spec.ts` (Stage 7, E7-S6) and passing, stable a
 8. Simulate a purchase, read the warnings, convert it into a real transaction.
 9. Pay an invoice and check the account balance and month expenses.
 10. Close out the month: open the month screen and check the donut, limits, and contributions.
+11. **Not yet automated** — Import a small CSV, see the validation report, confirm, check account balance/card limit/invoice `paidAt`, undo, check everything reverted exactly.
 
 ## Form validations
 

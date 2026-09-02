@@ -35,6 +35,35 @@ export function buildInstallmentPlan(
   });
 }
 
+/**
+ * Import-only (R15): given the CURRENT installment of an already-in-progress
+ * card purchase (`currentInstallmentNo` of `totalInstallments`, valued at
+ * `amountCents`, landing on `currentDate`), builds the plan for everything
+ * still owed — the current installment through the last one. Installments
+ * before `currentInstallmentNo` are not reconstructed: they already happened
+ * and don't affect any future projection or limit math. Unlike
+ * buildInstallmentPlan, the amount isn't split — every remaining installment
+ * gets `amountCents` as-is (we only know this one row's value).
+ */
+export function buildRemainingInstallmentPlan(
+  amountCents: number,
+  currentInstallmentNo: number,
+  totalInstallments: number,
+  currentDate: string,
+  closingDay: number,
+  dueDay: number
+): InstallmentPlanItem[] {
+  const first = assignInvoice(currentDate, closingDay, dueDay);
+  const count = totalInstallments - currentInstallmentNo + 1;
+
+  return Array.from({ length: count }, (_, index) => {
+    const installmentNo = currentInstallmentNo + index;
+    const referenceMonth = addMonths(first.referenceMonth, index);
+    const dueDate = formatDateParts({ ...referenceMonth, day: dueDay } as DateParts);
+    return { installmentNo, amountCents, referenceMonth, dueDate };
+  });
+}
+
 export interface PaidInstallment {
   installmentNo: number;
   amountCents: number;

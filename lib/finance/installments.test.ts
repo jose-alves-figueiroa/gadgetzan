@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildInstallmentPlan, installmentsToDelete, recalculateInstallments, splitInstallments } from "./installments";
+import {
+  buildInstallmentPlan,
+  buildRemainingInstallmentPlan,
+  installmentsToDelete,
+  recalculateInstallments,
+  splitInstallments,
+} from "./installments";
 
 describe("R4 — splitting installments", () => {
   it("R$100.00 in 3x → 33.33 / 33.33 / 33.34, remainder on the last one", () => {
@@ -45,6 +51,26 @@ describe("R4 — editing recalculates only unpaid installments", () => {
     expect(recalculated).toHaveLength(6);
     expect(recalculated.slice(2).map((p) => p.amountCents)).toEqual([120_000, 120_000, 120_000, 120_000]);
     expect(recalculated[5].installmentNo).toBe(6);
+  });
+});
+
+describe("R15 — importing the remaining installments of an in-progress purchase", () => {
+  it("2 of 4 → seeds only installments 2, 3, 4, one month apart, same amount repeated", () => {
+    const plan = buildRemainingInstallmentPlan(36_808, 2, 4, "2026-08-08", 12, 20);
+
+    expect(plan.map((p) => p.installmentNo)).toEqual([2, 3, 4]);
+    expect(plan.map((p) => p.amountCents)).toEqual([36_808, 36_808, 36_808]);
+    expect(plan.map((p) => p.referenceMonth)).toEqual([
+      { year: 2026, month: 8 },
+      { year: 2026, month: 9 },
+      { year: 2026, month: 10 },
+    ]);
+  });
+
+  it("the last installment (N of N) seeds exactly one row", () => {
+    const plan = buildRemainingInstallmentPlan(36_808, 4, 4, "2026-10-08", 12, 20);
+    expect(plan).toHaveLength(1);
+    expect(plan[0].installmentNo).toBe(4);
   });
 });
 

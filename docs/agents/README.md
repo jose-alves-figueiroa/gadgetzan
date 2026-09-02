@@ -28,18 +28,19 @@ The files in `design/` are **HTML design references** — prototypes showing int
 | --- | --- |
 | `PROMPT.md` | Initial prompt ready to paste into Claude Code |
 | `01-data-model.md` | Entities, fields, enums, full Prisma schema |
-| `02-business-rules.md` | The 14 rules that define the product (projection, invoice, savings, limits, goals, simulation) |
+| `02-business-rules.md` | The rules that define the product (projection, invoice, savings, limits, goals, simulation, CSV import) |
 | `03-screens.md` | Every screen: route, purpose, layout, data, states, mockup id |
 | `04-design-tokens.md` | Colors, typography, spacing, components, charts |
 | `05-acceptance-criteria.md` | Tests that define "done" |
 | `06-stack-and-deploy.md` | Stack, folder structure, auth, Docker Compose |
 | `07-open-decisions.md` | What still needs a decision from the product owner |
+| `../import-runbook.md` | Handoff spec for whoever prepares CSV files to import (column formats, worked examples) — written for a codebase-blind reader, not an implementation doc |
 
 ## Decisions already made (don't reopen without talking to the owner)
 
 1. **Stack**: Next.js (App Router) + TypeScript + Tailwind + Prisma + Postgres, self-hosted via Docker Compose.
 2. **Auth**: NextAuth with credentials, one user created via script, hashed password. Every table already carries `userId` to allow multi-user later.
-3. **Data entry**: **manual only**. OFX/CSV import with row-by-row approval is desired, but **out of scope for now** — don't build it yet; see `07-open-decisions.md`.
+3. **Data entry**: manual, plus **CSV batch import** for backfilling history (`02-business-rules.md` R15, `docs/import-runbook.md`) — validate/commit/undo/export, not the row-by-row approval originally floated. OFX import is still out of scope; see `07-open-decisions.md` D7.
 4. **Financial month**: starts on a **configurable day** chosen by the user (typically payday), not on the 1st.
 5. **Each card has its own closing day and due day.**
 6. **Variable spend projection**: average of the last 3 months per category.
