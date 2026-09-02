@@ -124,7 +124,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET}
       NEXTAUTH_URL: ${NEXTAUTH_URL}
       TZ: America/Sao_Paulo
-    ports: ["3000:3000"]
+    ports: ["9090:3000"]  # host:container — change the host side to whatever port you want to expose
     depends_on:
       db: { condition: service_healthy }
 volumes:
