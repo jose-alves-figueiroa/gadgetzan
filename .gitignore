@@ -15,6 +15,10 @@
 
 # backups (scripts/backup.sh) — real financial data, never committed
 /backups/
+
+# CSV import — real financial data, never committed
+/data/
+/gadgetzan_import/
 /test-results/
 /playwright-report/
 /blob-report/

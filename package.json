@@ -20,13 +20,16 @@
     "perf-check": "tsx scripts/perf-check.ts",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down --remove-orphans",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "import:gen": "tsx scripts/generate-imports.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "argon2": "^0.45.1",
+    "csv-parse": "^7.0.2",
+    "csv-stringify": "^6.8.3",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.7",
@@ -54,15 +57,5 @@
     "typescript": "^5",
     "vitest": "^4.1.11"
   },
-  "packageManager": "pnpm@10.24.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "argon2",
-      "@prisma/engines",
-      "prisma",
-      "esbuild",
-      "msgpackr-extract",
-      "workerd"
-    ]
-  }
+  "packageManager": "pnpm@11.25.0"
 }
