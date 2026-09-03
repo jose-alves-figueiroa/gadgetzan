@@ -190,7 +190,7 @@ Do not update the changelog for incomplete work or known failing tests.
 Use this structure:
 
 ```md
-## [Deploy - DD/MM/YYYY]
+## [DD/MM/YYYY - HH:mm]
 
 ### Modificado
 - ...
