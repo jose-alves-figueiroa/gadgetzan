@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } fro
 import { PayInvoiceModal } from "@/components/finance/PayInvoiceModal";
 import { AdjustInvoiceModal } from "@/components/finance/AdjustInvoiceModal";
 import { EnterPastInvoiceModal } from "@/components/finance/EnterPastInvoiceModal";
+import { getUnpaidInvoiceTotalCents } from "@/lib/server/invoices";
 
 export default async function CardDetailPage({
   params,
@@ -27,17 +28,14 @@ export default async function CardDetailPage({
   const card = await prisma.card.findFirst({ where: { id, userId } });
   if (!card) notFound();
 
-  const [accounts, unpaidAgg] = await Promise.all([
+  const [accounts, unpaidInvoiceTotalCents] = await Promise.all([
     listAccounts(),
-    prisma.transaction.aggregate({
-      where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-      _sum: { amountCents: true },
-    }),
+    getUnpaidInvoiceTotalCents(userId, card.id),
   ]);
 
   const { availableCents, utilizationPercent } = calculateAvailableLimit({
     limitCents: card.limitCents,
-    unpaidInvoiceTotalCents: unpaidAgg._sum.amountCents ?? 0,
+    unpaidInvoiceTotalCents,
   });
 
   // Default view is the card's currently-open invoice (R3), not the raw calendar

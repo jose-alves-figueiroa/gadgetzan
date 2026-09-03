@@ -7,6 +7,7 @@ import { buildInstallmentPlan, type InstallmentPlanItem } from "@/lib/finance/in
 import { formatDateParts } from "@/lib/finance/period";
 import { isExpense } from "@/lib/finance/transactions";
 import { toPrismaDate } from "./clock";
+import { getUnpaidInvoiceTotalCents } from "./invoices";
 
 export interface CardImpactPreview {
   installmentPlan: InstallmentPlanItem[];
@@ -44,7 +45,7 @@ export async function getCardImpactPreview(
     day: 1,
   });
 
-  const [currentInvoice, nextInvoice, unpaidAgg] = await Promise.all([
+  const [currentInvoice, nextInvoice, unpaidInvoiceTotalCents] = await Promise.all([
     prisma.invoice.findUnique({
       where: { cardId_referenceMonth: { cardId, referenceMonth: toPrismaDate(currentMonthDate) } },
       include: { transactions: true },
@@ -53,16 +54,17 @@ export async function getCardImpactPreview(
       where: { cardId_referenceMonth: { cardId, referenceMonth: toPrismaDate(nextMonthDate) } },
       include: { transactions: true },
     }),
-    prisma.transaction.aggregate({
-      where: { userId, cardId, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-      _sum: { amountCents: true },
-    }),
+    getUnpaidInvoiceTotalCents(userId, cardId),
   ]);
 
   const currentInvoiceBeforeCents =
-    currentInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ?? 0;
+    currentInvoice?.manualTotalCents ??
+    currentInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ??
+    0;
   const nextInvoiceBeforeCents =
-    nextInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ?? 0;
+    nextInvoice?.manualTotalCents ??
+    nextInvoice?.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0) ??
+    0;
 
   const currentMonthKey = `${assignment.referenceMonth.year}-${assignment.referenceMonth.month}`;
   const nextMonthParts =
@@ -78,11 +80,10 @@ export async function getCardImpactPreview(
     .filter((p) => `${p.referenceMonth.year}-${p.referenceMonth.month}` === nextMonthKey)
     .reduce((s, p) => s + p.amountCents, 0);
 
-  const unpaidBefore = unpaidAgg._sum.amountCents ?? 0;
-  const before = calculateAvailableLimit({ limitCents: card.limitCents, unpaidInvoiceTotalCents: unpaidBefore });
+  const before = calculateAvailableLimit({ limitCents: card.limitCents, unpaidInvoiceTotalCents });
   const after = calculateAvailableLimit({
     limitCents: card.limitCents,
-    unpaidInvoiceTotalCents: unpaidBefore + amountCents,
+    unpaidInvoiceTotalCents: unpaidInvoiceTotalCents + amountCents,
   });
 
   return {

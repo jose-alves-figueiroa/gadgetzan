@@ -9,8 +9,8 @@ import { Bar } from "@/components/ui/Bar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateCardModal } from "@/components/finance/CreateCardModal";
-import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
+import { getUnpaidInvoiceTotalCents } from "@/lib/server/invoices";
 
 export default async function CardsPage() {
   const [cards, accounts] = await Promise.all([listCards(), listAccounts()]);
@@ -33,13 +33,10 @@ export default async function CardsPage() {
         <div className="flex flex-col gap-md">
           {await Promise.all(
             cards.map(async (card) => {
-              const unpaid = await prisma.transaction.aggregate({
-                where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-                _sum: { amountCents: true },
-              });
+              const unpaidInvoiceTotalCents = await getUnpaidInvoiceTotalCents(userId, card.id);
               const { availableCents, utilizationPercent } = calculateAvailableLimit({
                 limitCents: card.limitCents,
-                unpaidInvoiceTotalCents: unpaid._sum.amountCents ?? 0,
+                unpaidInvoiceTotalCents,
               });
 
               return (

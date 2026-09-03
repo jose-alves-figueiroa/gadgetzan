@@ -8,6 +8,7 @@ import { calculateAvailableLimit } from "@/lib/finance/invoice";
 import { selectDashboardAlerts } from "@/lib/finance/alerts";
 import { todayDateString } from "./clock";
 import { getAllAlerts } from "./alerts";
+import { getUnpaidInvoiceTotalCents } from "./invoices";
 import type { FinanceTransaction } from "@/lib/finance/types";
 
 export async function getDashboardData() {
@@ -56,13 +57,10 @@ export async function getDashboardData() {
 
   const cardsWithLimit = await Promise.all(
     cards.map(async (card) => {
-      const unpaidAgg = await prisma.transaction.aggregate({
-        where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-        _sum: { amountCents: true },
-      });
+      const unpaidInvoiceTotalCents = await getUnpaidInvoiceTotalCents(userId, card.id);
       const { availableCents, utilizationPercent } = calculateAvailableLimit({
         limitCents: card.limitCents,
-        unpaidInvoiceTotalCents: unpaidAgg._sum.amountCents ?? 0,
+        unpaidInvoiceTotalCents,
       });
       return { card, availableCents, utilizationPercent };
     })

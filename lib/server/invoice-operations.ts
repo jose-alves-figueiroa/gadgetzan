@@ -6,11 +6,13 @@ import { prisma } from "@/lib/db";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
 import { toPrismaDate, todayDateString } from "./clock";
-import { adjustInvoiceCore, applyInvoicePaymentCore } from "./transaction-core";
+import { adjustInvoiceCore, applyInvoicePaymentCore, createTransferCore } from "./transaction-core";
 
 const PayInvoiceInput = z.object({
   invoiceId: z.string().min(1),
   accountId: z.string().min(1, "Conta obrigatória."),
+  /** Optional — money isn't sitting in `accountId` yet; a Transfer moves it there first (R1: never an expense either). */
+  sourceAccountId: z.string().nullable().optional(),
   paidCents: centsPositive,
   paidDate: z.string().min(1, "Data obrigatória."),
 });
@@ -19,6 +21,16 @@ const PayInvoiceInput = z.object({
 export async function payInvoice(input: z.input<typeof PayInvoiceInput>) {
   const userId = await requireUserId();
   const data = PayInvoiceInput.parse(input);
+
+  if (data.sourceAccountId && data.sourceAccountId !== data.accountId) {
+    await createTransferCore(userId, {
+      accountId: data.sourceAccountId,
+      toAccountId: data.accountId,
+      amountCents: data.paidCents,
+      competenceDate: data.paidDate,
+      note: "Transferência para pagamento de fatura",
+    });
+  }
 
   await applyInvoicePaymentCore(userId, data);
 

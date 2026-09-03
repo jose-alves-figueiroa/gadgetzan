@@ -12,6 +12,7 @@ import { isExpense } from "@/lib/finance/transactions";
 import { calculateAccountBalance } from "@/lib/finance/accounts";
 import { getUpcomingMonths } from "./future";
 import { createTransaction } from "./transactions";
+import { getUnpaidInvoiceTotalCents } from "./invoices";
 import type { FinanceTransaction } from "@/lib/finance/types";
 
 const SimulateInput = z.object({
@@ -38,7 +39,7 @@ async function invoiceExpenseTotal(cardId: string, referenceMonth: { year: numbe
     include: { transactions: true },
   });
   if (!invoice) return 0;
-  return invoice.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0);
+  return invoice.manualTotalCents ?? invoice.transactions.filter((t) => isExpense(t.kind)).reduce((s, t) => s + t.amountCents, 0);
 }
 
 /** R10 — pure simulation, gathered against real data. Writes nothing. */
@@ -90,20 +91,17 @@ export async function runSimulation(input: SimulateData): Promise<SimulationResu
     const assignment = assignInvoice(data.purchaseDate, cardRow.closingDay, cardRow.dueDay);
     const nextMonth = addMonths(assignment.referenceMonth, 1);
 
-    const [currentInvoiceTotal, nextInvoiceTotal, unpaidAgg] = await Promise.all([
+    const [currentInvoiceTotal, nextInvoiceTotal, unpaidInvoiceTotalCents] = await Promise.all([
       invoiceExpenseTotal(cardRow.id, assignment.referenceMonth),
       invoiceExpenseTotal(cardRow.id, nextMonth),
-      prisma.transaction.aggregate({
-        where: { userId, cardId: cardRow.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-        _sum: { amountCents: true },
-      }),
+      getUnpaidInvoiceTotalCents(userId, cardRow.id),
     ]);
 
     card = {
       closingDay: cardRow.closingDay,
       dueDay: cardRow.dueDay,
       limitCents: cardRow.limitCents,
-      unpaidInvoiceTotalBeforeCents: unpaidAgg._sum.amountCents ?? 0,
+      unpaidInvoiceTotalBeforeCents: unpaidInvoiceTotalCents,
       utilizationTargetPercent: cardRow.utilizationTarget ?? settings.cardUtilizationTarget,
       currentInvoiceMonthKey: `${assignment.referenceMonth.year}-${pad(assignment.referenceMonth.month)}`,
       nextInvoiceMonthKey: `${nextMonth.year}-${pad(nextMonth.month)}`,

@@ -49,7 +49,13 @@ export async function getProjectedInvoices(cardId: string, monthsAhead = 6) {
     let parcelasCents = 0;
     let assinaturasCents = 0;
 
-    if (invoice) {
+    if (invoice?.manualTotalCents != null) {
+      // A manually-entered past invoice (enterPastInvoice) has no linked
+      // transactions to break down by Compras/Parcelas/Assinaturas — its
+      // total overrides the transaction sum everywhere else an invoice
+      // total is computed, so it must here too or it silently reads as 0.
+      comprasCents = invoice.manualTotalCents;
+    } else if (invoice) {
       // Only real spend counts — a paid invoice's CARD_PAYMENT row is also
       // linked via invoiceId and must never inflate the invoice's own total.
       for (const t of invoice.transactions) {

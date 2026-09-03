@@ -9,6 +9,7 @@ import { calculateLimitUtilization } from "@/lib/finance/limits";
 import { calculateAvailableLimit, assignInvoice } from "@/lib/finance/invoice";
 import { calculateVariableProjection } from "@/lib/finance/projection";
 import { isExpense } from "@/lib/finance/transactions";
+import { getUnpaidInvoiceTotalCents } from "./invoices";
 import {
   categoryLimitAlert,
   cardUtilizationAlert,
@@ -98,13 +99,10 @@ export async function getAllAlerts(): Promise<Alert[]> {
 
   // Card utilization + invoice spike.
   for (const card of cards) {
-    const unpaidAgg = await prisma.transaction.aggregate({
-      where: { userId, cardId: card.id, invoice: { paidAt: null }, kind: { in: ["EXPENSE", "CARD_ADJUSTMENT"] } },
-      _sum: { amountCents: true },
-    });
+    const unpaidInvoiceTotalCents = await getUnpaidInvoiceTotalCents(userId, card.id);
     const { utilizationPercent } = calculateAvailableLimit({
       limitCents: card.limitCents,
-      unpaidInvoiceTotalCents: unpaidAgg._sum.amountCents ?? 0,
+      unpaidInvoiceTotalCents,
     });
     const cardAlert = cardUtilizationAlert({
       cardId: card.id,

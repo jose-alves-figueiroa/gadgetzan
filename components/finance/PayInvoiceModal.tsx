@@ -17,6 +17,7 @@ export function PayInvoiceModal({
   accounts: { id: string; nickname: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const [viaTransfer, setViaTransfer] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -29,6 +30,7 @@ export function PayInvoiceModal({
       await payInvoice({
         invoiceId,
         accountId: String(formData.get("accountId") ?? ""),
+        sourceAccountId: viaTransfer ? String(formData.get("sourceAccountId") ?? "") : null,
         paidCents: String(formData.get("paidCents") ?? ""),
         paidDate: String(formData.get("paidDate") ?? new Date().toISOString().slice(0, 10)),
       });
@@ -63,6 +65,33 @@ export function PayInvoiceModal({
               ))}
             </select>
           </div>
+
+          <label className="flex items-center gap-sm text-row text-text">
+            <input type="checkbox" checked={viaTransfer} onChange={(e) => setViaTransfer(e.target.checked)} />
+            Transferir de outra conta
+          </label>
+
+          {viaTransfer ? (
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="sourceAccountId" className="text-micro text-text/70">
+                Conta de origem
+              </label>
+              <select
+                id="sourceAccountId"
+                name="sourceAccountId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nickname}
+                  </option>
+                ))}
+              </select>
+              <span className="text-micro text-dim">Cria uma transferência dessa conta para a conta acima antes de pagar.</span>
+            </div>
+          ) : null}
+
           <Field
             name="paidCents"
             label="Valor pago"
