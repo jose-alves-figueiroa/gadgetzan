@@ -76,7 +76,7 @@ export async function runSimulation(input: SimulateData): Promise<SimulationResu
     expectedIncomeCents: m.incomeCents,
     expectedAccountExpensesCents: m.expensesCents,
     invoicesDueCents: m.invoicesCents,
-    scheduledContributionsCents: 0,
+    scheduledContributionsCents: m.scheduledContributionsCents,
   }));
 
   let card: SimulationCardState | undefined;

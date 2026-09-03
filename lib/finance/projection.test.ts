@@ -4,6 +4,7 @@ import {
   calculateVariableProjection,
   classifyTransactionConfidence,
   groupByConfidence,
+  sumRecurringContributions,
 } from "./projection";
 
 describe("R7 — transaction confidence", () => {
@@ -38,6 +39,26 @@ describe("R8 — variable spend projection", () => {
 
   it("uses only the most recent `lookback` months once there's more history", () => {
     expect(calculateVariableProjection([100, 1000, 2000, 3000], 3)).toBe(2000);
+  });
+});
+
+describe("R2 — recurring investment contributions", () => {
+  it("sums only occurrences landing inside [start, end)", () => {
+    const occurrences = [
+      { date: "2026-07-31", amountCents: 10_000 },
+      { date: "2026-08-01", amountCents: 20_000 },
+      { date: "2026-08-15", amountCents: 30_000 },
+      { date: "2026-08-31", amountCents: 40_000 },
+      { date: "2026-09-01", amountCents: 50_000 },
+    ];
+    expect(sumRecurringContributions(occurrences, "2026-08-01", "2026-09-01")).toBe(90_000);
+  });
+
+  it("returns 0 with no occurrences in range", () => {
+    expect(sumRecurringContributions([], "2026-08-01", "2026-09-01")).toBe(0);
+    expect(
+      sumRecurringContributions([{ date: "2026-06-01", amountCents: 10_000 }], "2026-08-01", "2026-09-01")
+    ).toBe(0);
   });
 });
 

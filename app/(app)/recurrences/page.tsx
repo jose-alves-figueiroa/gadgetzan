@@ -3,6 +3,7 @@ import { listRecurrenceRules } from "@/lib/server/recurrences";
 import { listCategories } from "@/lib/server/categories";
 import { listAccounts } from "@/lib/server/accounts";
 import { listCards } from "@/lib/server/cards";
+import { listInvestments } from "@/lib/server/investments";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -11,17 +12,18 @@ import { CreateRecurrenceModal } from "@/components/finance/CreateRecurrenceModa
 import { RecurrenceRow } from "@/components/finance/RecurrenceRow";
 
 export default async function RecurrencesPage() {
-  const [rules, categories, accounts, cards] = await Promise.all([
+  const [rules, categories, accounts, cards, investments] = await Promise.all([
     listRecurrenceRules(),
     listCategories(),
     listAccounts(),
     listCards(),
+    listInvestments(),
   ]);
 
   const active = rules.filter((r) => r.status === "ACTIVE");
   const income = active.filter((r) => r.kind === "INCOME");
-  const commitments = active.filter((r) => r.kind === "EXPENSE" && r.category.nature === "COMMITMENT");
-  const expenses = active.filter((r) => r.kind === "EXPENSE" && r.category.nature !== "COMMITMENT");
+  const commitments = active.filter((r) => r.kind === "EXPENSE" && r.category?.nature === "COMMITMENT");
+  const expenses = active.filter((r) => r.kind === "EXPENSE" && r.category?.nature !== "COMMITMENT");
 
   const sum = (list: typeof rules) => list.reduce((s, r) => s + r.amountCents, 0);
   const incomeTotal = sum(income);
@@ -37,6 +39,7 @@ export default async function RecurrencesPage() {
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           accounts={accounts.map((a) => ({ id: a.id, name: a.nickname }))}
           cards={cards.map((c) => ({ id: c.id, name: c.name }))}
+          investments={investments.map((i) => ({ id: i.id, name: i.name }))}
         />
       </div>
 
@@ -69,8 +72,9 @@ export default async function RecurrencesPage() {
         <div className="flex flex-col gap-xl">
           {[
             { label: "Receitas", list: rules.filter((r) => r.kind === "INCOME") },
-            { label: "Compromissos", list: rules.filter((r) => r.kind === "EXPENSE" && r.category.nature === "COMMITMENT") },
-            { label: "Despesas", list: rules.filter((r) => r.kind === "EXPENSE" && r.category.nature !== "COMMITMENT") },
+            { label: "Compromissos", list: rules.filter((r) => r.kind === "EXPENSE" && r.category?.nature === "COMMITMENT") },
+            { label: "Despesas", list: rules.filter((r) => r.kind === "EXPENSE" && r.category?.nature !== "COMMITMENT") },
+            { label: "Investimentos", list: rules.filter((r) => r.kind === "INVESTMENT_IN") },
           ].map((group) =>
             group.list.length > 0 ? (
               <div key={group.label} className="flex flex-col gap-sm">
@@ -84,7 +88,7 @@ export default async function RecurrencesPage() {
                         amountCents={rule.amountCents}
                         frequency={rule.frequency}
                         dayOfMonth={rule.dayOfMonth}
-                        categoryName={rule.category.name}
+                        categoryName={rule.kind === "INVESTMENT_IN" ? rule.investment?.name : rule.category?.name}
                         status={rule.status}
                       />
                     </HighlightOnCreate>

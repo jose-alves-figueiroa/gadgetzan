@@ -12,7 +12,7 @@ interface RecurrenceRowProps {
   amountCents: number;
   frequency: string;
   dayOfMonth: number | null;
-  categoryName: string;
+  categoryName?: string;
   status: "ACTIVE" | "PAUSED" | "ENDED";
   className?: string;
 }
@@ -55,7 +55,8 @@ export function RecurrenceRow({
       <div className="flex flex-col gap-xs">
         <span className="text-row text-text">{description}</span>
         <span className="text-micro text-dim">
-          {frequency === "MONTHLY" ? `Mensal · dia ${dayOfMonth}` : frequency} · {categoryName}
+          {frequency === "MONTHLY" ? `Mensal · dia ${dayOfMonth}` : frequency}
+          {categoryName ? ` · ${categoryName}` : ""}
         </span>
       </div>
       <div className="flex items-center gap-md">

@@ -43,6 +43,28 @@ export function calculateVariableProjection(
   return Math.round(sum / lookback);
 }
 
+export interface RecurringOccurrence {
+  date: string;
+  amountCents: number;
+}
+
+/**
+ * Sums recurring investment contribution occurrences (R2's `INVESTMENT_IN`)
+ * landing within a financial month's [start, end) window — feeds
+ * calculateProjectedBalanceSeries' scheduledContributionsCents. Investment
+ * contributions never count as income/expense (R1), so this stays separate
+ * from any income/expense total.
+ */
+export function sumRecurringContributions(
+  occurrences: RecurringOccurrence[],
+  start: string,
+  end: string
+): number {
+  return occurrences
+    .filter((o) => o.date >= start && o.date < end)
+    .reduce((sum, o) => sum + o.amountCents, 0);
+}
+
 export interface MonthlyProjectionInputs {
   expectedIncomeCents: number;
   expectedAccountExpensesCents: number;

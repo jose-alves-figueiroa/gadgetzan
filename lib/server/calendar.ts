@@ -52,7 +52,7 @@ export async function getCalendarMonth(monthOffset: number) {
     }),
     prisma.recurrenceRule.findMany({
       where: { userId, status: "ACTIVE", method: "ACCOUNT" },
-      include: { category: true },
+      include: { category: true, investment: true },
     }),
   ]);
 
@@ -168,15 +168,34 @@ export async function getCalendarMonth(monthOffset: number) {
     if (rangeStart >= month.end) continue;
     const dates = generateOccurrences(ruleToOccurrenceInput(rule), rangeStart, addDays(month.end, -1));
     for (const date of dates) {
-      const isIncome = rule.kind === "INCOME";
-      rows.push({
-        date,
-        kind: isIncome ? "income" : "expense",
-        label: rule.description,
-        subLabel: rule.category?.name ?? (rule.accountId ? accountNicknameById.get(rule.accountId) : undefined),
-        amountCents: isIncome ? rule.amountCents : -rule.amountCents,
-        balanceDelta: isIncome ? rule.amountCents : -rule.amountCents,
-      });
+      // Exhaustive over the 3 kinds createRecurrenceRule can actually write
+      // — an unrecognized kind is skipped, never silently rendered as an
+      // expense (a wrong sign on INVESTMENT_IN would look like a real bug).
+      let kind: AgendaRow["kind"];
+      let amountCents: number;
+      let balanceDelta: number;
+      let subLabel: string | undefined;
+
+      if (rule.kind === "INCOME") {
+        kind = "income";
+        amountCents = rule.amountCents;
+        balanceDelta = rule.amountCents;
+        subLabel = rule.category?.name ?? (rule.accountId ? accountNicknameById.get(rule.accountId) : undefined);
+      } else if (rule.kind === "EXPENSE") {
+        kind = "expense";
+        amountCents = -rule.amountCents;
+        balanceDelta = -rule.amountCents;
+        subLabel = rule.category?.name ?? (rule.accountId ? accountNicknameById.get(rule.accountId) : undefined);
+      } else if (rule.kind === "INVESTMENT_IN") {
+        kind = "investment_in";
+        amountCents = -rule.amountCents;
+        balanceDelta = -rule.amountCents;
+        subLabel = rule.investment?.name;
+      } else {
+        continue;
+      }
+
+      rows.push({ date, kind, label: rule.description, subLabel, amountCents, balanceDelta });
     }
   }
 

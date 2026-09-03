@@ -4,7 +4,11 @@ import { todayDateString } from "./clock";
 import { addDays, addMonths, formatDateParts, getFinancialMonth, parseDateParts } from "@/lib/finance/period";
 import { generateOccurrences, type RecurrenceRuleInput } from "@/lib/finance/recurrence";
 import { assignInvoice } from "@/lib/finance/invoice";
-import { calculateProjectedBalanceSeries, calculateVariableProjection } from "@/lib/finance/projection";
+import {
+  calculateProjectedBalanceSeries,
+  calculateVariableProjection,
+  sumRecurringContributions,
+} from "@/lib/finance/projection";
 import { calculateAccountBalance } from "@/lib/finance/accounts";
 import { isExpense, isIncome } from "@/lib/finance/transactions";
 import type { Confidence, FinanceTransaction } from "@/lib/finance/types";
@@ -16,6 +20,8 @@ export interface MonthForecast {
   incomeCents: number;
   expensesCents: number;
   invoicesCents: number;
+  /** Recurring investment contributions (R2) — never part of incomeCents/expensesCents/resultCents (R1). */
+  scheduledContributionsCents: number;
   resultCents: number;
   projectedBalanceCents: number;
   /** Composition of expenses+invoices for the stacked "committed spend" bar (1d). */
@@ -142,13 +148,18 @@ export async function getUpcomingMonths(): Promise<UpcomingMonthsResult> {
   const occurrenceRangeStart = addDays(horizonStart, -31);
   const occurrenceRangeEnd = addDays(horizonEnd, 31);
 
-  const occurrences: { date: string; amountCents: number; kind: "INCOME" | "EXPENSE"; method: "ACCOUNT" | "CARD"; cardId: string | null }[] = [];
+  // Exhaustive over the 3 kinds createRecurrenceRule can actually write
+  // (INCOME/EXPENSE/INVESTMENT_IN) — an occurrence never falls through to a
+  // wrong bucket for a kind nobody enumerated (see banco-xp lesson).
+  const occurrences: { date: string; amountCents: number; kind: "INCOME" | "EXPENSE" | "INVESTMENT_IN"; method: "ACCOUNT" | "CARD"; cardId: string | null }[] = [];
   for (const rule of rules) {
+    if (rule.kind !== "INCOME" && rule.kind !== "EXPENSE" && rule.kind !== "INVESTMENT_IN") continue;
     const dates = generateOccurrences(ruleToInput(rule), occurrenceRangeStart, occurrenceRangeEnd);
     for (const date of dates) {
-      occurrences.push({ date, amountCents: rule.amountCents, kind: rule.kind as "INCOME" | "EXPENSE", method: rule.method, cardId: rule.cardId });
+      occurrences.push({ date, amountCents: rule.amountCents, kind: rule.kind, method: rule.method, cardId: rule.cardId });
     }
   }
+  const contributionOccurrences = occurrences.filter((occ) => occ.kind === "INVESTMENT_IN");
 
   const months: MonthForecast[] = targets.map((target) => {
     let incomeRecurring = 0;
@@ -159,6 +170,8 @@ export async function getUpcomingMonths(): Promise<UpcomingMonthsResult> {
     let invoiceConfirmed = 0;
 
     for (const occ of occurrences) {
+      if (occ.kind === "INVESTMENT_IN") continue; // handled separately below (R1 — never income/expense)
+
       if (occ.method === "CARD") {
         const card = occ.cardId ? cardById.get(occ.cardId) : undefined;
         if (!card) continue;
@@ -171,6 +184,8 @@ export async function getUpcomingMonths(): Promise<UpcomingMonthsResult> {
         else expenseRecurring += occ.amountCents;
       }
     }
+
+    const scheduledContributionsCents = sumRecurringContributions(contributionOccurrences, target.start, target.end);
 
     for (const t of financeTx) {
       // Card-method expenses are bucketed by the invoice they actually land
@@ -209,6 +224,7 @@ export async function getUpcomingMonths(): Promise<UpcomingMonthsResult> {
       incomeCents,
       expensesCents,
       invoicesCents,
+      scheduledContributionsCents,
       resultCents,
       projectedBalanceCents: 0,
       breakdown,
@@ -222,7 +238,7 @@ export async function getUpcomingMonths(): Promise<UpcomingMonthsResult> {
       expectedIncomeCents: m.incomeCents,
       expectedAccountExpensesCents: m.expensesCents,
       invoicesDueCents: m.invoicesCents,
-      scheduledContributionsCents: 0,
+      scheduledContributionsCents: m.scheduledContributionsCents,
     }))
   );
   months.forEach((m, i) => {

@@ -9,19 +9,28 @@ import { todayDateString, toPrismaDate } from "./clock";
 
 const RecurrenceInput = z
   .object({
-    kind: z.enum(["INCOME", "EXPENSE"]),
+    kind: z.enum(["INCOME", "EXPENSE", "INVESTMENT_IN"]),
     description: z.string().min(1, "Nome obrigatório."),
     amountCents: centsPositive,
     frequency: z.enum(["MONTHLY", "WEEKLY", "YEARLY"]),
     dayOfMonth: z.number().int().min(1).max(31).nullable().optional(),
     weekday: z.number().int().min(0).max(6).nullable().optional(),
     monthOfYear: z.number().int().min(1).max(12).nullable().optional(),
-    categoryId: z.string().min(1, "Categoria obrigatória."),
+    categoryId: z.string().nullable().optional(),
+    investmentId: z.string().nullable().optional(),
     method: z.enum(["ACCOUNT", "CARD"]),
     accountId: z.string().nullable().optional(),
     cardId: z.string().nullable().optional(),
     startDate: z.string().min(1, "Data de início obrigatória."),
     endDate: z.string().nullable().optional(),
+  })
+  .refine((data) => data.kind === "INVESTMENT_IN" || !!data.categoryId, {
+    message: "Categoria obrigatória.",
+    path: ["categoryId"],
+  })
+  .refine((data) => data.kind !== "INVESTMENT_IN" || !!data.investmentId, {
+    message: "Investimento obrigatório.",
+    path: ["investmentId"],
   })
   .refine((data) => (data.method === "ACCOUNT" ? !!data.accountId : !!data.cardId), {
     message: "Conta ou cartão obrigatório conforme a forma de pagamento.",
@@ -42,7 +51,8 @@ export async function createRecurrenceRule(input: z.input<typeof RecurrenceInput
       dayOfMonth: data.dayOfMonth ?? null,
       weekday: data.weekday ?? null,
       monthOfYear: data.monthOfYear ?? null,
-      categoryId: data.categoryId,
+      categoryId: data.kind === "INVESTMENT_IN" ? null : data.categoryId,
+      investmentId: data.kind === "INVESTMENT_IN" ? data.investmentId : null,
       method: data.method,
       accountId: data.method === "ACCOUNT" ? data.accountId : null,
       cardId: data.method === "CARD" ? data.cardId : null,
@@ -77,7 +87,7 @@ export async function listRecurrenceRules() {
   const userId = await requireUserId();
   return prisma.recurrenceRule.findMany({
     where: { userId },
-    include: { category: true },
+    include: { category: true, investment: true },
     orderBy: { description: "asc" },
   });
 }

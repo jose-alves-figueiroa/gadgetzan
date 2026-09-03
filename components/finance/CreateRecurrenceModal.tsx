@@ -19,15 +19,17 @@ export function CreateRecurrenceModal({
   categories,
   accounts,
   cards,
+  investments,
   triggerLabel = "Nova recorrência",
 }: {
   categories: Option[];
   accounts: Option[];
   cards: Option[];
+  investments: Option[];
   triggerLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<"INCOME" | "EXPENSE">("EXPENSE");
+  const [kind, setKind] = useState<"INCOME" | "EXPENSE" | "INVESTMENT_IN">("EXPENSE");
   const [frequency, setFrequency] = useState<"MONTHLY" | "WEEKLY" | "YEARLY">("MONTHLY");
   const [method, setMethod] = useState<"ACCOUNT" | "CARD">("ACCOUNT");
   const [dayOfMonth, setDayOfMonth] = useState(5);
@@ -53,6 +55,7 @@ export function CreateRecurrenceModal({
 
     const formData = new FormData(event.currentTarget);
     try {
+      const isInvestment = kind === "INVESTMENT_IN";
       const rule = await createRecurrenceRule({
         kind,
         description: String(formData.get("description") ?? ""),
@@ -61,10 +64,12 @@ export function CreateRecurrenceModal({
         dayOfMonth: frequency !== "WEEKLY" ? dayOfMonth : null,
         weekday: frequency === "WEEKLY" ? Number(formData.get("weekday") ?? 0) : null,
         monthOfYear: frequency === "YEARLY" ? Number(formData.get("monthOfYear") ?? 1) : null,
-        categoryId: String(formData.get("categoryId") ?? ""),
-        method,
-        accountId: method === "ACCOUNT" ? String(formData.get("accountId") ?? "") : null,
-        cardId: method === "CARD" ? String(formData.get("cardId") ?? "") : null,
+        categoryId: isInvestment ? null : String(formData.get("categoryId") ?? ""),
+        investmentId: isInvestment ? String(formData.get("investmentId") ?? "") : null,
+        method: isInvestment ? "ACCOUNT" : method,
+        accountId:
+          isInvestment || method === "ACCOUNT" ? String(formData.get("accountId") ?? "") : null,
+        cardId: !isInvestment && method === "CARD" ? String(formData.get("cardId") ?? "") : null,
         startDate,
         endDate: null,
       });
@@ -87,6 +92,7 @@ export function CreateRecurrenceModal({
             options={[
               { value: "INCOME", label: "Receita" },
               { value: "EXPENSE", label: "Despesa" },
+              { value: "INVESTMENT_IN", label: "Investimento" },
             ]}
             value={kind}
             onChange={(v) => setKind(v as typeof kind)}
@@ -137,34 +143,56 @@ export function CreateRecurrenceModal({
             <Field name="monthOfYear" label="Mês do ano" type="number" min={1} max={12} defaultValue={1} />
           ) : null}
 
-          <div className="flex flex-col gap-xs">
-            <label htmlFor="categoryId" className="text-micro text-text/70">
-              Categoria
-            </label>
-            <select
-              id="categoryId"
-              name="categoryId"
-              required
-              className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {kind === "INVESTMENT_IN" ? (
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="investmentId" className="text-micro text-text/70">
+                Investimento
+              </label>
+              <select
+                id="investmentId"
+                name="investmentId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {investments.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-xs">
+              <label htmlFor="categoryId" className="text-micro text-text/70">
+                Categoria
+              </label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                required
+                className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          <Segmented
-            options={[
-              { value: "ACCOUNT", label: "Conta" },
-              { value: "CARD", label: "Cartão" },
-            ]}
-            value={method}
-            onChange={(v) => setMethod(v as typeof method)}
-          />
+          {kind !== "INVESTMENT_IN" ? (
+            <Segmented
+              options={[
+                { value: "ACCOUNT", label: "Conta" },
+                { value: "CARD", label: "Cartão" },
+              ]}
+              value={method}
+              onChange={(v) => setMethod(v as typeof method)}
+            />
+          ) : null}
 
-          {method === "ACCOUNT" ? (
+          {kind === "INVESTMENT_IN" || method === "ACCOUNT" ? (
             <div className="flex flex-col gap-xs">
               <label htmlFor="accountId" className="text-micro text-text/70">
                 Conta
