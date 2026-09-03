@@ -15,6 +15,10 @@ interface Option {
   name: string;
 }
 
+interface CategoryOption extends Option {
+  nature: "FIXED" | "VARIABLE" | "COMMITMENT" | "INCOME";
+}
+
 export function CreateRecurrenceModal({
   categories,
   accounts,
@@ -22,7 +26,7 @@ export function CreateRecurrenceModal({
   investments,
   triggerLabel = "Nova recorrência",
 }: {
-  categories: Option[];
+  categories: CategoryOption[];
   accounts: Option[];
   cards: Option[];
   investments: Option[];
@@ -172,11 +176,13 @@ export function CreateRecurrenceModal({
                 required
                 className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
               >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {categories
+                  .filter((c) => (kind === "INCOME" ? c.nature === "INCOME" : c.nature !== "INCOME"))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
               </select>
             </div>
           )}

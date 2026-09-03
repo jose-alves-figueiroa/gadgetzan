@@ -17,11 +17,15 @@ interface CardOption extends Option {
   dueDay: number;
 }
 
+interface CategoryOption extends Option {
+  nature: "FIXED" | "VARIABLE" | "COMMITMENT" | "INCOME";
+}
+
 interface AppShellProps {
   children: ReactNode;
   accounts: Option[];
   cards: CardOption[];
-  categories: Option[];
+  categories: CategoryOption[];
   investments: Option[];
   hideAmounts: boolean;
 }

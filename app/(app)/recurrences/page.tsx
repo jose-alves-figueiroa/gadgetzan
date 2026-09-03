@@ -36,7 +36,7 @@ export default async function RecurrencesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-title text-text">Recorrências</h1>
         <CreateRecurrenceModal
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          categories={categories.map((c) => ({ id: c.id, name: c.name, nature: c.nature }))}
           accounts={accounts.map((a) => ({ id: a.id, name: a.nickname }))}
           cards={cards.map((c) => ({ id: c.id, name: c.name }))}
           investments={investments.map((i) => ({ id: i.id, name: i.name }))}

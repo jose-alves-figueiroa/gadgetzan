@@ -38,6 +38,17 @@ export async function createTransaction(input: NewTransactionData) {
   const userId = await requireUserId();
   const data = NewTransactionInput.parse(input);
 
+  const category = await prisma.category.findFirst({ where: { id: data.categoryId, userId } });
+  if (!category) throw new Error("Categoria não encontrada.");
+  const isIncomeCategory = category.nature === "INCOME";
+  if (isIncomeCategory !== (data.kind === "INCOME")) {
+    throw new Error(
+      isIncomeCategory
+        ? "Categoria de receita não pode ser usada em uma despesa."
+        : "Categoria de despesa não pode ser usada em uma receita."
+    );
+  }
+
   if (data.method === "ACCOUNT") {
     await assertDateNotBeforeOpening(userId, data.accountId!, data.competenceDate);
   }

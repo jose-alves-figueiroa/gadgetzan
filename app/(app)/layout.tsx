@@ -24,7 +24,7 @@ export default async function AppGroupLayout({ children }: LayoutProps<"/">) {
     <AppShell
       accounts={accounts.map((a) => ({ id: a.id, name: a.nickname }))}
       cards={cards.map((c) => ({ id: c.id, name: c.name, closingDay: c.closingDay, dueDay: c.dueDay }))}
-      categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      categories={categories.map((c) => ({ id: c.id, name: c.name, nature: c.nature }))}
       investments={investments.map((i) => ({ id: i.id, name: i.name }))}
       hideAmounts={settings.hideAmounts}
     >

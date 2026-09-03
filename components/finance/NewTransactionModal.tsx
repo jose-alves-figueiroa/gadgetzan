@@ -21,6 +21,10 @@ interface CardOption extends Option {
   dueDay: number;
 }
 
+interface CategoryOption extends Option {
+  nature: "FIXED" | "VARIABLE" | "COMMITMENT" | "INCOME";
+}
+
 type TxType = "EXPENSE" | "INCOME" | "TRANSFER" | "INVESTMENT_IN" | "INVESTMENT_OUT";
 
 const TYPE_OPTIONS: { value: TxType; label: string }[] = [
@@ -41,7 +45,7 @@ export function NewTransactionModal({
 }: {
   open: boolean;
   onClose: () => void;
-  categories: Option[];
+  categories: CategoryOption[];
   accounts: Option[];
   cards: CardOption[];
   investments: Option[];
@@ -165,11 +169,13 @@ export function NewTransactionModal({
                 required
                 className="min-h-9 rounded-md border border-line bg-surface px-md text-body text-text outline-none focus:border-accent"
               >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+                {categories
+                  .filter((c) => (type === "INCOME" ? c.nature === "INCOME" : c.nature !== "INCOME"))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -240,9 +246,8 @@ export function NewTransactionModal({
             <label className="flex items-center gap-sm text-row text-text">
               <input type="checkbox" checked={isFixed} onChange={(e) => setIsFixed(e.target.checked)} />
               <Tooltip label="Despesa fixa">
-                Marca este lançamento como um gasto fixo do mês, pra diferenciar de despesas variáveis. Só fica
-                salvo na despesa — hoje não entra em relatórios, filtros ou projeções. Para uma despesa que se
-                repete todo mês e deve aparecer nas projeções futuras, cadastre uma recorrência em vez disso.
+                Só um rótulo neste lançamento — não afeta relatórios ou projeções. Não é recorrente: pra um gasto
+                que se repete todo mês, cadastre uma recorrência em vez disso.
               </Tooltip>
             </label>
 
