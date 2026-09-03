@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { formatBRL } from "@/lib/finance/money";
 import { createTransaction, createTransfer, createInvestmentMove } from "@/lib/server/transactions";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
@@ -238,7 +239,11 @@ export function NewTransactionModal({
 
             <label className="flex items-center gap-sm text-row text-text">
               <input type="checkbox" checked={isFixed} onChange={(e) => setIsFixed(e.target.checked)} />
-              Despesa fixa
+              <Tooltip label="Despesa fixa">
+                Marca este lançamento como um gasto fixo do mês, pra diferenciar de despesas variáveis. Só fica
+                salvo na despesa — hoje não entra em relatórios, filtros ou projeções. Para uma despesa que se
+                repete todo mês e deve aparecer nas projeções futuras, cadastre uma recorrência em vez disso.
+              </Tooltip>
             </label>
 
             {impact ? (

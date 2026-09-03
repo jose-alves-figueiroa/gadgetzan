@@ -13,6 +13,7 @@ import { Bar } from "@/components/ui/Bar";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
 import { PayInvoiceModal } from "@/components/finance/PayInvoiceModal";
 import { AdjustInvoiceModal } from "@/components/finance/AdjustInvoiceModal";
+import { EnterPastInvoiceModal } from "@/components/finance/EnterPastInvoiceModal";
 
 export default async function CardDetailPage({
   params,
@@ -98,7 +99,13 @@ export default async function CardDetailPage({
           </div>
         ) : invoice ? (
           <span className="text-micro text-pos">Fatura paga</span>
-        ) : null}
+        ) : (
+          <EnterPastInvoiceModal
+            cardId={card.id}
+            referenceMonth={`${targetMonth.year}-${String(targetMonth.month).padStart(2, "0")}`}
+            monthLabel={monthLabel}
+          />
+        )}
       </div>
 
       {invoice && invoice.transactions.length > 0 ? (
