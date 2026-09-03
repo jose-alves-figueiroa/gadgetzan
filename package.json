@@ -19,6 +19,7 @@
     "create-account": "tsx scripts/create-account.ts",
     "perf-check": "tsx scripts/perf-check.ts",
     "docker:up": "docker compose up -d",
+    "docker:up:rebuild": "docker compose up --build -d",
     "docker:down": "docker compose down --remove-orphans",
     "docker:logs": "docker compose logs -f",
     "import:gen": "tsx scripts/generate-imports.ts"
