@@ -164,6 +164,95 @@ Do not weaken, remove, or bypass tests simply to make them pass.
 
 End-to-end behavior must follow the Playwright flows defined by the acceptance criteria.
 
+## Changelog
+
+Maintain the project changelog in:
+
+```text
+CHANGELOG.md
+```
+
+The changelog records meaningful changes to the application's behavior and is written in Brazilian Portuguese (`pt-BR`).
+
+Update `CHANGELOG.md` after a requested change or implementation stage is complete and:
+
+```bash
+pnpm test
+pnpm build
+```
+
+both pass.
+
+Do not update the changelog for incomplete work or known failing tests.
+
+### Format
+
+Use this structure:
+
+```md
+## [Deploy - DD/MM/YYYY]
+
+### Modificado
+- ...
+
+### Adicionado
+- ...
+
+### Removido
+- ...
+
+### Corrigido
+- ...
+
+### Impacto
+- ...
+```
+
+Only include sections that are relevant. Do not create empty sections.
+
+### Changelog content
+
+Describe **behavioral changes**, not merely files or implementation steps.
+
+Prefer explaining:
+
+* what behavior changed;
+* relevant domain rules;
+* important edge cases;
+* affected integrations or downstream behavior;
+* relevant function, module, endpoint, or architectural names when they clarify the change;
+* the practical impact on users, data, or the system.
+
+For example, prefer:
+
+```md
+### Modificado
+- O cancelamento de créditos passou a consolidar as assinaturas por produto,
+  preservando apenas o item com maior `validUntil` como sobrevivente.
+```
+
+instead of:
+
+```md
+### Modificado
+- Refatorado `subscriptionWriteModel.ts`.
+- Adicionados testes.
+```
+
+Implementation details may be included when they are important for understanding the resulting behavior.
+
+Do not fabricate changes, impacts, deployment dates, or requirements.
+
+Do not claim a change was deployed unless it was actually deployed.
+
+Do not rewrite previous changelog entries unless correcting an error.
+
+Group related changes into a single changelog entry instead of creating one entry per commit or file.
+
+The `Impacto` section should explain the relevant consequences of the change, including preserved behavior when that is important for defining scope.
+
+When a change has not been deployed, do not use a fake `Deploy` date. Use an appropriate non-deployment heading if the project's existing changelog convention requires recording the change before deployment.
+
 ## Decisions
 
 Resolved product decisions must not be reopened.
@@ -201,6 +290,7 @@ Before changing behavior:
 5. Implement.
 6. Add or update tests.
 7. Run the relevant checks.
+8. Update `CHANGELOG.md` when the implementation is complete and all required checks pass.
 
 When a recurring implementation mistake reveals a missing **project-wide invariant**, update this file.
 
@@ -220,4 +310,3 @@ When deciding how to implement something, use this order:
 8. Reasonable implementation judgment
 
 When none of these determines the behavior and the decision affects the product, ask instead of guessing.
-
