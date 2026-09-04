@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { contributeToGoal, withdrawFromGoal } from "@/lib/server/goals";
+import { todayDateString } from "@/lib/today";
 
 export function GoalMoveModal({ goalId, kind }: { goalId: string; kind: "save" | "withdraw" }) {
   const [open, setOpen] = useState(false);
@@ -20,7 +21,7 @@ export function GoalMoveModal({ goalId, kind }: { goalId: string; kind: "save" |
       const payload = {
         goalId,
         amountCents: String(formData.get("amountCents") ?? ""),
-        competenceDate: String(formData.get("competenceDate") ?? new Date().toISOString().slice(0, 10)),
+        competenceDate: String(formData.get("competenceDate") ?? todayDateString()),
       };
       if (kind === "save") await contributeToGoal(payload);
       else await withdrawFromGoal(payload);
@@ -43,7 +44,7 @@ export function GoalMoveModal({ goalId, kind }: { goalId: string; kind: "save" |
       <Modal open={open} onClose={() => setOpen(false)} title={title}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-lg">
           <Field name="amountCents" label="Valor" placeholder="0,00" required />
-          <Field name="competenceDate" label="Data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required />
+          <Field name="competenceDate" label="Data" type="date" defaultValue={todayDateString()} required />
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
             {saving ? "Salvando…" : "Confirmar"}

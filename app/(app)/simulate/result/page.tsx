@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { todayDateString } from "@/lib/today";
 import { runSimulation, type SimulateData } from "@/lib/server/simulate";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
@@ -17,7 +18,7 @@ export default async function SimulationResultPage({ searchParams }: PageProps<"
     cardId: search?.cardId ? String(search.cardId) : null,
     accountId: search?.accountId ? String(search.accountId) : null,
     installments: Number(search?.installments ?? 1),
-    purchaseDate: String(search?.purchaseDate ?? new Date().toISOString().slice(0, 10)),
+    purchaseDate: String(search?.purchaseDate ?? todayDateString()),
   };
 
   const result = await runSimulation(data);

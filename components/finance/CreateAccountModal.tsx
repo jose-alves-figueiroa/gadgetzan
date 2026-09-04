@@ -7,6 +7,7 @@ import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { createAccount } from "@/lib/server/accounts";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
+import { todayDateString } from "@/lib/today";
 
 const TYPE_OPTIONS = [
   { value: "CHECKING", label: "Conta corrente" },
@@ -62,7 +63,7 @@ export function CreateAccountModal({ triggerLabel = "Nova conta" }: { triggerLab
             name="openingDate"
             label="Data"
             type="date"
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={todayDateString()}
             required
           />
           <label className="flex items-center gap-sm text-row text-text">

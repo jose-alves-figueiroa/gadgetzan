@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { payPurchaseRemaining } from "@/lib/server/purchases";
 import { formatBRL } from "@/lib/finance/money";
+import { todayDateString } from "@/lib/today";
 
 export function PayPurchaseRemainingModal({
   purchaseId,
@@ -73,7 +74,7 @@ export function PayPurchaseRemainingModal({
               ))}
             </select>
           </div>
-          <Field name="paidDate" label="Data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required />
+          <Field name="paidDate" label="Data" type="date" defaultValue={todayDateString()} required />
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
             {saving ? "Salvando…" : "Confirmar antecipação"}

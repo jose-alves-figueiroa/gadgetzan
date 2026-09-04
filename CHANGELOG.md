@@ -1,5 +1,15 @@
 # Changelog
 
+## [03/09/2026 - 22:09]
+
+### Corrigido
+
+- Todo campo de data que se auto-preenchia com "hoje" (novo lançamento, pagar fatura, antecipar parcelas, aportar/resgatar porquinho, nova conta, nova recorrência, onboarding, simulador) usava `new Date().toISOString().slice(0, 10)` — `toISOString()` sempre normaliza pra UTC, então de ~21h em diante (horário de Brasília, UTC-3) esse cálculo silenciosamente dava o dia **seguinte**, não hoje. Um lançamento feito às 22h de um dia ficava registrado no dia seguinte sem nenhum aviso. Novo helper único `lib/today.ts` (`todayDateString`, usando o fuso `America/Sao_Paulo` explicitamente, igual ao que `lib/server/clock.ts` já fazia só no servidor) substitui todas as ocorrências, no cliente e no servidor.
+
+### Impacto
+
+- Lançamentos já salvos com a data errada (um dia à frente) não são corrigidos automaticamente por esta mudança — pedem correção manual nos casos identificados.
+
 ## [03/09/2026 - 21:51]
 
 ### Adicionado

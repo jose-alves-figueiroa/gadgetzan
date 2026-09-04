@@ -7,6 +7,7 @@ import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { formatBRL } from "@/lib/finance/money";
+import { todayDateString } from "@/lib/today";
 import { createTransaction, createTransfer, createInvestmentMove } from "@/lib/server/transactions";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
 import { getCardImpactPreview, type CardImpactPreview } from "@/lib/server/transaction-impact";
@@ -55,7 +56,7 @@ export function NewTransactionModal({
   const [cardId, setCardId] = useState(cards[0]?.id ?? "");
   const [amountInput, setAmountInput] = useState("");
   const [installments, setInstallments] = useState(1);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayDateString());
   const [isFixed, setIsFixed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);

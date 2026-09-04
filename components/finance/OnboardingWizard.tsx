@@ -9,6 +9,7 @@ import { updateMonthStartDay } from "@/lib/server/settings";
 import { createAccount } from "@/lib/server/accounts";
 import { createRecurrenceRule } from "@/lib/server/recurrences";
 import { createCard } from "@/lib/server/cards";
+import { todayDateString } from "@/lib/today";
 
 interface CategoryOption {
   id: string;
@@ -70,7 +71,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
         nickname: String(formData.get("nickname") ?? ""),
         type: "CHECKING",
         openingBalance: String(formData.get("openingBalance") ?? "0"),
-        openingDate: String(formData.get("openingDate") ?? new Date().toISOString().slice(0, 10)),
+        openingDate: String(formData.get("openingDate") ?? todayDateString()),
         includeInTotals: true,
       });
       setAccountId(account.id);
@@ -104,7 +105,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
         method: "ACCOUNT",
         accountId,
         cardId: null,
-        startDate: new Date().toISOString().slice(0, 10),
+        startDate: todayDateString(),
         endDate: null,
       });
       next();
@@ -165,7 +166,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
           method: "ACCOUNT",
           accountId,
           cardId: null,
-          startDate: new Date().toISOString().slice(0, 10),
+          startDate: todayDateString(),
           endDate: null,
         });
       }
@@ -214,7 +215,7 @@ export function OnboardingWizard({ categories }: { categories: CategoryOption[] 
             <Field name="institution" label="Instituição" required />
             <Field name="nickname" label="Apelido" required />
             <Field name="openingBalance" label="Saldo atual" placeholder="0,00" required />
-            <Field name="openingDate" label="Data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required />
+            <Field name="openingDate" label="Data" type="date" defaultValue={todayDateString()} required />
             {error ? <p className="text-micro text-neg">{error}</p> : null}
             <Button type="submit" disabled={saving}>
               {saving ? "Salvando…" : "Continuar"}

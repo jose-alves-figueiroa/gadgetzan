@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { payInvoice } from "@/lib/server/invoice-operations";
 import { formatBRL } from "@/lib/finance/money";
+import { todayDateString } from "@/lib/today";
 
 export function PayInvoiceModal({
   invoiceId,
@@ -32,7 +33,7 @@ export function PayInvoiceModal({
         accountId: String(formData.get("accountId") ?? ""),
         sourceAccountId: viaTransfer ? String(formData.get("sourceAccountId") ?? "") : null,
         paidCents: String(formData.get("paidCents") ?? ""),
-        paidDate: String(formData.get("paidDate") ?? new Date().toISOString().slice(0, 10)),
+        paidDate: String(formData.get("paidDate") ?? todayDateString()),
       });
       setOpen(false);
     } catch (err) {
@@ -101,7 +102,7 @@ export function PayInvoiceModal({
             defaultValue={(outstandingCents / 100).toFixed(2).replace(".", ",")}
             required
           />
-          <Field name="paidDate" label="Data" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required />
+          <Field name="paidDate" label="Data" type="date" defaultValue={todayDateString()} required />
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
             {saving ? "Salvando…" : "Confirmar pagamento"}

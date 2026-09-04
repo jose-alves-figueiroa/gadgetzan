@@ -1,16 +1,4 @@
-import { formatInTimeZone } from "date-fns-tz";
-
-const APP_TIMEZONE = "America/Sao_Paulo";
-
-/**
- * "Today" as YYYY-MM-DD in the app's configured timezone — the one place
- * server code reads the wall clock. lib/finance/ functions always take
- * `today` as an explicit parameter instead, so they stay pure and
- * timezone-independent (CLAUDE.md § Dates).
- */
-export function todayDateString(): string {
-  return formatInTimeZone(new Date(), APP_TIMEZONE, "yyyy-MM-dd");
-}
+export { todayDateString } from "@/lib/today";
 
 /**
  * Prisma's client requires a full ISO-8601 DateTime even for `@db.Date`

@@ -9,6 +9,7 @@ import { createRecurrenceRule } from "@/lib/server/recurrences";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
 import { generateOccurrences } from "@/lib/finance/recurrence";
 import { addMonths, formatDateParts, parseDateParts } from "@/lib/finance/period";
+import { todayDateString } from "@/lib/today";
 
 interface Option {
   id: string;
@@ -37,7 +38,7 @@ export function CreateRecurrenceModal({
   const [frequency, setFrequency] = useState<"MONTHLY" | "WEEKLY" | "YEARLY">("MONTHLY");
   const [method, setMethod] = useState<"ACCOUNT" | "CARD">("ACCOUNT");
   const [dayOfMonth, setDayOfMonth] = useState(5);
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(todayDateString());
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
