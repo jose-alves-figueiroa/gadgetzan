@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
-import { calculateAccountBalance } from "@/lib/finance/accounts";
+import { accountTransactionDirection, calculateAccountBalance } from "@/lib/finance/accounts";
 import { isExpense, isIncome } from "@/lib/finance/transactions";
 import { todayDateString } from "@/lib/server/clock";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import { AccountActions } from "@/components/finance/AccountActions";
 
 export default async function AccountDetailPage({ params }: PageProps<"/accounts/[id]">) {
@@ -79,13 +80,31 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
             </TableRow>
           </TableHead>
           <TableBody>
-            {transactions.slice(0, 20).map((t) => (
-              <TableRow key={t.id}>
-                <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
-                <TableCell className="text-text">{t.description}</TableCell>
-                <TableCell className="tabular-money text-right text-text">{formatBRL(t.amountCents)}</TableCell>
-              </TableRow>
-            ))}
+            {transactions.slice(0, 20).map((t) => {
+              const direction = accountTransactionDirection(id, {
+                id: t.id,
+                kind: t.kind,
+                amountCents: t.amountCents,
+                competenceDate: t.competenceDate.toISOString().slice(0, 10),
+                accountId: t.accountId,
+                toAccountId: t.toAccountId,
+                method: t.method,
+              });
+              return (
+                <ClickableTableRow key={t.id} href={`/transactions/${t.id}`}>
+                  <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
+                  <TableCell className="text-text">{t.description}</TableCell>
+                  <TableCell
+                    className={`tabular-money text-right ${
+                      direction === "in" ? "text-pos" : direction === "out" ? "text-neg" : "text-text"
+                    }`}
+                  >
+                    {direction === "in" ? "+" : direction === "out" ? "−" : ""}
+                    {formatBRL(t.amountCents)}
+                  </TableCell>
+                </ClickableTableRow>
+              );
+            })}
           </TableBody>
         </Table>
       ) : (

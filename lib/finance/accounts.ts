@@ -46,3 +46,33 @@ export function calculateAccountBalance(
 
   return balance;
 }
+
+/**
+ * Whether a transaction moved money into ("in"), out of ("out"), or left
+ * untouched (null) a given account — the same per-kind sign convention as
+ * calculateAccountBalance, exposed for display (e.g. coloring a ledger row
+ * green/red) instead of accumulating a total.
+ */
+export function accountTransactionDirection(
+  accountId: string,
+  t: FinanceTransaction
+): "in" | "out" | null {
+  switch (t.kind) {
+    case "INCOME":
+      return t.accountId === accountId ? "in" : null;
+    case "EXPENSE":
+      return t.accountId === accountId && t.method === "ACCOUNT" ? "out" : null;
+    case "TRANSFER":
+      if (t.accountId === accountId) return "out";
+      if (t.toAccountId === accountId) return "in";
+      return null;
+    case "INVESTMENT_IN":
+      return t.accountId === accountId ? "out" : null;
+    case "INVESTMENT_OUT":
+      return t.accountId === accountId ? "in" : null;
+    case "CARD_PAYMENT":
+      return t.accountId === accountId ? "out" : null;
+    default:
+      return null;
+  }
+}

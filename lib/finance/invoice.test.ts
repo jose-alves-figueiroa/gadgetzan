@@ -5,6 +5,7 @@ import {
   calculateOutstandingBalance,
   closingForReferenceMonth,
   groupRemainingInstallmentsByInvoice,
+  reverseInvoicePayment,
 } from "./invoice";
 
 describe("R3 — invoice assignment", () => {
@@ -73,6 +74,24 @@ describe("R3 — partial payment leaves a visible outstanding balance", () => {
 
   it("an unpaid invoice is outstanding for its full total", () => {
     expect(calculateOutstandingBalance(1_000_00, null)).toBe(1_000_00);
+  });
+});
+
+describe("R3 — undoing a payment (\"Desfazer pagamento\" / deleting a CARD_PAYMENT)", () => {
+  it("a full payment reversed leaves the invoice unpaid again", () => {
+    expect(reverseInvoicePayment(1_000_00, 1_000_00, 1_000_00)).toEqual({ paidCents: 0, stillSettled: false });
+  });
+
+  it("reversing one of two partial payments leaves the other outstanding", () => {
+    expect(reverseInvoicePayment(1_000_00, 1_000_00, 400_00)).toEqual({ paidCents: 600_00, stillSettled: false });
+  });
+
+  it("never goes negative even if reversing more than what's on record", () => {
+    expect(reverseInvoicePayment(1_000_00, 300_00, 1_000_00)).toEqual({ paidCents: 0, stillSettled: false });
+  });
+
+  it("treats a null paidCents (never paid) as zero", () => {
+    expect(reverseInvoicePayment(1_000_00, null, 100_00)).toEqual({ paidCents: 0, stillSettled: false });
   });
 });
 

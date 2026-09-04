@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateAccountBalance } from "./accounts";
+import { accountTransactionDirection, calculateAccountBalance } from "./accounts";
 import type { FinanceTransaction } from "./types";
 
 const ACC = "acc1";
@@ -72,5 +72,42 @@ describe("R12 — account balance", () => {
       tx({ kind: "INCOME", amountCents: 50_000, competenceDate: "2026-09-15" }),
     ], TODAY);
     expect(balance).toBe(100_000);
+  });
+});
+
+describe("R12 — per-transaction direction (ledger row coloring)", () => {
+  it("INCOME into this account is \"in\"", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "INCOME", amountCents: 50_000 }))).toBe("in");
+  });
+
+  it("EXPENSE debited from this account (method=ACCOUNT) is \"out\"", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "EXPENSE", amountCents: 20_000, method: "ACCOUNT" }))).toBe(
+      "out"
+    );
+  });
+
+  it("a card EXPENSE (method=CARD) doesn't touch this account", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "EXPENSE", amountCents: 20_000, method: "CARD" }))).toBeNull();
+  });
+
+  it("TRANSFER is \"out\" for the source account and \"in\" for the destination", () => {
+    const t = tx({ kind: "TRANSFER", amountCents: 200_000, accountId: ACC, toAccountId: OTHER });
+    expect(accountTransactionDirection(ACC, t)).toBe("out");
+    expect(accountTransactionDirection(OTHER, t)).toBe("in");
+  });
+
+  it("INVESTMENT_IN is \"out\", INVESTMENT_OUT is \"in\"", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "INVESTMENT_IN", amountCents: 30_000 }))).toBe("out");
+    expect(accountTransactionDirection(ACC, tx({ kind: "INVESTMENT_OUT", amountCents: 10_000 }))).toBe("in");
+  });
+
+  it("CARD_PAYMENT is \"out\" for the paying account", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "CARD_PAYMENT", amountCents: 234_00 }))).toBe("out");
+  });
+
+  it("CARD_ADJUSTMENT and GOAL_IN/GOAL_OUT never touch the account", () => {
+    expect(accountTransactionDirection(ACC, tx({ kind: "CARD_ADJUSTMENT", amountCents: 1_840 }))).toBeNull();
+    expect(accountTransactionDirection(ACC, tx({ kind: "GOAL_IN", amountCents: 5_000 }))).toBeNull();
+    expect(accountTransactionDirection(ACC, tx({ kind: "GOAL_OUT", amountCents: 2_000 }))).toBeNull();
   });
 });

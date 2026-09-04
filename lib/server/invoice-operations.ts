@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
 import { toPrismaDate, todayDateString } from "./clock";
-import { adjustInvoiceCore, applyInvoicePaymentCore, createTransferCore } from "./transaction-core";
+import { adjustInvoiceCore, applyInvoicePaymentCore, createTransferCore, unpayInvoiceCore } from "./transaction-core";
 
 const PayInvoiceInput = z.object({
   invoiceId: z.string().min(1),
@@ -33,6 +33,16 @@ export async function payInvoice(input: z.input<typeof PayInvoiceInput>) {
   }
 
   await applyInvoicePaymentCore(userId, data);
+
+  revalidatePath("/cards");
+  revalidatePath("/accounts");
+  revalidatePath("/");
+}
+
+/** "Desfazer pagamento" — reverses every payment on the invoice back to unpaid. */
+export async function unpayInvoice(invoiceId: string) {
+  const userId = await requireUserId();
+  await unpayInvoiceCore(userId, invoiceId);
 
   revalidatePath("/cards");
   revalidatePath("/accounts");

@@ -11,9 +11,11 @@ import { todayDateString } from "@/lib/server/clock";
 import { Card } from "@/components/ui/Card";
 import { Bar } from "@/components/ui/Bar";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
+import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import { PayInvoiceModal } from "@/components/finance/PayInvoiceModal";
 import { AdjustInvoiceModal } from "@/components/finance/AdjustInvoiceModal";
 import { EnterPastInvoiceModal } from "@/components/finance/EnterPastInvoiceModal";
+import { UnpayInvoiceButton } from "@/components/finance/UnpayInvoiceButton";
 import { getUnpaidInvoiceTotalCents } from "@/lib/server/invoices";
 
 export default async function CardDetailPage({
@@ -66,13 +68,19 @@ export default async function CardDetailPage({
       </div>
 
       <Card className="gap-md">
-        <div className="flex items-center justify-between text-row">
-          <span className="text-dim">Limite</span>
-          <span className="tabular-money text-text">{formatBRL(card.limitCents)}</span>
-        </div>
-        <div className="flex items-center justify-between text-row">
-          <span className="text-dim">Disponível</span>
-          <span className="tabular-money text-text">{formatBRL(availableCents)}</span>
+        <div className="grid grid-cols-3 gap-md">
+          <div className="flex flex-col gap-xs">
+            <span className="text-label uppercase text-dim">Limite</span>
+            <span className="tabular-money text-kpi-md text-text">{formatBRL(card.limitCents)}</span>
+          </div>
+          <div className="flex flex-col gap-xs">
+            <span className="text-label uppercase text-dim">Comprometido</span>
+            <span className="tabular-money text-kpi-md text-text">{formatBRL(unpaidInvoiceTotalCents)}</span>
+          </div>
+          <div className="flex flex-col gap-xs">
+            <span className="text-label uppercase text-dim">Disponível</span>
+            <span className="tabular-money text-kpi-md text-pos">{formatBRL(availableCents)}</span>
+          </div>
         </div>
         <Bar
           percent={utilizationPercent}
@@ -96,7 +104,10 @@ export default async function CardDetailPage({
             <AdjustInvoiceModal invoiceId={invoice.id} />
           </div>
         ) : invoice ? (
-          <span className="text-micro text-pos">Fatura paga</span>
+          <div className="flex items-center gap-md">
+            <span className="text-micro text-pos">Fatura paga</span>
+            <UnpayInvoiceButton invoiceId={invoice.id} />
+          </div>
         ) : (
           <EnterPastInvoiceModal
             cardId={card.id}
@@ -118,18 +129,25 @@ export default async function CardDetailPage({
           </TableHead>
           <TableBody>
             {invoice.transactions.map((t) => (
-              <TableRow key={t.id}>
+              <ClickableTableRow key={t.id} href={`/transactions/${t.id}`}>
                 <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
                 <TableCell className="text-text">{t.description}</TableCell>
                 <TableCell className="text-muted">{t.category?.name ?? "—"}</TableCell>
                 <TableCell className="tabular-money text-right text-text">{formatBRL(t.amountCents)}</TableCell>
-              </TableRow>
+              </ClickableTableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
         <p className="text-micro text-dim">Nenhum lançamento nesta fatura.</p>
       )}
+
+      {invoice ? (
+        <div className="flex items-center justify-between border-t border-line pt-sm text-row">
+          <span className="text-dim">Total da fatura</span>
+          <span className="tabular-money text-kpi-md text-text">{formatBRL(invoiceTotal)}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

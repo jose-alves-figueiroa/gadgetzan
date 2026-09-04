@@ -68,6 +68,21 @@ export function calculateOutstandingBalance(invoiceTotalCents: number, paidCents
   return Math.max(0, invoiceTotalCents - (paidCents ?? 0));
 }
 
+/**
+ * Undoing a payment (deleting a CARD_PAYMENT, or "Desfazer pagamento") — the
+ * paidCents to persist afterward, and whether the invoice is still fully
+ * settled once that amount is taken back. Never negative: reversing more than
+ * what's on record just floors at zero rather than going negative.
+ */
+export function reverseInvoicePayment(
+  invoiceTotalCents: number,
+  paidCentsSoFar: number | null,
+  reversedCents: number
+): { paidCents: number; stillSettled: boolean } {
+  const paidCents = Math.max(0, (paidCentsSoFar ?? 0) - reversedCents);
+  return { paidCents, stillSettled: calculateOutstandingBalance(invoiceTotalCents, paidCents) === 0 };
+}
+
 export interface UnpaidInstallment {
   invoiceId: string | null;
   amountCents: number;

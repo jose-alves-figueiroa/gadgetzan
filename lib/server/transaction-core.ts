@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import type { Card } from "@prisma/client";
-import { assignInvoice, calculateOutstandingBalance } from "@/lib/finance/invoice";
+import { assignInvoice, calculateOutstandingBalance, reverseInvoicePayment } from "@/lib/finance/invoice";
 import { buildInstallmentPlan, buildRemainingInstallmentPlan } from "@/lib/finance/installments";
 import { findOrCreateInvoice } from "./invoices";
 import { toPrismaDate } from "./clock";
@@ -41,6 +41,8 @@ export interface ExpenseOrIncomeCoreInput extends BatchTag {
   installments?: number;
   isFixed?: boolean;
   note?: string | null;
+  /** Links this transaction back to the RecurrenceRule occurrence it fulfills (R6). */
+  recurrenceId?: string | null;
 }
 
 /** Mirrors createTransaction's (transactions.ts) ACCOUNT/CARD/installment branching exactly. */
@@ -72,6 +74,7 @@ export async function createExpenseOrIncomeCore(userId: string, input: ExpenseOr
         note: input.note ?? null,
         externalId: input.externalId ?? null,
         importBatchId: input.importBatchId ?? null,
+        recurrenceId: input.recurrenceId ?? null,
       },
     });
   }
@@ -90,6 +93,7 @@ export async function createExpenseOrIncomeCore(userId: string, input: ExpenseOr
       note: input.note ?? null,
       externalId: input.externalId ?? null,
       importBatchId: input.importBatchId ?? null,
+      recurrenceId: input.recurrenceId ?? null,
     },
   });
 }
@@ -235,6 +239,8 @@ export interface InvestmentMoveCoreInput extends BatchTag {
   accountId: string;
   amountCents: number;
   competenceDate: string;
+  /** Links this transaction back to the RecurrenceRule occurrence it fulfills (R6). */
+  recurrenceId?: string | null;
 }
 
 export async function createInvestmentMoveCore(userId: string, input: InvestmentMoveCoreInput) {
@@ -253,6 +259,7 @@ export async function createInvestmentMoveCore(userId: string, input: Investment
       method: "ACCOUNT",
       externalId: input.externalId ?? null,
       importBatchId: input.importBatchId ?? null,
+      recurrenceId: input.recurrenceId ?? null,
     },
   });
 }
@@ -340,6 +347,95 @@ export async function applyInvoicePaymentCore(userId: string, input: InvoicePaym
   ]);
 
   return transaction;
+}
+
+const TRANSFER_FOR_INVOICE_PAYMENT_NOTE = "Transferência para pagamento de fatura";
+
+/**
+ * "Pagar via transferência" (payInvoice with sourceAccountId) creates the
+ * Transfer and the CARD_PAYMENT back to back with no field linking them —
+ * so undoing the payment has to find its companion the same way a human
+ * would: same destination account, amount, date and note. Only acts when
+ * that match is unambiguous (exactly one candidate); with more than one, or
+ * none, the transfer is left alone rather than guessing which one to delete.
+ */
+async function findCompanionTransferIds(
+  userId: string,
+  payments: Array<{ accountId: string | null; amountCents: number; competenceDate: Date }>
+): Promise<string[]> {
+  const ids: string[] = [];
+  for (const payment of payments) {
+    if (!payment.accountId) continue;
+    const matches = await prisma.transaction.findMany({
+      where: {
+        userId,
+        kind: "TRANSFER",
+        toAccountId: payment.accountId,
+        amountCents: payment.amountCents,
+        competenceDate: payment.competenceDate,
+        note: TRANSFER_FOR_INVOICE_PAYMENT_NOTE,
+      },
+      select: { id: true },
+    });
+    if (matches.length === 1) ids.push(matches[0].id);
+  }
+  return ids;
+}
+
+/**
+ * Deletes a transaction, reversing any side effect it created. A CARD_PAYMENT
+ * debited an account and advanced Invoice.paidCents/paidAt
+ * (applyInvoicePaymentCore) — deleting it through the generic transaction
+ * delete must undo exactly that, or the invoice keeps counting money that was
+ * never actually paid. If it was paid via a transfer between accounts, that
+ * unambiguous companion Transfer is reversed too, or the source account would
+ * stay permanently short the transferred amount.
+ */
+export async function deleteTransactionCore(userId: string, id: string) {
+  const transaction = await prisma.transaction.findFirst({ where: { id, userId } });
+  if (!transaction) return;
+
+  if (transaction.kind === "CARD_PAYMENT" && transaction.invoiceId) {
+    const invoice = await prisma.invoice.findFirst({ where: { id: transaction.invoiceId, userId } });
+    if (invoice) {
+      const invoiceTotalCents = invoice.manualTotalCents ?? (await sumInvoiceChargeCents(invoice.id));
+      const { paidCents, stillSettled } = reverseInvoicePayment(invoiceTotalCents, invoice.paidCents, transaction.amountCents);
+      const companionTransferIds = await findCompanionTransferIds(userId, [transaction]);
+
+      await prisma.$transaction([
+        prisma.transaction.delete({ where: { id: transaction.id } }),
+        ...(companionTransferIds.length
+          ? [prisma.transaction.deleteMany({ where: { id: { in: companionTransferIds }, userId } })]
+          : []),
+        prisma.invoice.update({
+          where: { id: invoice.id },
+          data: { paidCents, paidAt: stillSettled ? invoice.paidAt : null },
+        }),
+      ]);
+      return;
+    }
+  }
+
+  await prisma.transaction.deleteMany({ where: { id, userId } });
+}
+
+/** "Desfazer pagamento" — reverses every CARD_PAYMENT tied to the invoice back
+ * to unpaid, including any unambiguous companion Transfer from "pagar via
+ * transferência" (see findCompanionTransferIds). */
+export async function unpayInvoiceCore(userId: string, invoiceId: string) {
+  const invoice = await prisma.invoice.findFirst({ where: { id: invoiceId, userId } });
+  if (!invoice) throw new Error("Fatura não encontrada.");
+
+  const payments = await prisma.transaction.findMany({ where: { userId, invoiceId, kind: "CARD_PAYMENT" } });
+  const companionTransferIds = await findCompanionTransferIds(userId, payments);
+
+  await prisma.$transaction([
+    prisma.transaction.deleteMany({ where: { userId, invoiceId, kind: "CARD_PAYMENT" } }),
+    ...(companionTransferIds.length
+      ? [prisma.transaction.deleteMany({ where: { id: { in: companionTransferIds }, userId } })]
+      : []),
+    prisma.invoice.update({ where: { id: invoice.id }, data: { paidCents: 0, paidAt: null } }),
+  ]);
 }
 
 export interface AdjustInvoiceCoreInput extends BatchTag {

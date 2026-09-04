@@ -1,5 +1,24 @@
 # Changelog
 
+## [03/09/2026 - 21:35]
+
+### Adicionado
+
+- Tela do cartão (`/cards/[id]`) passou a mostrar "Comprometido" (total não pago comprometido contra o limite) como terceiro KPI, ao lado de Limite e Disponível — antes só limite e disponível apareciam, então não dava pra ver quanto já tinha sido gasto sem fazer conta de cabeça. A lista de cartões (`/cards`) ganhou a mesma informação na legenda de cada cartão.
+- Rodapé "Total da fatura" abaixo da tabela de lançamentos da fatura, sempre que existe uma fatura para o mês (inclusive quando ela foi lançada manualmente via "Lançar fatura já existente" e não tem nenhum lançamento associado — antes esse total nunca aparecia em lugar nenhum nesse caso).
+- Botão "Desfazer pagamento" na fatura quando ela está paga — reverte o(s) pagamento(s) e a fatura volta a aparecer como em aberto. Se o pagamento foi feito com "Transferir de outra conta", a transferência correspondente é desfeita junto (só quando o casamento entre pagamento e transferência é inequívoco por conta/valor/data/nota; em caso de ambiguidade a transferência não é tocada e precisa ser excluída manualmente em Lançamentos).
+- Linhas de lançamento nas tabelas somente-leitura de Cartão, Conta e Porquinho agora abrem `/transactions/[id]` ao clicar (ou Enter/Espaço com foco no teclado) — antes essas tabelas eram só leitura, sem nenhuma forma de editar ou excluir o que aparecia lá.
+- Conta (`/accounts/[id]`): valores na tabela de lançamentos agora aparecem em verde (entrada nessa conta) ou vermelho (saída dessa conta), com o mesmo sinal usado no cálculo de saldo (`calculateAccountBalance`) — TRANSFER, INVESTMENT_IN/OUT e CARD_PAYMENT entram na conta certa em vez de ficar tudo na cor neutra.
+
+### Corrigido
+
+- Excluir um lançamento de pagamento de fatura (`CARD_PAYMENT`) pela tela de Lançamentos apagava a transação mas não atualizava `paidCents`/`paidAt` da fatura — ela continuava aparecendo como paga mesmo com o pagamento excluído. `deleteTransaction` agora reverte a fatura corretamente nesse caso (mesma lógica usada pelo novo "Desfazer pagamento").
+
+### Impacto
+
+- Essas mudanças não alteram nenhum valor já salvo — só passam a exibir e permitir reverter dados que já existiam (fatura comprometida, total da fatura, pagamentos).
+- Quem já excluiu um pagamento de fatura antes desta correção pode ter uma fatura com `paidCents` desatualizado; abrir a fatura e usar "Desfazer pagamento" resolve.
+
 ## [03/09/2026 - 21:10]
 
 ### Adicionado

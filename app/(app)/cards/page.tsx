@@ -46,7 +46,7 @@ export default async function CardsPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-row font-medium text-text">{card.name}</span>
                         <span className="tabular-money text-row text-dim">
-                          {formatBRL(availableCents)} disponível
+                          {formatBRL(unpaidInvoiceTotalCents)} comprometido · {formatBRL(availableCents)} disponível
                         </span>
                       </div>
                       <Bar

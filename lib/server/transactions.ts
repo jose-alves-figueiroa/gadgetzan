@@ -10,6 +10,7 @@ import {
   createExpenseOrIncomeCore,
   createInvestmentMoveCore,
   createTransferCore,
+  deleteTransactionCore,
 } from "./transaction-core";
 import { toPrismaDate } from "./clock";
 
@@ -110,8 +111,10 @@ export async function createInvestmentMove(input: z.input<typeof InvestmentMoveI
 
 export async function deleteTransaction(id: string) {
   const userId = await requireUserId();
-  await prisma.transaction.deleteMany({ where: { id, userId } });
+  await deleteTransactionCore(userId, id);
   revalidatePath("/transactions");
+  revalidatePath("/cards");
+  revalidatePath("/accounts");
   revalidatePath("/");
 }
 
