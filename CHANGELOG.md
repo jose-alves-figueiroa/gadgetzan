@@ -1,5 +1,12 @@
 # Changelog
 
+## [03/09/2026 - 23:23]
+
+### Adicionado
+
+- Novo lançamento parcelado no cartão: quando há mais de 1 parcela, um seletor "O valor acima é" deixa escolher entre "O total da compra" (comportamento de sempre — R$100 em 3x vira 3 parcelas de ~R$33,33) e "De cada parcela" (novo — 3x de R$100 vira 3 parcelas de R$100, total R$300, do jeito que o comércio costuma anunciar parcelamento). O rótulo do campo "Valor" muda para "Valor de cada parcela" nesse segundo modo, e o texto abaixo de "Parcelas" mostra o total calculado em vez da aproximação por parcela. Sempre envia o total pro servidor — o modo só muda a interpretação do que foi digitado.
+- `centsToDecimalString` em `lib/finance/money.ts` (inverso de `toCents`, sem o "R$") — consolida uma função que já existia copiada em três modais diferentes.
+
 ## [03/09/2026 - 22:56]
 
 ### Modificado

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { formatBRL } from "@/lib/finance/money";
+import { formatBRL, toCents, centsToDecimalString } from "@/lib/finance/money";
 import { todayDateString } from "@/lib/today";
 import { createTransaction, createTransfer, createInvestmentMove } from "@/lib/server/transactions";
 import { markCreated } from "@/components/ui/HighlightOnCreate";
@@ -56,11 +56,33 @@ export function NewTransactionModal({
   const [cardId, setCardId] = useState(cards[0]?.id ?? "");
   const [amountInput, setAmountInput] = useState("");
   const [installments, setInstallments] = useState(1);
+  const [amountMode, setAmountMode] = useState<"TOTAL" | "PER_INSTALLMENT">("TOTAL");
   const [date, setDate] = useState(todayDateString());
   const [isFixed, setIsFixed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [impact, setImpact] = useState<CardImpactPreview | null>(null);
+
+  // "3x de R$100" (per-installment, total R$300) vs the total split across
+  // installments (R$100 ÷ 3 ≈ R$33,33 each) — only ambiguous with 2+
+  // installments, and always resolves to the TOTAL the server expects.
+  const isPerInstallment = method === "CARD" && installments > 1 && amountMode === "PER_INSTALLMENT";
+  const safeAmountCents = (() => {
+    try {
+      return toCents(amountInput);
+    } catch {
+      return 0;
+    }
+  })();
+
+  function resolveTotalAmountInput(): string {
+    if (!isPerInstallment || !amountInput) return amountInput;
+    try {
+      return centsToDecimalString(toCents(amountInput) * installments);
+    } catch {
+      return amountInput;
+    }
+  }
 
   useEffect(() => {
     if (!cards.some((c) => c.id === cardId)) {
@@ -75,8 +97,7 @@ export function NewTransactionModal({
     }
     const handle = setTimeout(async () => {
       try {
-        const { toCents } = await import("@/lib/finance/money");
-        const cents = toCents(amountInput);
+        const cents = toCents(resolveTotalAmountInput());
         const preview = await getCardImpactPreview(cardId, cents, installments, date);
         setImpact(preview);
       } catch {
@@ -84,7 +105,7 @@ export function NewTransactionModal({
       }
     }, 300);
     return () => clearTimeout(handle);
-  }, [type, method, cardId, amountInput, installments, date]);
+  }, [type, method, cardId, amountInput, installments, date, amountMode]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -116,7 +137,7 @@ export function NewTransactionModal({
         const transaction = await createTransaction({
           kind: type,
           description: String(formData.get("description") ?? ""),
-          amountCents: amountInput,
+          amountCents: resolveTotalAmountInput(),
           competenceDate: date,
           categoryId: String(formData.get("categoryId") ?? ""),
           method,
@@ -132,6 +153,7 @@ export function NewTransactionModal({
       (event.target as HTMLFormElement).reset();
       setAmountInput("");
       setInstallments(1);
+      setAmountMode("TOTAL");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao salvar lançamento.");
     } finally {
@@ -149,7 +171,7 @@ export function NewTransactionModal({
         ) : null}
 
         <Field
-          label="Valor"
+          label={isPerInstallment ? "Valor de cada parcela" : "Valor"}
           placeholder="0,00"
           required
           value={amountInput}
@@ -235,15 +257,33 @@ export function NewTransactionModal({
                   onChange={(e) => setInstallments(Number(e.target.value))}
                   hint={
                     installments > 1 && amountInput ? (
-                      <>
-                        {installments}× de aprox.{" "}
-                        <span className="tabular-money">
-                          {formatBRL(Math.floor((Number(amountInput.replace(/\D/g, "")) || 0) / installments))}
-                        </span>
-                      </>
+                      amountMode === "TOTAL" ? (
+                        <>
+                          {installments}× de aprox.{" "}
+                          <span className="tabular-money">{formatBRL(Math.floor(safeAmountCents / installments))}</span>
+                        </>
+                      ) : (
+                        <>
+                          Total da compra:{" "}
+                          <span className="tabular-money">{formatBRL(safeAmountCents * installments)}</span>
+                        </>
+                      )
                     ) : undefined
                   }
                 />
+                {installments > 1 ? (
+                  <div className="flex flex-col gap-xs">
+                    <span className="text-micro text-text/70">O valor acima é</span>
+                    <Segmented
+                      options={[
+                        { value: "TOTAL", label: "O total da compra" },
+                        { value: "PER_INSTALLMENT", label: "De cada parcela" },
+                      ]}
+                      value={amountMode}
+                      onChange={(v) => setAmountMode(v as typeof amountMode)}
+                    />
+                  </div>
+                ) : null}
               </>
             )}
 

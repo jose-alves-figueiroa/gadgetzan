@@ -5,10 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { enterPastInvoice } from "@/lib/server/invoice-operations";
-
-function centsToInputValue(cents: number): string {
-  return (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { centsToDecimalString } from "@/lib/finance/money";
 
 /**
  * Enters (or, via `enterPastInvoice`'s upsert on cardId+referenceMonth,
@@ -69,7 +66,7 @@ export function EnterPastInvoiceModal({
             name="totalCents"
             label="Total da fatura"
             placeholder="0,00"
-            defaultValue={defaultValueCents !== undefined ? centsToInputValue(defaultValueCents) : undefined}
+            defaultValue={defaultValueCents !== undefined ? centsToDecimalString(defaultValueCents) : undefined}
             required
           />
           {error ? <p className="text-micro text-neg">{error}</p> : null}

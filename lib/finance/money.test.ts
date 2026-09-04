@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toCents, formatBRL } from "./money";
+import { toCents, formatBRL, centsToDecimalString } from "./money";
 
 describe("toCents", () => {
   it("parses '1.234,56' with a thousands separator", () => {
@@ -39,5 +39,15 @@ describe("formatBRL", () => {
   it("never renders negative zero (e.g. from negating an empty total)", () => {
     expect(formatBRL(-0, { compact: true })).toBe(formatBRL(0, { compact: true }));
     expect(formatBRL(-0, { compact: true })).not.toMatch(/^-/);
+  });
+});
+
+describe("centsToDecimalString", () => {
+  it("formats with a comma decimal and no currency symbol", () => {
+    expect(centsToDecimalString(123456)).toBe("1.234,56");
+  });
+
+  it("round-trips through toCents", () => {
+    expect(toCents(centsToDecimalString(91000))).toBe(91000);
   });
 });

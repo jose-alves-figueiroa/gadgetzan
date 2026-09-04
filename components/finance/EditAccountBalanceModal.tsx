@@ -6,10 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { updateAccountOpeningBalance } from "@/lib/server/accounts";
-
-function centsToInputValue(cents: number): string {
-  return (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { centsToDecimalString } from "@/lib/finance/money";
 
 export function EditAccountBalanceModal({
   accountId,
@@ -60,7 +57,7 @@ export function EditAccountBalanceModal({
             name="openingBalance"
             label="Saldo inicial"
             placeholder="0,00"
-            defaultValue={centsToInputValue(openingBalanceCents)}
+            defaultValue={centsToDecimalString(openingBalanceCents)}
             required
           />
           <Field name="openingDate" label="Data" type="date" defaultValue={openingDate} required />

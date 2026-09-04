@@ -39,3 +39,12 @@ export function formatBRL(cents: number, options: { compact?: boolean } = {}): s
     maximumFractionDigits: showCents ? 2 : 0,
   }).format(value);
 }
+
+/**
+ * Integer centavos as a bare pt-BR decimal string ("1234,56", no "R$"
+ * prefix) — the inverse of toCents, for pre-filling an editable amount
+ * input (a `Field`'s `defaultValue`/`value`) from a stored value.
+ */
+export function centsToDecimalString(cents: number): string {
+  return (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}

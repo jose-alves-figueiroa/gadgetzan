@@ -5,10 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { updateInvestmentValue } from "@/lib/server/investments";
-
-function centsToInputValue(cents: number): string {
-  return (cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { centsToDecimalString } from "@/lib/finance/money";
 
 /** Manual revaluation (return/loss) or correcting a value entered wrong — a
  * contribution/withdrawal already keeps currentCents in sync on its own. */
@@ -46,7 +43,7 @@ export function UpdateInvestmentValueModal({ investmentId, currentCents }: { inv
             Pra refletir um rendimento, perda ou corrigir um valor lançado errado — não mexe em nenhum lançamento,
             só no valor atual do investimento.
           </p>
-          <Field name="currentCents" label="Valor atual" placeholder="0,00" defaultValue={centsToInputValue(currentCents)} required />
+          <Field name="currentCents" label="Valor atual" placeholder="0,00" defaultValue={centsToDecimalString(currentCents)} required />
           {error ? <p className="text-micro text-neg">{error}</p> : null}
           <Button type="submit" disabled={saving}>
             {saving ? "Salvando…" : "Salvar"}
