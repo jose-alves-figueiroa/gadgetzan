@@ -19,6 +19,9 @@ Status convention: `[ ]` open · `[~]` partially addressed · `[x]` resolved.
 | 5 | [Account editing covers only opening balance/date](#5-account-editing-covers-only-opening-balancedate) | `[ ]` open |
 | 6 | [Investment revaluation and per-investment aporte/resgate are minimal](#6-investment-revaluation-and-per-investment-aporteresgate-are-minimal) | `[ ]` open |
 | 7 | [`ClickableTableRow` isn't a real link](#7-clickabletablerow-isnt-a-real-link) | `[ ]` open |
+| 8 | [Card detail screen never shows how much of the invoice is already paid](#8-card-detail-screen-never-shows-how-much-of-the-invoice-is-already-paid) | `[ ]` open |
+| 9 | [No edit path for a card's limit (or any other field) after creation](#9-no-edit-path-for-a-cards-limit-or-any-other-field-after-creation) | `[ ]` open |
+| 10 | [Card screens never display closing/due day](#10-card-screens-never-display-closingdue-day) | `[ ]` open |
 
 ---
 
@@ -110,6 +113,52 @@ The topbar's `‹ month ›` reads/writes a `?month=` param on whatever page is 
 `ClickableTableRow` fakes anchor semantics (`role="link"` + `tabIndex` + `onClick`/`onKeyDown`) since a real `<a>` can't wrap a `<tr>`. Click and keyboard (Enter/Space) work; things a real `<a>` gives you for free — cmd/ctrl-click or middle-click to open in a new tab, "copy link," drag-to-bookmark — don't.
 
 **Why not fixed**: a real fix means restructuring the table markup (or replacing `<tr>` semantics) across every screen that uses `ClickableTableRow`, not a local change to the component itself.
+
+---
+
+## 8. Card detail screen never shows how much of the invoice is already paid
+
+**Status**: `[ ]` open — reported by the user against a real invoice (September 2026 card invoice, partially paid R$ 652,91 of R$ 1.354,00).
+
+**Where**: `app/(app)/cards/[id]/page.tsx`.
+
+`invoiceTotal` (line 55–57) is deliberately the gross sum of `EXPENSE`/`CARD_ADJUSTMENT` charges for the invoice — it already correctly excludes the `CARD_PAYMENT` row, and `outstanding = calculateOutstandingBalance(invoiceTotal, invoice.paidCents)` (line 58) is computed correctly and correctly gates the "Pagar fatura"/"Fatura paga" branch (line 95). So a partial payment *is* recorded and accounted for internally.
+
+The screen just never surfaces that: the only number shown under "Total da fatura" is the gross `invoiceTotal`, with no "Pago" / "Restante" breakdown next to it. The `CARD_PAYMENT` transaction does appear as an ordinary row in the transaction table, but nothing calls out that it already reduced what's owed. After paying R$ 652,91 of a R$ 1.354,00 invoice, the footer still reads "Total da fatura: R$ 1.354,00" with no visible R$ 701,09 anywhere on the page — reading, at a glance, as if the payment "wasn't computed," even though `PayInvoiceModal`'s own "Em aberto" field (only visible once the modal is opened) would show the correct R$ 701,09.
+
+**Why not fixed**: not investigated for a fix yet — the user asked to log the symptom now rather than debug live.
+
+**How to apply**: when picked up, add an explicit "Pago" / "Restante a pagar" line next to "Total da fatura" (both already computable from `invoice.paidCents` and `outstanding`, no new query needed) rather than treating the gross total as the only headline number.
+
+---
+
+## 9. No edit path for a card's limit (or any other field) after creation
+
+**Status**: `[ ]` open — reported by the user ("não consigo mexer no limite de um cartão").
+
+**Where**: `lib/server/cards.ts`.
+
+`lib/server/cards.ts` only exports `createCard` and `listCards` — there is no `updateCard`, and no edit UI anywhere under `/cards`. `limitCents`, `closingDay`, `dueDay`, `name`, and `accountId` are all set once at creation and have no revisit path, the same gap [[5]](#5-account-editing-covers-only-opening-balancedate) already documents for accounts.
+
+**Why not fixed**: no edit story for cards has been scoped yet — creation-only was enough to satisfy Stage 3's setup-form story, and nothing since has added an edit path.
+
+**How to apply**: follow the same shape as `updateAccountOpeningBalance` (item 5) — a dedicated update action + modal, validated with the same `CardInput` bounds already enforced at creation (`closingDay`/`dueDay` 1–28, `limitCents` positive).
+
+---
+
+## 10. Card screens never display closing/due day
+
+**Status**: `[ ]` open — reported by the user ("não dá para ver vencimento, nem fechamento").
+
+**Where**: `app/(app)/cards/page.tsx`, `app/(app)/cards/[id]/page.tsx`.
+
+`Card.closingDay`/`Card.dueDay` are written once by `CreateCardModal` and read back internally (`assignInvoice(todayDateString(), card.closingDay, card.dueDay)` in `cards/[id]/page.tsx:46`) to pick the currently-open invoice, but neither value is ever rendered anywhere in the UI. Once a card is created there is no way to see, on-screen, which day it closes or which day it's due — only to infer it indirectly from which month an invoice lands in.
+
+**Why not fixed**: no display story for these fields was ever scoped — `CreateCardModal`'s own helper text ("Compras feitas até o dia {closingDay} entram na fatura deste mês…") is the only place either value is ever shown, and only during creation, before the value is even saved.
+
+**How to apply**: surface both values on `cards/page.tsx`'s card row and/or `cards/[id]/page.tsx`'s header alongside limit/committed/available — no new query needed, both fields are already on the `Card` record being fetched.
+
+Related but separate from this: the **1–28 day range itself is an intentional, already-resolved product decision**, not a bug — `docs/agents/05-acceptance-criteria.md` explicitly requires `closingDay`/`dueDay` between 1 and 28 (same reasoning as `monthStartDay`'s R5 cap: avoids short-month edge cases on the 29th–31st). Don't reopen that constraint; this entry is only about the missing *display* of whatever value was chosen within it.
 
 ---
 
