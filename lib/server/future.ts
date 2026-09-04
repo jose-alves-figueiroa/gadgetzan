@@ -42,6 +42,7 @@ function ruleToInput(rule: {
   startDate: Date;
   endDate: Date | null;
   status: "ACTIVE" | "PAUSED" | "ENDED";
+  confirmedThroughDate: Date | null;
 }): RecurrenceRuleInput {
   return {
     frequency: rule.frequency,
@@ -51,6 +52,7 @@ function ruleToInput(rule: {
     startDate: rule.startDate.toISOString().slice(0, 10),
     endDate: rule.endDate ? rule.endDate.toISOString().slice(0, 10) : null,
     status: rule.status,
+    confirmedThroughDate: rule.confirmedThroughDate ? rule.confirmedThroughDate.toISOString().slice(0, 10) : null,
   };
 }
 

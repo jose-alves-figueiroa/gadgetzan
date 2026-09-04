@@ -4,7 +4,23 @@ import { listCategories } from "@/lib/server/categories";
 import { listAccounts } from "@/lib/server/accounts";
 import { listCards } from "@/lib/server/cards";
 import { listInvestments } from "@/lib/server/investments";
+import { nextOccurrenceDate, type RecurrenceRuleInput } from "@/lib/finance/recurrence";
 import { formatBRL } from "@/lib/finance/money";
+
+function nextOccurrenceFor(rule: Awaited<ReturnType<typeof listRecurrenceRules>>[number]): string | null {
+  if (rule.status !== "ACTIVE") return null;
+  const input: RecurrenceRuleInput = {
+    frequency: rule.frequency,
+    dayOfMonth: rule.dayOfMonth,
+    weekday: rule.weekday,
+    monthOfYear: rule.monthOfYear,
+    startDate: rule.startDate.toISOString().slice(0, 10),
+    endDate: rule.endDate ? rule.endDate.toISOString().slice(0, 10) : null,
+    status: rule.status,
+    confirmedThroughDate: rule.confirmedThroughDate ? rule.confirmedThroughDate.toISOString().slice(0, 10) : null,
+  };
+  return nextOccurrenceDate(input);
+}
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
@@ -90,6 +106,7 @@ export default async function RecurrencesPage() {
                         dayOfMonth={rule.dayOfMonth}
                         categoryName={rule.kind === "INVESTMENT_IN" ? rule.investment?.name : rule.category?.name}
                         status={rule.status}
+                        nextOccurrenceDate={nextOccurrenceFor(rule)}
                       />
                     </HighlightOnCreate>
                   ))}

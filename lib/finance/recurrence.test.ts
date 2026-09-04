@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateOccurrences, isOccurrencePending, occurrenceTarget } from "./recurrence";
+import { generateOccurrences, isOccurrencePending, nextOccurrenceDate, occurrenceTarget } from "./recurrence";
 import type { RecurrenceRuleInput } from "./recurrence";
 
 function monthlyRule(overrides: Partial<RecurrenceRuleInput> = {}): RecurrenceRuleInput {
@@ -63,6 +63,50 @@ describe("R6 — method=CARD lands on the invoice", () => {
   it("CARD targets the invoice, ACCOUNT targets the account", () => {
     expect(occurrenceTarget("CARD")).toBe("INVOICE");
     expect(occurrenceTarget("ACCOUNT")).toBe("ACCOUNT");
+  });
+});
+
+describe("R6 — confirmedThroughDate suppresses already-fulfilled occurrences", () => {
+  it("excludes an occurrence on or before confirmedThroughDate", () => {
+    const rule = monthlyRule({ confirmedThroughDate: "2026-09-05" });
+    expect(generateOccurrences(rule, "2026-08-01", "2026-10-31")).toEqual(["2026-10-05"]);
+  });
+
+  it("keeps occurrences strictly after confirmedThroughDate", () => {
+    const rule = monthlyRule({ confirmedThroughDate: "2026-09-04" });
+    expect(generateOccurrences(rule, "2026-08-01", "2026-10-31")).toEqual(["2026-09-05", "2026-10-05"]);
+  });
+});
+
+describe("R6 — nextOccurrenceDate (anticipating a recurrence, 'confirmar agora')", () => {
+  it("returns the first occurrence when nothing was confirmed yet", () => {
+    expect(nextOccurrenceDate(monthlyRule())).toBe("2026-01-05");
+  });
+
+  it("skips past confirmedThroughDate to the following occurrence", () => {
+    const rule = monthlyRule({ confirmedThroughDate: "2026-09-05" });
+    expect(nextOccurrenceDate(rule)).toBe("2026-10-05");
+  });
+
+  it("returns null once the rule is exhausted (endDate before the next slot)", () => {
+    const rule = monthlyRule({ confirmedThroughDate: "2026-09-05", endDate: "2026-09-05" });
+    expect(nextOccurrenceDate(rule)).toBeNull();
+  });
+
+  it("returns null for a PAUSED rule", () => {
+    expect(nextOccurrenceDate(monthlyRule({ status: "PAUSED" }))).toBeNull();
+  });
+
+  it("works for YEARLY, skipping to next year once this year's is confirmed", () => {
+    const rule: RecurrenceRuleInput = {
+      frequency: "YEARLY",
+      dayOfMonth: 15,
+      monthOfYear: 12,
+      startDate: "2025-01-01",
+      status: "ACTIVE",
+      confirmedThroughDate: "2026-12-15",
+    };
+    expect(nextOccurrenceDate(rule)).toBe("2027-12-15");
   });
 });
 

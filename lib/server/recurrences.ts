@@ -3,9 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import type { RecurrenceRule } from "@prisma/client";
 import { centsPositive } from "@/lib/validation/money";
 import { requireUserId } from "./session";
 import { todayDateString, toPrismaDate } from "./clock";
+import { nextOccurrenceDate, type RecurrenceRuleInput } from "@/lib/finance/recurrence";
+import { createExpenseOrIncomeCore, createInvestmentMoveCore } from "./transaction-core";
 
 const RecurrenceInput = z
   .object({
@@ -94,6 +97,77 @@ export async function endRecurrenceRule(id: string) {
     data: { status: "ENDED", endDate: toPrismaDate(todayDateString()) },
   });
   revalidatePath("/recurrences");
+}
+
+function ruleToOccurrenceInput(rule: RecurrenceRule): RecurrenceRuleInput {
+  return {
+    frequency: rule.frequency,
+    dayOfMonth: rule.dayOfMonth,
+    weekday: rule.weekday,
+    monthOfYear: rule.monthOfYear,
+    startDate: rule.startDate.toISOString().slice(0, 10),
+    endDate: rule.endDate ? rule.endDate.toISOString().slice(0, 10) : null,
+    status: rule.status,
+    confirmedThroughDate: rule.confirmedThroughDate ? rule.confirmedThroughDate.toISOString().slice(0, 10) : null,
+  };
+}
+
+/**
+ * "Antecipar/confirmar agora" — creates the real Transaction for this rule's
+ * next occurrence today, linked via recurrenceId, and advances
+ * confirmedThroughDate past it so it's never generated again as RECURRING
+ * (R7). Works whether that occurrence is still ahead (anticipating pay day)
+ * or already due — either way there's exactly one unambiguous next slot.
+ */
+export async function confirmRecurrenceNow(id: string) {
+  const userId = await requireUserId();
+  const rule = await prisma.recurrenceRule.findFirst({ where: { id, userId } });
+  if (!rule) throw new Error("Recorrência não encontrada.");
+  if (rule.status !== "ACTIVE") throw new Error("Só é possível confirmar recorrências ativas.");
+
+  const next = nextOccurrenceDate(ruleToOccurrenceInput(rule));
+  if (!next) throw new Error("Não há próxima ocorrência para confirmar.");
+
+  const today = todayDateString();
+
+  if (rule.kind === "INCOME" || rule.kind === "EXPENSE") {
+    if (!rule.categoryId) throw new Error("Recorrência sem categoria definida.");
+    await createExpenseOrIncomeCore(userId, {
+      kind: rule.kind,
+      description: rule.description,
+      amountCents: rule.amountCents,
+      competenceDate: today,
+      categoryId: rule.categoryId,
+      method: rule.method,
+      accountId: rule.accountId,
+      cardId: rule.cardId,
+      recurrenceId: rule.id,
+    });
+  } else if (rule.kind === "INVESTMENT_IN") {
+    if (!rule.investmentId || !rule.accountId) {
+      throw new Error("Recorrência de aporte sem investimento ou conta definidos.");
+    }
+    await createInvestmentMoveCore(userId, {
+      kind: "INVESTMENT_IN",
+      investmentId: rule.investmentId,
+      accountId: rule.accountId,
+      amountCents: rule.amountCents,
+      competenceDate: today,
+      recurrenceId: rule.id,
+    });
+  } else {
+    throw new Error("Tipo de recorrência não suportado para confirmação antecipada.");
+  }
+
+  await prisma.recurrenceRule.update({
+    where: { id: rule.id },
+    data: { confirmedThroughDate: toPrismaDate(next) },
+  });
+
+  revalidatePath("/recurrences");
+  revalidatePath("/calendar");
+  revalidatePath("/future");
+  revalidatePath("/dashboard");
 }
 
 export async function listRecurrenceRules() {

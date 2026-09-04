@@ -150,7 +150,12 @@ export default async function CardDetailPage({
                 <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
                 <TableCell className="text-text"><span className="mask-text">{t.description}</span></TableCell>
                 <TableCell className="text-muted">{t.category?.name ?? "—"}</TableCell>
-                <TableCell className="tabular-money text-right text-text">{formatBRL(t.amountCents)}</TableCell>
+                <TableCell
+                  className={`tabular-money text-right ${isExpense(t.kind) ? "text-neg" : "text-dim"}`}
+                >
+                  {isExpense(t.kind) ? "−" : ""}
+                  {formatBRL(t.amountCents)}
+                </TableCell>
               </ClickableTableRow>
             ))}
           </TableBody>

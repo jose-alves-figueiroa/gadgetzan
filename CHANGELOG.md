@@ -1,5 +1,32 @@
 # Changelog
 
+## [04/09/2026 - 16:18]
+
+### Adicionado
+
+- Recorrências ativas (`/recurrences`) ganharam a ação "Confirmar agora (dd/mm)", que antecipa/confirma a próxima ocorrência ainda não confirmada da regra: cria a `Transaction` real vinculada à recorrência (`recurrenceId`) com competência hoje, e marca a regra como confirmada até aquela data (`RecurrenceRule.confirmedThroughDate`) para que ela nunca mais seja projetada como `RECURRING` (R6). Funciona tanto para adiantar um pagamento que ainda está no futuro quanto para confirmar uma ocorrência já vencida — sempre a próxima ocorrência não confirmada da regra, decidida por `nextOccurrenceDate`. Suportado para recorrências de despesa/receita e de aporte em investimento; recorrências de outros tipos retornam erro. `confirmedThroughDate` também passou a ser respeitado por toda leitura de ocorrências projetadas (`/calendar`, `/future`, previsão de fatura), suprimindo qualquer ocorrência já confirmada nesses módulos.
+
+### Impacto
+
+- Recorrências nunca confirmadas manualmente continuam se comportando exatamente como antes (mesma projeção `RECURRING` de sempre). O efeito só aparece depois de um "Confirmar agora": aquela ocorrência específica some das projeções futuras porque já virou uma transação real.
+
+## [04/09/2026 - 10:12]
+
+### Modificado
+
+- Tabela de lançamentos da tela de fatura do cartão (`/cards/[id]`) passou a colorir o valor: cobranças (`EXPENSE`/`CARD_ADJUSTMENT`, o que aumenta o total da fatura) em vermelho com prefixo "−"; `CARD_PAYMENT` (pagamento de fatura) em cinza neutro, sem sinal — não é receita nem despesa (R1), é a fatura sendo quitada. Mudança escopada só a essa tabela; o resto do app mantém o esquema atual (`04-design-tokens.md`: verde só para entradas/confirmações, vermelho reservado para estouro de limite/erro, despesa comum em texto neutro).
+
+## [04/09/2026 - 10:05]
+
+### Corrigido
+
+- Uma fatura lançada manualmente (via "Lançar fatura já existente", `Invoice.manualTotalCents`) que depois recebia uma compra real no cartão nesse mesmo período tinha essa compra silenciosamente ignorada no total: `manualTotalCents` sempre vencia a soma dos lançamentos (`manualTotalCents ?? soma`), em vez de somar. Na prática, quem lançava o total manual da fatura do mês e depois fazia uma compra normal no mesmo cartão via o app via essa compra desaparecer do total a pagar — e, se a fatura já tivesse sido paga, o valor pago não incluía a compra nova, sem jeito de fazer um segundo pagamento pra cobrir a diferença. `findOrCreateInvoice` agora absorve o total manual num lançamento de despesa equivalente assim que uma fatura com `manualTotalCents` recebe um novo lançamento, e zera `manualTotalCents` — a partir daí a fatura volta a ser uma fatura normal, com o total sempre igual à soma dos lançamentos, pagável (e re-pagável, se já paga e receber lançamento novo) em qualquer valor.
+- Corrigida em produção a fatura de 09/2026 do Cartão Inter, que estava nesse estado (R$904,12 manual + R$244,15 de combustível lançado depois, pagamento de R$904,12 já desfeito): o total manual virou um lançamento de despesa "Fatura (total lançado manualmente)" de R$904,12, sem apagar nenhum registro existente, e o total da fatura passou a refletir os R$1.148,27 (R$904,12 + R$244,15) corretamente.
+
+### Impacto
+
+- Faturas lançadas manualmente que nunca recebem lançamento novo continuam idênticas a antes (mesmo formulário "Lançar fatura já existente", mesmo botão "Editar total", mesmo "Apagar fatura" enquanto vazias). O comportamento só muda no momento em que uma fatura manual passa a ter um lançamento real vinculado — nesse ponto ela deixa de ter total manual e os botões "Editar total"/"Apagar fatura" (que dependem de `manualTotalCents`) somem, dando lugar ao fluxo normal de pagamento/fatura paga.
+
 ## [03/09/2026 - 23:23]
 
 ### Adicionado

@@ -79,6 +79,7 @@ export async function getProjectedInvoices(cardId: string, monthsAhead = 6) {
           startDate: rule.startDate.toISOString().slice(0, 10),
           endDate: rule.endDate ? rule.endDate.toISOString().slice(0, 10) : null,
           status: rule.status,
+          confirmedThroughDate: rule.confirmedThroughDate ? rule.confirmedThroughDate.toISOString().slice(0, 10) : null,
         },
         rangeStart,
         rangeEnd

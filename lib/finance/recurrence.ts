@@ -1,5 +1,5 @@
 // R6 — recurrence occurrences.
-import { formatDateParts, parseDateParts, type DateParts } from "./period";
+import { addDays, formatDateParts, parseDateParts, type DateParts } from "./period";
 import type { Frequency, PaymentMethod, RuleStatus } from "./types";
 
 export interface RecurrenceRuleInput {
@@ -13,6 +13,8 @@ export interface RecurrenceRuleInput {
   startDate: string;
   endDate?: string | null;
   status: RuleStatus;
+  /** Occurrences up to and including this date were already confirmed (on time or early) — never regenerated. */
+  confirmedThroughDate?: string | null;
 }
 
 function daysInMonth(year: number, month: number): number {
@@ -23,6 +25,7 @@ function inRange(date: string, rule: RecurrenceRuleInput, rangeStart: string, ra
   if (date < rangeStart || date > rangeEnd) return false;
   if (date < rule.startDate) return false;
   if (rule.endDate && date > rule.endDate) return false;
+  if (rule.confirmedThroughDate && date <= rule.confirmedThroughDate) return false;
   return true;
 }
 
@@ -105,6 +108,22 @@ export function generateOccurrences(
     case "WEEKLY":
       return weeklyOccurrences(rule, rangeStart, rangeEnd);
   }
+}
+
+/**
+ * The next not-yet-confirmed occurrence, regardless of whether it's still ahead
+ * or already due — the caller (confirmRecurrenceNow) decides what "now" means.
+ * null once the rule is exhausted (endDate passed before the next slot, or
+ * status isn't ACTIVE).
+ */
+export function nextOccurrenceDate(rule: RecurrenceRuleInput): string | null {
+  const rangeStart =
+    rule.confirmedThroughDate && rule.confirmedThroughDate >= rule.startDate
+      ? addDays(rule.confirmedThroughDate, 1)
+      : rule.startDate;
+  // 2-year horizon covers the worst case (YEARLY) with room to spare.
+  const rangeEnd = addDays(rangeStart, 731);
+  return generateOccurrences(rule, rangeStart, rangeEnd)[0] ?? null;
 }
 
 /** A past occurrence with no matching transaction is "pending" — shown as to-confirm, not realized (R6). */

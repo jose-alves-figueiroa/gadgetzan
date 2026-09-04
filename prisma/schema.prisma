@@ -336,6 +336,9 @@ model RecurrenceRule {
   endDate      DateTime?     @db.Date
   status       RuleStatus    @default(ACTIVE)
 
+  /** Occurrences up to and including this date are already fulfilled (confirmed early or on time) — never re-projected as RECURRING. */
+  confirmedThroughDate DateTime? @db.Date
+
   transactions Transaction[]
 
   @@index([userId])
