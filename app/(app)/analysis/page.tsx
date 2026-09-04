@@ -89,8 +89,8 @@ export default async function AnalysisPage({ searchParams }: PageProps<"/analysi
             {(["FIXED", "COMMITMENT", "VARIABLE"] as const).map((nature) => (
               <div key={nature} className="flex items-center justify-between text-micro">
                 <span className="text-dim">{NATURE_LABEL[nature]}</span>
-                <span className="tabular-money text-text">
-                  {formatBRL(data.natureBreakdown[nature], { compact: true })}
+                <span className="text-text">
+                  <span className="tabular-money">{formatBRL(data.natureBreakdown[nature], { compact: true })}</span>
                   {natureTotal > 0 ? ` (${Math.round((data.natureBreakdown[nature] / natureTotal) * 100)}%)` : ""}
                 </span>
               </div>

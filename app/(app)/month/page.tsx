@@ -99,7 +99,7 @@ export default async function MonthPage({ searchParams }: PageProps<"/month">) {
 
       <Card className="gap-sm">
         <span className="text-micro text-dim">Taxa de poupança</span>
-        <span className="tabular-money text-kpi-md text-text">
+        <span className="tabular-nums-mono text-kpi-md text-text">
           {current.savingsRate === null ? "—" : `${(current.savingsRate * 100).toFixed(1)}%`}
         </span>
       </Card>

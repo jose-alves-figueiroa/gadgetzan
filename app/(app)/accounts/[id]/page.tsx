@@ -92,7 +92,7 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
               return (
                 <ClickableTableRow key={t.id} href={`/transactions/${t.id}`}>
                   <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
-                  <TableCell className="text-text">{t.description}</TableCell>
+                  <TableCell className="text-text"><span className="mask-text">{t.description}</span></TableCell>
                   <TableCell
                     className={`tabular-money text-right ${
                       direction === "in" ? "text-pos" : direction === "out" ? "text-neg" : "text-text"

@@ -148,7 +148,7 @@ export default async function CardDetailPage({
             {invoice.transactions.map((t) => (
               <ClickableTableRow key={t.id} href={`/transactions/${t.id}`}>
                 <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
-                <TableCell className="text-text">{t.description}</TableCell>
+                <TableCell className="text-text"><span className="mask-text">{t.description}</span></TableCell>
                 <TableCell className="text-muted">{t.category?.name ?? "—"}</TableCell>
                 <TableCell className="tabular-money text-right text-text">{formatBRL(t.amountCents)}</TableCell>
               </ClickableTableRow>

@@ -67,7 +67,7 @@ export default async function ImportBatchDetailPage({ params }: PageProps<"/impo
               <TableRow key={t.id} edgeFade={false}>
                 <TableCell className="text-muted">{t.competenceDate.toISOString().slice(0, 10)}</TableCell>
                 <TableCell className="text-muted">{KIND_LABEL[t.kind] ?? t.kind}</TableCell>
-                <TableCell className="text-text">{t.description}</TableCell>
+                <TableCell className="text-text"><span className="mask-text">{t.description}</span></TableCell>
                 <TableCell className="tabular-money text-right text-text">{formatBRL(t.amountCents)}</TableCell>
               </TableRow>
             ))}

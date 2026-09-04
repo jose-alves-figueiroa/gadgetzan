@@ -1,5 +1,16 @@
 # Changelog
 
+## [03/09/2026 - 22:56]
+
+### Modificado
+
+- "Ocultar valores" trocou de `blur` para um placeholder de largura fixa (`R$ ***`) — o blur deixava a ordem de grandeza visível pela largura do borrão (um valor de 6 dígitos borra muito mais largo que um de 2), então dava pra estimar o valor sem decifrar os números. `R$ ***` tem sempre a mesma largura, não importa o valor real. As cores (verde/vermelho/cinza) continuam as mesmas de antes — só a cor do texto real é reaproveitada no placeholder, nunca redefinida.
+- Descrições de lançamento (ex.: "Lanche") agora também são ocultadas com "***" junto dos valores — categoria e conta continuam visíveis. Aplicado na lista de Lançamentos, na tabela de fatura do cartão, na tabela da conta, no lote de importação e nos títulos de lançamento/compra parcelada.
+
+### Corrigido
+
+- Duas "Taxa de poupança" (Dashboard e Mês) e a decomposição por natureza (Análise, "R$ X (Y%)") usavam a classe `.tabular-money` só pra ganhar a fonte monoespaçada, sem serem valores monetários (uma é %, a outra mistura R$ com % no mesmo elemento) — com o blur isso já passava despercebido, mas com o placeholder de texto viraria "R$ ***" no lugar de uma porcentagem, ou apagaria o "(Y%)" junto do valor. Corrigido: as taxas passaram para `.tabular-nums-mono` (mesma classe do rótulo de mês da barra superior) e a porcentagem de Análise saiu de dentro do `.tabular-money`.
+
 ## [03/09/2026 - 22:20]
 
 ### Adicionado

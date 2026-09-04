@@ -46,7 +46,7 @@ export default async function TransactionDetailPage({ params }: PageProps<"/tran
   return (
     <div className="flex max-w-[520px] flex-col gap-lg">
       <div className="flex items-center justify-between">
-        <h1 className="text-title text-text">{transaction.description}</h1>
+        <h1 className="mask-text text-title text-text">{transaction.description}</h1>
         <span className="tabular-money text-kpi-lg text-text">{formatBRL(transaction.amountCents)}</span>
       </div>
 

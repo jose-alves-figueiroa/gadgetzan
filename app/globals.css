@@ -173,10 +173,48 @@
   font-family: var(--font-mono);
 }
 
-/* Settings.hideAmounts (1aa) — blurs every monetary value app-wide without
-   touching lib/finance/money.ts, which must stay UI-independent. Toggled
-   either from the Settings form or the topbar eye icon (AppShell). */
-[data-hide-amounts="true"] .tabular-money {
-  filter: blur(5px);
+/*
+ * Settings.hideAmounts (1aa) — masks every monetary value (.tabular-money)
+ * and free-text label that can be sensitive on its own, e.g. a transaction's
+ * description like "Lanche" (.mask-text — category/tag text next to it
+ * keeps its own, unmasked class) app-wide, without touching
+ * lib/finance/money.ts, which must stay UI-independent. Toggled either from
+ * the Settings form or the topbar eye icon (AppShell).
+ *
+ * A fixed-width "R$ ***" / "***" placeholder, not a blur: blurring a
+ * 6-digit and a 2-digit value produces visibly different smudge widths, so
+ * the order of magnitude leaks right through the mask. `visibility: hidden`
+ * drops the real text without touching its layout box, `overflow: hidden`
+ * clips that box to a fixed width regardless of how long the real value
+ * was, and `::after` (explicitly `visibility: visible`, overriding the
+ * inherited hidden value) renders the placeholder in the element's own
+ * color — text-pos/text-neg/text-dim etc. are never touched, so the
+ * green/red/gray distinction some page kept survives.
+ */
+[data-hide-amounts="true"] .tabular-money,
+[data-hide-amounts="true"] .mask-text {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  visibility: hidden;
   user-select: none;
+}
+[data-hide-amounts="true"] .tabular-money {
+  width: 4.5em;
+}
+[data-hide-amounts="true"] .mask-text {
+  width: 3em;
+}
+[data-hide-amounts="true"] .tabular-money::after,
+[data-hide-amounts="true"] .mask-text::after {
+  position: absolute;
+  inset: 0;
+  visibility: visible;
+}
+[data-hide-amounts="true"] .tabular-money::after {
+  content: "R$ ***";
+}
+[data-hide-amounts="true"] .mask-text::after {
+  content: "***";
 }

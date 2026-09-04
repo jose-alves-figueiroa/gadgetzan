@@ -64,7 +64,7 @@ export default async function DashboardPage() {
           <RealizedStat label="Sobra em caixa" value={data.monthSavings.cashLeftover} color="text-text" />
           <div className="flex flex-col gap-xs">
             <span className="text-micro text-dim">Taxa de poupança</span>
-            <span className="tabular-money text-kpi-md text-text">
+            <span className="tabular-nums-mono text-kpi-md text-text">
               {data.monthSavings.savingsRate === null ? "—" : `${(data.monthSavings.savingsRate * 100).toFixed(1)}%`}
             </span>
           </div>

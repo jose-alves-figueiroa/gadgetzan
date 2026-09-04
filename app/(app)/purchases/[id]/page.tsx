@@ -42,7 +42,7 @@ export default async function PurchaseDetailPage({ params }: PageProps<"/purchas
       </Link>
 
       <div className="flex flex-col gap-xs">
-        <h1 className="text-title text-text">{purchase.description}</h1>
+        <h1 className="mask-text text-title text-text">{purchase.description}</h1>
         <span className="tabular-money text-kpi-lg text-text">{formatBRL(purchase.totalCents)}</span>
         <span className="text-micro text-dim">
           {purchase.installments}× de{" "}

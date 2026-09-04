@@ -63,7 +63,7 @@ export default async function TransactionsPage() {
                       className="flex items-center justify-between px-md py-sm hover:bg-text/4"
                     >
                       <div className="flex flex-col gap-xs">
-                        <span className="text-row text-text">{t.description}</span>
+                        <span className="mask-text text-row text-text">{t.description}</span>
                         <span className="text-micro text-dim">
                           {t.category?.name ?? "—"} · {t.account?.nickname ?? t.card?.name ?? "—"}
                         </span>
