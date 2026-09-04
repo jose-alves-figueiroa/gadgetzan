@@ -1,5 +1,19 @@
 # Changelog
 
+## [03/09/2026 - 22:12]
+
+### Adicionado
+
+- Ação "Atualizar valor" em cada investimento (`/investments`) para lançar um rendimento/perda de mercado, ou corrigir um valor lançado errado — atualiza só `currentCents` (e `lastValuationAt`), sem criar lançamento nenhum.
+
+### Corrigido
+
+- Um aporte feito depois de criar o investimento (via "Novo lançamento") não alterava o valor atual mostrado em `/investments` — só criava o lançamento `INVESTMENT_IN`, sem tocar em `Investment.currentCents`/`appliedCents`. Isso fazia o aporte parecer ter "desaparecido": o dinheiro saía do saldo da conta mas o investimento continuava com o valor de antes, derrubando o patrimônio líquido total até alguém atualizar o valor manualmente. `createInvestmentMoveCore` agora ajusta os dois valores no mesmo instante do lançamento (aporte soma, resgate subtrai) — o mesmo caminho usado por recorrência de aporte confirmada continua correto.
+
+### Impacto
+
+- Investimentos com aportes/resgates já lançados antes desta correção ficaram com `currentCents` desatualizado — use "Atualizar valor" pra corrigir o valor de cada um manualmente.
+
 ## [03/09/2026 - 22:09]
 
 ### Corrigido

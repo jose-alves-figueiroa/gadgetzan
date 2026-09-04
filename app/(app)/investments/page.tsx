@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HighlightOnCreate } from "@/components/ui/HighlightOnCreate";
 import { CreateInvestmentModal } from "@/components/finance/CreateInvestmentModal";
+import { UpdateInvestmentValueModal } from "@/components/finance/UpdateInvestmentValueModal";
 
 export default async function InvestmentsPage() {
   const [investments, accounts] = await Promise.all([listInvestments(), listAccounts()]);
@@ -29,7 +30,10 @@ export default async function InvestmentsPage() {
             <HighlightOnCreate key={investment.id} id={investment.id}>
               <Card className="flex-row items-center justify-between">
                 <span className="text-row font-medium text-text">{investment.name}</span>
-                <span className="tabular-money text-kpi-md text-text">{formatBRL(investment.currentCents)}</span>
+                <div className="flex items-center gap-md">
+                  <span className="tabular-money text-kpi-md text-text">{formatBRL(investment.currentCents)}</span>
+                  <UpdateInvestmentValueModal investmentId={investment.id} currentCents={investment.currentCents} />
+                </div>
               </Card>
             </HighlightOnCreate>
           ))}

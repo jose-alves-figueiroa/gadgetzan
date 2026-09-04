@@ -243,25 +243,47 @@ export interface InvestmentMoveCoreInput extends BatchTag {
   recurrenceId?: string | null;
 }
 
+/**
+ * A contribution/withdrawal is principal moving, not a return — it must
+ * move Investment.appliedCents/currentCents by the same amount right away,
+ * or net worth (accounts + Σ currentCents, R12) visibly drops by the
+ * contributed amount until someone manually revalues the investment later.
+ * Manual revaluation (updating currentCents alone, to reflect an actual
+ * market return) is a separate, not-yet-built action — see 02-business-rules
+ * §"Investment returns are not income."
+ */
 export async function createInvestmentMoveCore(userId: string, input: InvestmentMoveCoreInput) {
   const investment = await prisma.investment.findFirst({ where: { id: input.investmentId, userId } });
   if (!investment) throw new Error("Investimento não encontrado.");
 
-  return prisma.transaction.create({
-    data: {
-      userId,
-      kind: input.kind,
-      description: input.kind === "INVESTMENT_IN" ? `Aporte em ${investment.name}` : `Resgate de ${investment.name}`,
-      amountCents: input.amountCents,
-      competenceDate: toPrismaDate(input.competenceDate),
-      accountId: input.accountId,
-      investmentId: input.investmentId,
-      method: "ACCOUNT",
-      externalId: input.externalId ?? null,
-      importBatchId: input.importBatchId ?? null,
-      recurrenceId: input.recurrenceId ?? null,
-    },
-  });
+  const signedCents = input.kind === "INVESTMENT_IN" ? input.amountCents : -input.amountCents;
+
+  const [transaction] = await prisma.$transaction([
+    prisma.transaction.create({
+      data: {
+        userId,
+        kind: input.kind,
+        description: input.kind === "INVESTMENT_IN" ? `Aporte em ${investment.name}` : `Resgate de ${investment.name}`,
+        amountCents: input.amountCents,
+        competenceDate: toPrismaDate(input.competenceDate),
+        accountId: input.accountId,
+        investmentId: input.investmentId,
+        method: "ACCOUNT",
+        externalId: input.externalId ?? null,
+        importBatchId: input.importBatchId ?? null,
+        recurrenceId: input.recurrenceId ?? null,
+      },
+    }),
+    prisma.investment.update({
+      where: { id: investment.id },
+      data: {
+        appliedCents: investment.appliedCents + signedCents,
+        currentCents: investment.currentCents + signedCents,
+      },
+    }),
+  ]);
+
+  return transaction;
 }
 
 export interface GoalMoveCoreInput extends BatchTag {

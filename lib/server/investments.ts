@@ -64,3 +64,27 @@ export async function listInvestments() {
     orderBy: { name: "asc" },
   });
 }
+
+const UpdateInvestmentValueInput = z.object({
+  id: z.string().min(1),
+  currentCents: centsAny,
+});
+
+/**
+ * Manual revaluation — the only way `currentCents` moves outside of a
+ * contribution/withdrawal (which already keep it in sync automatically, see
+ * createInvestmentMoveCore). Use this to reflect an actual market
+ * return/loss, or to correct a value entered wrong.
+ */
+export async function updateInvestmentValue(input: z.input<typeof UpdateInvestmentValueInput>) {
+  const userId = await requireUserId();
+  const data = UpdateInvestmentValueInput.parse(input);
+
+  await prisma.investment.updateMany({
+    where: { id: data.id, userId },
+    data: { currentCents: data.currentCents, lastValuationAt: toPrismaDate(todayDateString()) },
+  });
+
+  revalidatePath("/investments");
+  revalidatePath("/", "layout");
+}
