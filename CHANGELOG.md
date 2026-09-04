@@ -1,5 +1,15 @@
 # Changelog
 
+## [03/09/2026 - 21:51]
+
+### Adicionado
+
+- Ação "Editar total" na fatura (`/cards/[id]`) quando o total foi lançado manualmente (`manualTotalCents`, via "Lançar fatura já existente") — antes só dava pra somar um ajuste em cima (juros/tarifa/estorno) pelo botão "Ajustar", sem forma de corrigir o valor errado direto. Reaproveita a mesma ação `enterPastInvoice` (upsert por cartão+mês), só muda o rótulo/título do modal e pré-preenche com o valor atual.
+
+### Corrigido
+
+- Um mês sem nenhum lançamento e sem total manual (ex.: a fatura do ciclo atual, ainda vazia) aparecia como "Fatura paga" — a tela só checava se existia uma linha de `Invoice`, sem checar se havia algo pra pagar (fatura com total R$ 0,00 sempre fecha em "outstanding = 0"). Isso fazia o botão "Desfazer pagamento" parecer sem efeito (não tinha pagamento nenhum pra desfazer) e o mês atual, ao abrir a tela do cartão, parecer com algo quebrado. Agora esse caso mostra a mesma ação de lançar fatura, igual a um mês sem `Invoice` nenhuma.
+
 ## [03/09/2026 - 21:47]
 
 ### Corrigido

@@ -57,6 +57,7 @@ export default async function CardDetailPage({
   const outstanding = invoice ? calculateOutstandingBalance(invoiceTotal, invoice.paidCents) : 0;
 
   const monthLabel = referenceMonth.toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
+  const referenceMonthStr = `${targetMonth.year}-${String(targetMonth.month).padStart(2, "0")}`;
 
   return (
     <div className="flex flex-col gap-lg">
@@ -98,22 +99,42 @@ export default async function CardDetailPage({
             ›
           </Link>
         </div>
-        {invoice && outstanding > 0 ? (
+        {invoice && invoiceTotal > 0 && outstanding > 0 ? (
           <div className="flex gap-md">
             <PayInvoiceModal invoiceId={invoice.id} outstandingCents={outstanding} accounts={accounts.map((a) => ({ id: a.id, nickname: a.nickname }))} />
             <AdjustInvoiceModal invoiceId={invoice.id} />
+            {invoice.manualTotalCents !== null ? (
+              <EnterPastInvoiceModal
+                cardId={card.id}
+                referenceMonth={referenceMonthStr}
+                monthLabel={monthLabel}
+                triggerLabel="Editar total"
+                title="Editar total da fatura"
+                defaultValueCents={invoice.manualTotalCents}
+              />
+            ) : null}
           </div>
-        ) : invoice ? (
+        ) : invoice && invoiceTotal > 0 ? (
           <div className="flex items-center gap-md">
             <span className="text-micro text-pos">Fatura paga</span>
             <UnpayInvoiceButton invoiceId={invoice.id} />
+            {invoice.manualTotalCents !== null ? (
+              <EnterPastInvoiceModal
+                cardId={card.id}
+                referenceMonth={referenceMonthStr}
+                monthLabel={monthLabel}
+                triggerLabel="Editar total"
+                title="Editar total da fatura"
+                defaultValueCents={invoice.manualTotalCents}
+              />
+            ) : null}
           </div>
         ) : (
-          <EnterPastInvoiceModal
-            cardId={card.id}
-            referenceMonth={`${targetMonth.year}-${String(targetMonth.month).padStart(2, "0")}`}
-            monthLabel={monthLabel}
-          />
+          // Covers both "no invoice row yet" and "an invoice row exists but is
+          // still empty" (0 transactions, no manual total) — enterPastInvoice
+          // upserts by cardId+referenceMonth, so the same action works for
+          // both without falsely labeling an empty invoice "Fatura paga".
+          <EnterPastInvoiceModal cardId={card.id} referenceMonth={referenceMonthStr} monthLabel={monthLabel} />
         )}
       </div>
 
