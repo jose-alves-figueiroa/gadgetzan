@@ -1,5 +1,19 @@
 # Changelog
 
+## [03/09/2026 - 22:20]
+
+### Adicionado
+
+- Botão "Apagar fatura" na tela do cartão, para uma fatura lançada manualmente (via "Lançar fatura já existente") sem nenhum lançamento e sem pagamento registrado — pra quando o valor e/ou o mês foram lançados errados e não tem o que corrigir, só desfazer. Bloqueado no servidor (não só escondido na tela) se já existir lançamento ou pagamento na fatura.
+
+### Modificado
+
+- O seletor de mês da barra superior era só decoração — trocava o rótulo mas não filtrava nada em lugar nenhum. Agora ele lê/escreve o mesmo parâmetro `?month=` que a tela do cartão e o calendário já usavam, então navegar por ele efetivamente troca de mês nessas telas. A tela do cartão perdeu seu próprio `‹ mês ›` (ficava duplicado com o de cima) — o rótulo do mês continua lá, só sem as setas.
+
+### Impacto
+
+- Em qualquer outra tela (sem noção de mês), as setas de cima ainda navegam — só ficam sem efeito visível, acumulando um `?month=` inofensivo na URL.
+
 ## [03/09/2026 - 22:15]
 
 ### Adicionado

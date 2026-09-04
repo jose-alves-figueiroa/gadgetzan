@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { CaretLeft, CaretRight, Eye, EyeSlash, List, MagnifyingGlass, Plus } from "@phosphor-icons/react/dist/ssr";
 
@@ -17,10 +17,24 @@ interface TopbarProps {
 }
 
 export function Topbar({ onNewTransaction, onOpenDrawer, hideAmounts, onToggleHideAmounts }: TopbarProps) {
-  const [monthOffset, setMonthOffset] = useState(0);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Drives the same `?month=` offset the card detail and calendar pages
+  // already read — a single month control instead of one per page.
+  const monthOffset = Number(searchParams.get("month") ?? 0);
   const now = new Date();
   now.setMonth(now.getMonth() + monthOffset);
   const label = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  function goToMonth(offset: number) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (offset === 0) params.delete("month");
+    else params.set("month", String(offset));
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
+  }
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-line px-2xl">
@@ -37,7 +51,7 @@ export function Topbar({ onNewTransaction, onOpenDrawer, hideAmounts, onToggleHi
         <button
           type="button"
           aria-label="Mês anterior"
-          onClick={() => setMonthOffset((value) => value - 1)}
+          onClick={() => goToMonth(monthOffset - 1)}
           className="text-dim hover:text-text"
         >
           <CaretLeft size={14} />
@@ -46,7 +60,7 @@ export function Topbar({ onNewTransaction, onOpenDrawer, hideAmounts, onToggleHi
         <button
           type="button"
           aria-label="Próximo mês"
-          onClick={() => setMonthOffset((value) => value + 1)}
+          onClick={() => goToMonth(monthOffset + 1)}
           className="text-dim hover:text-text"
         >
           <CaretRight size={14} />

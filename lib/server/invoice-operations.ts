@@ -102,6 +102,31 @@ export async function enterPastInvoice(input: z.input<typeof PastInvoiceInput>) 
   revalidatePath("/cards");
 }
 
+/**
+ * Erases a manually-entered invoice (via "Lançar fatura já existente") —
+ * for when the total or the month itself was wrong and there's nothing to
+ * correct, only to undo. Scoped tight on purpose: only a manual entry
+ * (`manualTotalCents` set) with no transactions and no payment recorded is
+ * safe to drop outright — anything else needs "Desfazer pagamento" or
+ * deleting the individual transactions first.
+ */
+export async function deleteManualInvoice(invoiceId: string) {
+  const userId = await requireUserId();
+  const invoice = await prisma.invoice.findFirst({
+    where: { id: invoiceId, userId },
+    include: { transactions: { select: { id: true } } },
+  });
+  if (!invoice) throw new Error("Fatura não encontrada.");
+  if (invoice.manualTotalCents === null) throw new Error("Essa fatura não foi lançada manualmente.");
+  if (invoice.transactions.length > 0) throw new Error("Essa fatura já tem lançamentos — exclua-os primeiro.");
+  if (invoice.paidCents) throw new Error("Desfaça o pagamento antes de apagar a fatura.");
+
+  await prisma.invoice.delete({ where: { id: invoice.id } });
+
+  revalidatePath("/cards");
+  revalidatePath("/");
+}
+
 export async function getInvoiceDetail(invoiceId: string) {
   const userId = await requireUserId();
   return prisma.invoice.findFirst({

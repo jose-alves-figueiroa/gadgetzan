@@ -16,6 +16,7 @@ import { PayInvoiceModal } from "@/components/finance/PayInvoiceModal";
 import { AdjustInvoiceModal } from "@/components/finance/AdjustInvoiceModal";
 import { EnterPastInvoiceModal } from "@/components/finance/EnterPastInvoiceModal";
 import { UnpayInvoiceButton } from "@/components/finance/UnpayInvoiceButton";
+import { DeleteManualInvoiceButton } from "@/components/finance/DeleteManualInvoiceButton";
 import { getUnpaidInvoiceTotalCents } from "@/lib/server/invoices";
 
 export default async function CardDetailPage({
@@ -90,15 +91,7 @@ export default async function CardDetailPage({
       </Card>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-md text-row">
-          <Link href={`/cards/${id}?month=${monthOffset - 1}`} className="text-dim hover:text-text">
-            ‹
-          </Link>
-          <span className="capitalize text-text">{monthLabel}</span>
-          <Link href={`/cards/${id}?month=${monthOffset + 1}`} className="text-dim hover:text-text">
-            ›
-          </Link>
-        </div>
+        <span className="capitalize text-row text-text">{monthLabel}</span>
         {invoice && invoiceTotal > 0 && outstanding > 0 ? (
           <div className="flex gap-md">
             <PayInvoiceModal invoiceId={invoice.id} outstandingCents={outstanding} accounts={accounts.map((a) => ({ id: a.id, nickname: a.nickname }))} />
@@ -112,6 +105,9 @@ export default async function CardDetailPage({
                 title="Editar total da fatura"
                 defaultValueCents={invoice.manualTotalCents}
               />
+            ) : null}
+            {invoice.manualTotalCents !== null && invoice.transactions.length === 0 ? (
+              <DeleteManualInvoiceButton invoiceId={invoice.id} />
             ) : null}
           </div>
         ) : invoice && invoiceTotal > 0 ? (
