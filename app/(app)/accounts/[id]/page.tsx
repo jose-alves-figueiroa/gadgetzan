@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/Table";
 import { ClickableTableRow } from "@/components/ui/ClickableTableRow";
 import { AccountActions } from "@/components/finance/AccountActions";
+import { EditAccountBalanceModal } from "@/components/finance/EditAccountBalanceModal";
 
 export default async function AccountDetailPage({ params }: PageProps<"/accounts/[id]">) {
   const { id } = await params;
@@ -44,6 +45,11 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
         </div>
         <div className="flex items-center gap-md">
           <span className="tabular-money text-kpi-lg text-text">{formatBRL(balance)}</span>
+          <EditAccountBalanceModal
+            accountId={account.id}
+            openingBalanceCents={account.openingBalance}
+            openingDate={account.openingDate.toISOString().slice(0, 10)}
+          />
           <AccountActions id={account.id} />
         </div>
       </div>

@@ -1,5 +1,15 @@
 # Changelog
 
+## [03/09/2026 - 22:15]
+
+### Adicionado
+
+- Ação "Editar saldo inicial" na conta (`/accounts/[id]`) — até agora só dava pra definir saldo/data de abertura na criação, sem forma de corrigir depois. Bloqueia a edição se a nova data ficar depois de algum lançamento já existente nessa conta (mesma regra que já impede lançar antes da abertura, agora também na direção contrária).
+
+### Impacto
+
+- Corrigir o saldo/data inicial recalcula todo o saldo/patrimônio histórico da conta, já que nunca são armazenados — só derivados de `saldo inicial + lançamentos` (R12).
+
 ## [03/09/2026 - 22:12]
 
 ### Adicionado
