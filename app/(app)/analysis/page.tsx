@@ -64,7 +64,12 @@ export default async function AnalysisPage({ searchParams }: PageProps<"/analysi
                   <span>
                     {row.nature ? `${NATURE_LABEL[row.nature] ?? row.nature} · ` : ""}
                     {row.percentOfTotal.toFixed(1)}% do total
-                    {row.limitCents ? ` · limite ${formatBRL(row.limitCents, { compact: true })}` : ""}
+                    {row.limitCents ? (
+                      <>
+                        {" "}
+                        · limite <span className="tabular-money">{formatBRL(row.limitCents, { compact: true })}</span>
+                      </>
+                    ) : null}
                   </span>
                   {row.changePercent !== null ? (
                     <span className={row.changePercent > 0 ? "text-neg" : "text-pos"}>

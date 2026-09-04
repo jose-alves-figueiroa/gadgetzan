@@ -1,9 +1,9 @@
-import { type InputHTMLAttributes, forwardRef, useId } from "react";
+import { type InputHTMLAttributes, type ReactNode, forwardRef, useId } from "react";
 import { cn } from "@/lib/cn";
 
 interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
 }
 
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(

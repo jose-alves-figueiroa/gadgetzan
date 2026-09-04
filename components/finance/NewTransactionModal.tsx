@@ -233,11 +233,14 @@ export function NewTransactionModal({
                   value={installments}
                   onChange={(e) => setInstallments(Number(e.target.value))}
                   hint={
-                    installments > 1 && amountInput
-                      ? `${installments}× de aprox. ${formatBRL(
-                          Math.floor((Number(amountInput.replace(/\D/g, "")) || 0) / installments)
-                        )}`
-                      : undefined
+                    installments > 1 && amountInput ? (
+                      <>
+                        {installments}× de aprox.{" "}
+                        <span className="tabular-money">
+                          {formatBRL(Math.floor((Number(amountInput.replace(/\D/g, "")) || 0) / installments))}
+                        </span>
+                      </>
+                    ) : undefined
                   }
                 />
               </>
@@ -255,13 +258,22 @@ export function NewTransactionModal({
               <div className="flex flex-col gap-xs rounded-md bg-tile p-md text-micro text-muted">
                 <span className="text-dim uppercase tracking-wide">Impacto ao salvar</span>
                 <span>
-                  Fatura atual: {formatBRL(impact.currentInvoiceBeforeCents)} → {formatBRL(impact.currentInvoiceAfterCents)}
+                  Fatura atual:{" "}
+                  <span className="tabular-money">
+                    {formatBRL(impact.currentInvoiceBeforeCents)} → {formatBRL(impact.currentInvoiceAfterCents)}
+                  </span>
                 </span>
                 <span>
-                  Próxima fatura: {formatBRL(impact.nextInvoiceBeforeCents)} → {formatBRL(impact.nextInvoiceAfterCents)}
+                  Próxima fatura:{" "}
+                  <span className="tabular-money">
+                    {formatBRL(impact.nextInvoiceBeforeCents)} → {formatBRL(impact.nextInvoiceAfterCents)}
+                  </span>
                 </span>
                 <span>
-                  Limite disponível: {formatBRL(impact.availableBeforeCents)} → {formatBRL(impact.availableAfterCents)}
+                  Limite disponível:{" "}
+                  <span className="tabular-money">
+                    {formatBRL(impact.availableBeforeCents)} → {formatBRL(impact.availableAfterCents)}
+                  </span>
                 </span>
               </div>
             ) : null}

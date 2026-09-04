@@ -34,8 +34,11 @@ export default async function NetWorthPage({ searchParams }: PageProps<"/net-wor
       <Card className="gap-sm">
         <span className="tabular-money text-kpi-lg text-text">{formatBRL(current.netWorthCents, { compact: true })}</span>
         <span className={cn("text-micro", changeCents >= 0 ? "text-pos" : "text-neg")}>
-          {changeCents >= 0 ? "+" : ""}
-          {formatBRL(changeCents, { compact: true })} no período
+          <span className="tabular-money">
+            {changeCents >= 0 ? "+" : ""}
+            {formatBRL(changeCents, { compact: true })}
+          </span>{" "}
+          no período
         </span>
       </Card>
 
@@ -75,9 +78,11 @@ export default async function NetWorthPage({ searchParams }: PageProps<"/net-wor
       </Card>
 
       <p className="text-micro text-dim">
-        {changeCents >= 0
-          ? `Patrimônio cresceu ${formatBRL(changeCents, { compact: true })} no período selecionado.`
-          : `Patrimônio caiu ${formatBRL(-changeCents, { compact: true })} no período selecionado.`}
+        {changeCents >= 0 ? "Patrimônio cresceu " : "Patrimônio caiu "}
+        <span className="tabular-money">
+          {formatBRL(changeCents >= 0 ? changeCents : -changeCents, { compact: true })}
+        </span>{" "}
+        no período selecionado.
       </p>
     </div>
   );

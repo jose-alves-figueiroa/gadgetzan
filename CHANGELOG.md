@@ -1,5 +1,21 @@
 # Changelog
 
+## [03/09/2026 - 21:10]
+
+### Adicionado
+
+- Ícone de olho na barra superior para ocultar/mostrar valores instantaneamente, em qualquer tela — sem precisar abrir Ajustes e salvar. Usa o mesmo campo `Settings.hideAmounts` e a mesma máscara CSS (`blur` em `.tabular-money`) já existentes; o clique aplica o efeito na hora (otimista) e persiste a preferência em segundo plano.
+
+### Corrigido
+
+- O rótulo de mês/ano da barra superior usava a mesma classe `.tabular-money` dos valores monetários só para alinhar os dígitos, então ficava borrado junto com os valores ao ativar "Ocultar valores". Passou a usar uma classe própria (`.tabular-nums-mono`) com o mesmo efeito visual, sem entrar na máscara.
+- Vários valores exibidos como parte de uma frase (ex.: "de R$ X", "R$ X disponível", "Ritmo necessário: R$ X/mês", "Patrimônio cresceu R$ X no período") não tinham a classe `.tabular-money` e continuavam visíveis com "Ocultar valores" ativado — em Contas, Cartões, Porquinhos, Patrimônio, Mês, Dashboard, Compra parcelada e nos modais de novo lançamento e pagamento de fatura. Cada número passou a ter seu próprio `<span className="tabular-money">`, preservando o texto ao redor.
+
+### Impacto
+
+- Quem já usava o checkbox "Ocultar valores na tela" em Ajustes não perde nada — continua funcionando, e agora reflete o estado alternado pelo ícone de olho (e vice-versa).
+- Duas exceções conhecidas continuam mostrando valores mesmo com a máscara ativada: (1) o `title` nativo dos mini-gráficos de barra (Análise, Patrimônio, Dashboard) — só aparece ao passar o mouse, é tooltip do navegador e não pode ser borrado por CSS; (2) os títulos de alertas (`/alertas` e o card de alertas do dashboard) e as mensagens da simulação, que constroem o valor já dentro da frase em `lib/finance/alerts.ts` e `lib/finance/simulate.ts` — mascarar exigiria separar o texto do valor no modelo de domínio, o que não foi feito nesta mudança.
+
 ## [2026-09-02 22:49]
 
 ### Adicionado

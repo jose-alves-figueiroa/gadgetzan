@@ -47,7 +47,9 @@ export function PayInvoiceModal({
       <Button onClick={() => setOpen(true)}>Pagar fatura</Button>
       <Modal open={open} onClose={() => setOpen(false)} title="Pagar fatura">
         <form onSubmit={handleSubmit} className="flex flex-col gap-lg">
-          <p className="text-row text-muted">Em aberto: {formatBRL(outstandingCents)}</p>
+          <p className="text-row text-muted">
+            Em aberto: <span className="tabular-money">{formatBRL(outstandingCents)}</span>
+          </p>
           <div className="flex flex-col gap-xs">
             <label htmlFor="accountId" className="text-micro text-text/70">
               Conta

@@ -126,8 +126,11 @@ function KpiCard({
       <span className="tabular-money text-kpi-md text-text">{formatBRL(value)}</span>
       {previous !== 0 ? (
         <span className={`text-micro ${good ? "text-pos" : "text-neg"}`}>
-          {delta >= 0 ? "+" : ""}
-          {formatBRL(delta)} vs. mês anterior
+          <span className="tabular-money">
+            {delta >= 0 ? "+" : ""}
+            {formatBRL(delta)}
+          </span>{" "}
+          vs. mês anterior
         </span>
       ) : null}
     </Card>

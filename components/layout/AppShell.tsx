@@ -1,11 +1,12 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { MobileActionBar } from "./MobileActionBar";
 import { NewTransactionModal } from "@/components/finance/NewTransactionModal";
+import { setHideAmounts } from "@/lib/server/settings";
 
 interface Option {
   id: string;
@@ -30,10 +31,32 @@ interface AppShellProps {
   hideAmounts: boolean;
 }
 
-export function AppShell({ children, accounts, cards, categories, investments, hideAmounts }: AppShellProps) {
+export function AppShell({
+  children,
+  accounts,
+  cards,
+  categories,
+  investments,
+  hideAmounts: initialHideAmounts,
+}: AppShellProps) {
   const router = useRouter();
   const [newTransactionOpen, setNewTransactionOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [hideAmounts, setHideAmountsState] = useState(initialHideAmounts);
+
+  // Keeps the eye-icon toggle in sync when the value changes elsewhere (e.g. the
+  // full Settings form), which reaches this layout via revalidatePath, not props.
+  useEffect(() => setHideAmountsState(initialHideAmounts), [initialHideAmounts]);
+
+  async function handleToggleHideAmounts() {
+    const next = !hideAmounts;
+    setHideAmountsState(next);
+    try {
+      await setHideAmounts({ hideAmounts: next });
+    } catch {
+      setHideAmountsState(!next);
+    }
+  }
 
   return (
     <div className="flex min-h-screen" data-hide-amounts={hideAmounts}>
@@ -46,6 +69,8 @@ export function AppShell({ children, accounts, cards, categories, investments, h
         <Topbar
           onNewTransaction={() => setNewTransactionOpen(true)}
           onOpenDrawer={() => setDrawerOpen(true)}
+          hideAmounts={hideAmounts}
+          onToggleHideAmounts={handleToggleHideAmounts}
         />
         <main className="flex-1 overflow-y-auto p-2xl pb-[calc(var(--spacing-2xl)+56px)] md:pb-2xl">{children}</main>
       </div>

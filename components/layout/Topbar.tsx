@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signOut } from "next-auth/react";
-import { CaretLeft, CaretRight, List, MagnifyingGlass, Plus } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, CaretRight, Eye, EyeSlash, List, MagnifyingGlass, Plus } from "@phosphor-icons/react/dist/ssr";
 
 const MONTHS = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -12,9 +12,11 @@ const MONTHS = [
 interface TopbarProps {
   onNewTransaction: () => void;
   onOpenDrawer: () => void;
+  hideAmounts: boolean;
+  onToggleHideAmounts: () => void;
 }
 
-export function Topbar({ onNewTransaction, onOpenDrawer }: TopbarProps) {
+export function Topbar({ onNewTransaction, onOpenDrawer, hideAmounts, onToggleHideAmounts }: TopbarProps) {
   const [monthOffset, setMonthOffset] = useState(0);
   const now = new Date();
   now.setMonth(now.getMonth() + monthOffset);
@@ -40,7 +42,7 @@ export function Topbar({ onNewTransaction, onOpenDrawer }: TopbarProps) {
         >
           <CaretLeft size={14} />
         </button>
-        <span className="tabular-money">{label}</span>
+        <span className="tabular-nums-mono">{label}</span>
         <button
           type="button"
           aria-label="Próximo mês"
@@ -53,6 +55,15 @@ export function Topbar({ onNewTransaction, onOpenDrawer }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-lg">
+        <button
+          type="button"
+          aria-label="Ocultar valores"
+          aria-pressed={hideAmounts}
+          onClick={onToggleHideAmounts}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-dim hover:text-text max-md:min-h-11 max-md:min-w-11"
+        >
+          {hideAmounts ? <EyeSlash size={17} /> : <Eye size={17} />}
+        </button>
         <button
           type="button"
           aria-label="Buscar"

@@ -73,13 +73,21 @@ export default async function GoalsPage() {
                   <Bar percent={(goal.savedCents / goal.targetCents) * 100} />
                   {goal.pace ? (
                     <span className={`text-micro ${goal.pace.status === "on_pace" ? "text-pos" : "text-warn"}`}>
-                      {goal.pace.status === "on_pace"
-                        ? "No ritmo"
-                        : `${formatBRL(goal.pace.behindByCents, { compact: true })} abaixo do ritmo`}
+                      {goal.pace.status === "on_pace" ? (
+                        "No ritmo"
+                      ) : (
+                        <>
+                          <span className="tabular-money">{formatBRL(goal.pace.behindByCents, { compact: true })}</span>{" "}
+                          abaixo do ritmo
+                        </>
+                      )}
                     </span>
                   ) : null}
                   <span className="text-micro text-dim">
-                    Faltam {formatBRL(Math.max(0, goal.targetCents - goal.savedCents), { compact: true })}
+                    Faltam{" "}
+                    <span className="tabular-money">
+                      {formatBRL(Math.max(0, goal.targetCents - goal.savedCents), { compact: true })}
+                    </span>
                   </span>
                 </Card>
               </HighlightOnCreate>

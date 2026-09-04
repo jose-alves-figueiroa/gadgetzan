@@ -43,7 +43,7 @@ export default async function DashboardPage() {
               {data.cards.slice(0, 2).map(({ card, availableCents, utilizationPercent }) => (
                 <div key={card.id} className="flex flex-col gap-xs">
                   <span className="text-micro text-muted">
-                    {card.name}: {formatBRL(availableCents, { compact: true })} disponível
+                    {card.name}: <span className="tabular-money">{formatBRL(availableCents, { compact: true })}</span> disponível
                   </span>
                   <Bar percent={utilizationPercent} severity={utilizationPercent >= 80 ? "warn" : "accent"} />
                 </div>
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
                 <div key={goal.id} className="flex flex-col gap-xs">
                   <div className="flex items-center justify-between text-micro">
                     <span className="text-text">{goal.name}</span>
-                    <span className="text-dim">
+                    <span className="tabular-money text-dim">
                       {formatBRL(goal.savedCents, { compact: true })} / {formatBRL(goal.targetCents, { compact: true })}
                     </span>
                   </div>

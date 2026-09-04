@@ -45,8 +45,11 @@ export default async function PurchaseDetailPage({ params }: PageProps<"/purchas
         <h1 className="text-title text-text">{purchase.description}</h1>
         <span className="tabular-money text-kpi-lg text-text">{formatBRL(purchase.totalCents)}</span>
         <span className="text-micro text-dim">
-          {purchase.installments}× de {formatBRL(Math.round(purchase.totalCents / purchase.installments))} ·{" "}
-          {purchase.category.name}
+          {purchase.installments}× de{" "}
+          <span className="tabular-money">
+            {formatBRL(Math.round(purchase.totalCents / purchase.installments))}
+          </span>{" "}
+          · {purchase.category.name}
         </span>
       </div>
 
