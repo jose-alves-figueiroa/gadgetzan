@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUserId } from "@/lib/server/session";
-import { accountTransactionDirection, calculateAccountBalance } from "@/lib/finance/accounts";
-import { isExpense, isIncome } from "@/lib/finance/transactions";
+import { accountTransactionDirection, calculateAccountBalance, calculateAccountFlows } from "@/lib/finance/accounts";
 import { todayDateString } from "@/lib/server/clock";
 import { formatBRL } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
@@ -34,13 +33,7 @@ export default async function AccountDetailPage({ params }: PageProps<"/accounts
     method: t.method,
   }));
   const balance = calculateAccountBalance(id, account.openingBalance, financeTx, today);
-
-  const inflows = transactions
-    .filter((t) => t.accountId === id && (isIncome(t.kind) || (t.kind === "TRANSFER" && t.toAccountId === id)))
-    .reduce((s, t) => s + t.amountCents, 0);
-  const outflows = transactions
-    .filter((t) => t.accountId === id && isExpense(t.kind))
-    .reduce((s, t) => s + t.amountCents, 0);
+  const { inflowsCents: inflows, outflowsCents: outflows } = calculateAccountFlows(id, financeTx, today);
 
   return (
     <div className="flex flex-col gap-lg">

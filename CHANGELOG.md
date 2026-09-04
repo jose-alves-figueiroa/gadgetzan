@@ -1,5 +1,15 @@
 # Changelog
 
+## [03/09/2026 - 21:47]
+
+### Corrigido
+
+- Na tela da conta (`/accounts/[id]`), "Entradas" e "Saídas" ignoravam transferências entre contas — uma transferência de R$ 40 e outra de R$ 240 saindo da conta não entravam em "Saídas", mesmo já debitando corretamente o "Saldo atual". A causa era reaproveitar `isIncome`/`isExpense` (que por R1 excluem TRANSFER do resultado/P&L) para uma pergunta diferente: "essa conta especificamente recebeu ou perdeu dinheiro nesse lançamento". Nova função pura `calculateAccountFlows` (`lib/finance/accounts.ts`), construída sobre o mesmo `accountTransactionDirection` que já colore as linhas da tabela, garante que os dois nunca voltem a divergir.
+
+### Impacto
+
+- "Entradas"/"Saídas" na tela da conta agora batem com `Saldo inicial + Entradas − Saídas = Saldo atual`, incluindo toda transferência de/para outras contas, aporte/resgate de investimento e pagamento de fatura — antes só transferências de entrada eram contadas (e de forma incompleta), e nenhuma saída não-EXPENSE entrava na soma.
+
 ## [03/09/2026 - 21:35]
 
 ### Adicionado

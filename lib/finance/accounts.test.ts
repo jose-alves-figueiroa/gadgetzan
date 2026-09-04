@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountTransactionDirection, calculateAccountBalance } from "./accounts";
+import { accountTransactionDirection, calculateAccountBalance, calculateAccountFlows } from "./accounts";
 import type { FinanceTransaction } from "./types";
 
 const ACC = "acc1";
@@ -109,5 +109,48 @@ describe("R12 — per-transaction direction (ledger row coloring)", () => {
     expect(accountTransactionDirection(ACC, tx({ kind: "CARD_ADJUSTMENT", amountCents: 1_840 }))).toBeNull();
     expect(accountTransactionDirection(ACC, tx({ kind: "GOAL_IN", amountCents: 5_000 }))).toBeNull();
     expect(accountTransactionDirection(ACC, tx({ kind: "GOAL_OUT", amountCents: 2_000 }))).toBeNull();
+  });
+});
+
+describe("R12 — account inflow/outflow totals include transfers", () => {
+  it("a transfer out of the account counts as an outflow, not just a balance debit", () => {
+    // Reproduces the reported bug: R$ 40 and R$ 240 transferred out of the
+    // account never showed up in "Saídas" because isExpense() excludes
+    // TRANSFER (R1) — right for the P&L, wrong for this account's own ledger.
+    const { inflowsCents, outflowsCents } = calculateAccountFlows(
+      ACC,
+      [
+        tx({ kind: "TRANSFER", amountCents: 40_00, toAccountId: OTHER }),
+        tx({ kind: "TRANSFER", amountCents: 240_00, toAccountId: OTHER }),
+        tx({ kind: "EXPENSE", amountCents: 900_00, method: "ACCOUNT" }),
+        tx({ kind: "INCOME", amountCents: 14_000_00 }),
+        tx({ kind: "EXPENSE", amountCents: 1_153_64, method: "ACCOUNT" }),
+        tx({ kind: "EXPENSE", amountCents: 240_00, method: "ACCOUNT" }),
+        tx({ kind: "EXPENSE", amountCents: 930_00, method: "ACCOUNT" }),
+        tx({ kind: "EXPENSE", amountCents: 700_00, method: "ACCOUNT" }),
+      ],
+      TODAY
+    );
+    expect(inflowsCents).toBe(14_000_00);
+    expect(outflowsCents).toBe(420_364); // R$ 4.203,64 = R$ 3.923,64 of expenses + R$ 280,00 transferred out
+  });
+
+  it("a transfer into the account counts as an inflow", () => {
+    const { inflowsCents, outflowsCents } = calculateAccountFlows(
+      ACC,
+      [tx({ kind: "TRANSFER", amountCents: 500_00, accountId: OTHER, toAccountId: ACC })],
+      TODAY
+    );
+    expect(inflowsCents).toBe(500_00);
+    expect(outflowsCents).toBe(0);
+  });
+
+  it("a future-dated transaction isn't counted yet", () => {
+    const { inflowsCents } = calculateAccountFlows(
+      ACC,
+      [tx({ kind: "INCOME", amountCents: 50_000, competenceDate: "2026-09-15" })],
+      TODAY
+    );
+    expect(inflowsCents).toBe(0);
   });
 });

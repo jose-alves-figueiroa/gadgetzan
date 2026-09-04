@@ -76,3 +76,28 @@ export function accountTransactionDirection(
       return null;
   }
 }
+
+/**
+ * Realized inflow/outflow totals for an account's own ledger, as of `today`.
+ * Deliberately not R1's isIncome/isExpense (which excludes TRANSFER from
+ * both) — from a single account's point of view, a transfer out is still
+ * money leaving it, and a transfer in is still money arriving. Built on
+ * accountTransactionDirection so this never drifts from calculateAccountBalance.
+ */
+export function calculateAccountFlows(
+  accountId: string,
+  transactions: FinanceTransaction[],
+  today: string
+): { inflowsCents: number; outflowsCents: number } {
+  let inflowsCents = 0;
+  let outflowsCents = 0;
+
+  for (const t of transactions) {
+    if (t.competenceDate > today) continue;
+    const direction = accountTransactionDirection(accountId, t);
+    if (direction === "in") inflowsCents += t.amountCents;
+    else if (direction === "out") outflowsCents += t.amountCents;
+  }
+
+  return { inflowsCents, outflowsCents };
+}
