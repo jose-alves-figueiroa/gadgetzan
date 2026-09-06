@@ -1,5 +1,15 @@
 # Changelog
 
+## [04/09/2026 - 17:10]
+
+### Modificado
+
+- Cada parcela de uma compra parcelada no cartão passou a onerar o mês de competência da sua própria fatura, em vez de todas onerarem o mês da compra original (R4, `docs/agents/02-business-rules.md`). A parcela 1 continua com a data real da compra; a partir da parcela 2, `competenceDate` passa a ser a data de vencimento da fatura daquela parcela — mesma convenção já usada na importação de CSV para compras em andamento (`createRemainingInstallmentsCore`). Como `/month`, limites por categoria, alertas mensais, dashboard e análise leem `Transaction.competenceDate` diretamente do banco, o efeito se propaga a todas essas telas sem precisar tocá-las individualmente. Ex.: uma compra 2x feita em setembro, com a parcela 2 vencendo em novembro, agora conta a parcela 2 como despesa de novembro (antes, contava as duas em setembro). Resolve o item 1 de `docs/TECH-DEBT.md`.
+
+### Impacto
+
+- Só afeta compras parceladas criadas a partir de agora. Parcelas já registradas no banco mantêm a `competenceDate` antiga (mês da compra original) — trazê-las para a nova regra é um backfill de dados históricos que muda totais de meses passados, então foi deliberadamente deixado de fora deste fix e registrado como item pendente, sujeito a aprovação explícita antes de rodar: [`docs/epic/EPICS.md` #1](docs/epic/EPICS.md#1-backfill-competencedate-for-existing-installments).
+
 ## [04/09/2026 - 16:18]
 
 ### Adicionado

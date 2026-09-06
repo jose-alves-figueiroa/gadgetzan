@@ -36,6 +36,13 @@ describe("R4 — installment plan", () => {
   });
 });
 
+describe("R4 — each installment burdens its own competence month", () => {
+  it("installment 1 keeps the real purchase date; installment N>1 lands on its own invoice due date", () => {
+    const plan = buildInstallmentPlan(300_000, 3, "2026-08-08", 12, 20);
+    expect(plan.map((p) => p.competenceDate)).toEqual(["2026-08-08", "2026-09-20", "2026-10-20"]);
+  });
+});
+
 describe("R4 — editing recalculates only unpaid installments", () => {
   it("editing a 10x R$6,000 purchase to 6x keeps the 2 paid installments untouched", () => {
     const original = buildInstallmentPlan(600_000, 10, "2026-08-08", 12, 20);
@@ -51,6 +58,15 @@ describe("R4 — editing recalculates only unpaid installments", () => {
     expect(recalculated).toHaveLength(6);
     expect(recalculated.slice(2).map((p) => p.amountCents)).toEqual([120_000, 120_000, 120_000, 120_000]);
     expect(recalculated[5].installmentNo).toBe(6);
+  });
+
+  it("every recalculated (unpaid) installment accrues on its own invoice due date, including the first unpaid one", () => {
+    const original = buildInstallmentPlan(600_000, 10, "2026-08-08", 12, 20);
+    const paid = original.slice(0, 2);
+
+    const recalculated = recalculateInstallments(paid, 600_000, 6, "2026-08-08", 12, 20);
+
+    expect(recalculated.slice(2).map((p) => p.competenceDate)).toEqual(recalculated.slice(2).map((p) => p.dueDate));
   });
 });
 
@@ -71,6 +87,11 @@ describe("R15 — importing the remaining installments of an in-progress purchas
     const plan = buildRemainingInstallmentPlan(36_808, 4, 4, "2026-10-08", 12, 20);
     expect(plan).toHaveLength(1);
     expect(plan[0].installmentNo).toBe(4);
+  });
+
+  it("the current installment keeps its real (imported) date; the rest accrue on their own invoice due date", () => {
+    const plan = buildRemainingInstallmentPlan(36_808, 2, 4, "2026-08-08", 12, 20);
+    expect(plan.map((p) => p.competenceDate)).toEqual(["2026-08-08", "2026-09-20", "2026-10-20"]);
   });
 });
 

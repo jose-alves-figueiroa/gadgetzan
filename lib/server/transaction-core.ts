@@ -127,7 +127,7 @@ async function createInstallmentPurchaseCore(
         kind: "EXPENSE",
         description: `${input.description} (${item.installmentNo}/${installments})`,
         amountCents: item.amountCents,
-        competenceDate: toPrismaDate(input.competenceDate),
+        competenceDate: toPrismaDate(item.competenceDate),
         categoryId: input.categoryId,
         method: "CARD",
         cardId: card.id,
@@ -188,9 +188,7 @@ export async function createRemainingInstallmentsCore(userId: string, input: Rem
         kind: "EXPENSE",
         description: `${input.description} (${item.installmentNo}/${input.totalInstallments})`,
         amountCents: item.amountCents,
-        competenceDate: item.installmentNo === input.currentInstallmentNo
-          ? toPrismaDate(input.competenceDate)
-          : toPrismaDate(item.dueDate),
+        competenceDate: toPrismaDate(item.competenceDate),
         categoryId: input.categoryId,
         method: "CARD",
         cardId: card.id,

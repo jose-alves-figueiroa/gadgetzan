@@ -36,6 +36,7 @@ The files in `design/` are **HTML design references** — prototypes showing int
 | `07-open-decisions.md` | What still needs a decision from the product owner |
 | `../import-runbook.md` | Handoff spec for whoever prepares CSV files to import (column formats, worked examples) — written for a codebase-blind reader, not an implementation doc |
 | `../TECH-DEBT.md` | Known implementation shortcuts in already-specified behavior, tracked deliberately for later follow-up |
+| `../epic/EPICS.md` | Deferred follow-up work surfaced by a change (typically a data backfill), pending explicit sign-off |
 
 ## Decisions already made (don't reopen without talking to the owner)
 

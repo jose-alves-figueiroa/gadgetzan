@@ -12,7 +12,7 @@ Status convention: `[ ]` open · `[~]` partially addressed · `[x]` resolved.
 
 | # | Item | Status |
 | --- | --- | --- |
-| 1 | [Installment `competenceDate` doesn't shift per installment](#1-installment-competencedate-doesnt-shift-per-installment) | `[ ]` blocked on a product decision |
+| 1 | [Installment `competenceDate` doesn't shift per installment](#1-installment-competencedate-doesnt-shift-per-installment) | `[x]` resolved |
 | 2 | ["Ocultar valores" has two blind spots](#2-ocultar-valores-has-two-blind-spots) | `[ ]` open |
 | 3 | [Topbar month selector doesn't scope every page](#3-topbar-month-selector-doesnt-scope-every-page) | `[ ]` open |
 | 4 | ["Desfazer pagamento" only reverses an unambiguous companion Transfer](#4-desfazer-pagamento-only-reverses-an-unambiguous-companion-transfer) | `[ ]` open |
@@ -27,17 +27,17 @@ Status convention: `[ ]` open · `[~]` partially addressed · `[x]` resolved.
 
 ## 1. Installment `competenceDate` doesn't shift per installment
 
-**Status**: `[ ]` open — blocked on a product decision.
+**Status**: `[x]` resolved — see `CHANGELOG.md` entry from 04/09/2026.
 
-**Where**: `createInstallmentPurchaseCore` (`lib/server/transaction-core.ts`).
+**Where**: `createInstallmentPurchaseCore` (`lib/server/transaction-core.ts`); domain logic in `lib/finance/installments.ts`.
 
-`createInstallmentPurchaseCore` sets every installment's `competenceDate` to the *original purchase date*, not to the month its own invoice bills for. `invoiceId` correctly advances one month per installment (R4), but `competenceDate` — what `/month`, category limits, and monthly alerts filter on — does not.
+`createInstallmentPurchaseCore` used to set every installment's `competenceDate` to the *original purchase date*, not to the month its own invoice bills for. `invoiceId` correctly advanced one month per installment (R4), but `competenceDate` — what `/month`, category limits, and monthly alerts filter on — did not.
 
-Concretely: a 2x purchase made in September, with installment 2 due in November, still counts installment 2 as a **September** expense in every monthly report; November shows nothing for it.
+Concretely: a 2x purchase made in September, with installment 2 due in November, used to still count installment 2 as a **September** expense in every monthly report; November showed nothing for it.
 
-**Why not fixed**: this is a foundational accrual-timing call affecting every month/limit/alert computation, past and future, and `docs/agents/02-business-rules.md` (R3/R4) doesn't explicitly resolve which month each installment should accrue in.
+**Resolution**: the product decision was made — each installment now burdens its own financial month. `docs/agents/02-business-rules.md` R4 item 4 documents the resolved rule: installment 1 keeps the real purchase date, installment N (N > 1) uses that installment's own invoice due date. `InstallmentPlanItem.competenceDate` (`lib/finance/installments.ts`) is the single source every write path (`createInstallmentPurchaseCore`, `createRemainingInstallmentsCore`, `recalculateInstallments`) now reads from, so the fix applies to every screen that aggregates on `competenceDate` — not just `/month`.
 
-**How to apply**: needs a product decision before touching it — do not infer the rule from the UI or simplify it in presentation code.
+**Follow-up**: installments already recorded before this fix keep their old (pre-fix) `competenceDate`. Backfilling them is tracked separately, pending user sign-off — see [`docs/epic/EPICS.md` #1](epic/EPICS.md#1-backfill-competencedate-for-existing-installments).
 
 ---
 

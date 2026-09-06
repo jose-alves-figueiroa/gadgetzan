@@ -253,6 +253,25 @@ The `Impacto` section should explain the relevant consequences of the change, in
 
 When a change has not been deployed, do not use a fake `Deploy` date. Use an appropriate non-deployment heading if the project's existing changelog convention requires recording the change before deployment.
 
+## Epics
+
+Implementing a change sometimes surfaces necessary follow-up work that is out of scope for the change itself — most commonly a **data backfill/migration** needed to bring already-existing records in line with a new or changed business rule. Do not silently skip that work, do not fold it into the current change uninvited, and do not leave it as an unresolved question hanging in conversation.
+
+Track it as an entry in:
+
+```text
+docs/epic/EPICS.md
+```
+
+Written in English. Follow the same system as `docs/TECH-DEBT.md`: status convention `[ ]` open · `[~]` in progress · `[x]` resolved, an overview table, one numbered section per item with **Where** / **Context** / **Why not fixed inline** / **How to apply**.
+
+Link the epic from both:
+
+* the business rule section it follows up on (`docs/agents/02-business-rules.md`, or the relevant `docs/agents/*.md` file);
+* the `CHANGELOG.md` entry for the change that surfaced it.
+
+Do not carry out an epic's deferred work without the user's explicit go-ahead — a backfill changes historical financial data and needs sign-off on scope (which records, which date range) before running.
+
 ## Decisions
 
 Resolved product decisions must not be reopened.

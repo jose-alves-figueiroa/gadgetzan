@@ -7,6 +7,14 @@ export interface InstallmentPlanItem {
   amountCents: number;
   referenceMonth: { year: number; month: number };
   dueDate: string;
+  /**
+   * The month this installment burdens (R4/R5). The first installment of a
+   * plan keeps its real, known date (the purchase itself, or — for
+   * buildRemainingInstallmentPlan — the current installment being imported);
+   * every later installment hasn't happened yet, so it accrues on its own
+   * invoice's due date, not the original purchase date.
+   */
+  competenceDate: string;
 }
 
 /** floor(total/n) per installment, remainder into the last one. */
@@ -31,7 +39,8 @@ export function buildInstallmentPlan(
   return amounts.map((amountCents, index) => {
     const referenceMonth = addMonths(first.referenceMonth, index);
     const dueDate = formatDateParts({ ...referenceMonth, day: dueDay } as DateParts);
-    return { installmentNo: index + 1, amountCents, referenceMonth, dueDate };
+    const competenceDate = index === 0 ? purchaseDate : dueDate;
+    return { installmentNo: index + 1, amountCents, referenceMonth, dueDate, competenceDate };
   });
 }
 
@@ -60,7 +69,8 @@ export function buildRemainingInstallmentPlan(
     const installmentNo = currentInstallmentNo + index;
     const referenceMonth = addMonths(first.referenceMonth, index);
     const dueDate = formatDateParts({ ...referenceMonth, day: dueDay } as DateParts);
-    return { installmentNo, amountCents, referenceMonth, dueDate };
+    const competenceDate = index === 0 ? currentDate : dueDate;
+    return { installmentNo, amountCents, referenceMonth, dueDate, competenceDate };
   });
 }
 
@@ -69,6 +79,7 @@ export interface PaidInstallment {
   amountCents: number;
   referenceMonth: { year: number; month: number };
   dueDate: string;
+  competenceDate: string;
 }
 
 /**
@@ -98,7 +109,9 @@ export function recalculateInstallments(
     const installmentNo = paidCount + index + 1;
     const referenceMonth = addMonths(first.referenceMonth, installmentNo - 1);
     const dueDate = formatDateParts({ ...referenceMonth, day: dueDay } as DateParts);
-    return { installmentNo, amountCents, referenceMonth, dueDate };
+    // Every recalculated installment is still unpaid — i.e. still ahead — so
+    // it accrues on its own invoice's due date, same as any later installment.
+    return { installmentNo, amountCents, referenceMonth, dueDate, competenceDate: dueDate };
   });
 
   return [...paidInstallments, ...remainingPlan];

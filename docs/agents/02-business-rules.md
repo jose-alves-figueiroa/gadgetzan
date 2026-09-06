@@ -65,8 +65,11 @@ When recording an installment purchase of `total` in `n` installments:
 1. Create a `Purchase` and **n** `Transaction` rows (`installmentNo` 1..n), one per consecutive invoice starting from the invoice of the purchase date (R3).
 2. Value of each installment: `floor(total / n)`. The **cent remainder goes into the last installment**. E.g. R$ 100.00 in 3× → 33.33 / 33.33 / 33.34.
 3. Each installment gets the `invoiceId` of its corresponding invoice, one month at a time, advancing one month per installment.
-4. Editing the purchase recalculates the installments **not yet paid**; installments in an already-paid invoice don't change.
-5. Deleting the purchase removes the future installments and keeps the already-paid ones (with a warning in the UI).
+4. **Each installment burdens its own financial month (R5), not the purchase month.** `competenceDate` — what `/month`, category limits, monthly alerts, the dashboard, and analysis all filter on — follows the same one-month-per-installment cadence as `invoiceId`: installment 1 keeps the real purchase date; installment N (N > 1) uses that installment's own invoice due date. Applies to every write path that creates installments (manual entry, CSV import of an in-progress purchase's remaining installments, recalculation on edit).
+5. Editing the purchase recalculates the installments **not yet paid**; installments in an already-paid invoice don't change.
+6. Deleting the purchase removes the future installments and keeps the already-paid ones (with a warning in the UI).
+
+Installments already recorded before this rule (item 4) took effect keep their old `competenceDate` (the original purchase date) — see [`docs/epic/EPICS.md` #1](../epic/EPICS.md#1-backfill-competencedate-for-existing-installments) for the pending backfill.
 
 Future installments are `CONFIRMED` — that's what lets the app say "how much of my future income is already committed."
 
